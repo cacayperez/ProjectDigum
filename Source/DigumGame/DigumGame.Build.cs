@@ -9,17 +9,17 @@ public class DigumGame : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		
 		// unreal engine dependencies
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"});
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 		
 		// Utilities and Tools
 		PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" });
 		
 		// Digum Modules
-		PublicDependencyModuleNames.AddRange(new string[] { "DigumCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "DigumCore", "DigumUI"});
 		
 		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

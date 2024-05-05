@@ -9,6 +9,10 @@
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumMinerCharacter, Log, All);
 
+DECLARE_MULTICAST_DELEGATE(FOnToggleInventory);
+DECLARE_MULTICAST_DELEGATE(FOnToggleCharacterMenu);
+DECLARE_MULTICAST_DELEGATE(FOnCancelAction);
+
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -26,6 +30,10 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
 
 protected:
 	void Move(const FInputActionValue& InputActionValue);
+
+	FOnToggleInventory OnToggleInventory;
+	FOnToggleCharacterMenu OnToggleCharacterMenu;
+	FOnCancelAction OnCancelAction;
 	
 public:
 	// Sets default values for this character's properties
@@ -39,7 +47,13 @@ public:
 public:
 	virtual void PrimaryAction();
 	virtual void SecondaryAction();
+	virtual void ToggleInventory();
+	virtual void ToggleCharacterMenu();
+	virtual void CancelAction();
+	
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
+	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 };

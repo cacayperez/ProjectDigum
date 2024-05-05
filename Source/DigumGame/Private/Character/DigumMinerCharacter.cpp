@@ -88,6 +88,9 @@ void ADigumMinerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 			BindActionLambda("Jump", InputSettings->JumpAction, ETriggerEvent::Started, &ADigumMinerCharacter::Jump);
 			BindActionLambda("Primary",InputSettings->PrimaryAction, ETriggerEvent::Started, &ADigumMinerCharacter::PrimaryAction);
 			BindActionLambda("Secondary",InputSettings->SecondaryAction, ETriggerEvent::Started,&ADigumMinerCharacter::SecondaryAction);
+			BindActionLambda("Cancel",InputSettings->CancelAction, ETriggerEvent::Started,&ADigumMinerCharacter::CancelAction);
+			BindActionLambda("Toggle Inventory", InputSettings->CharacterContextAction1, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleInventory);
+			BindActionLambda("Toggle Character Menu", InputSettings->CharacterContextAction2, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleCharacterMenu);
 			
 		}
 	}
@@ -109,6 +112,21 @@ void ADigumMinerCharacter::PrimaryAction()
 
 void ADigumMinerCharacter::SecondaryAction()
 {
+}
+
+void ADigumMinerCharacter::ToggleInventory()
+{
+	OnToggleInventory.Broadcast();
+}
+
+void ADigumMinerCharacter::ToggleCharacterMenu()
+{
+	OnToggleCharacterMenu.Broadcast();
+}
+
+void ADigumMinerCharacter::CancelAction()
+{
+	OnCancelAction.Broadcast();
 }
 
 
