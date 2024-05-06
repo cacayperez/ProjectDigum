@@ -4,34 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "PlayerMinerUI.generated.h"
+#include "PlayerMinerUIComponent.generated.h"
 
 class SDigumWindow;
 class SWidget;
 class ADigumMinerCharacter;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class DIGUMGAME_API UPlayerMinerUI : public UActorComponent
+class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
 	UPROPERTY()
 	TWeakObjectPtr<ADigumMinerCharacter> OwningMiner;
 
 	UPROPERTY()
 	TWeakObjectPtr<APlayerController> OwningController;
+	
 	TSharedPtr<SOverlay> Overlay;
 	TSharedPtr<SDigumWindow> InventorySlateWidget;
 	TSharedPtr<SDigumWindow> CharacterMenuSlateWidget;
 	
 	TWeakPtr<SWidget> _Container;
-	TWeakPtr<SWidget> InventoryContainer;
-	TWeakPtr<SWidget> CharacterMenuContainer;
 
-
-	
 public:
 	// Sets default values for this component's properties
-	UPlayerMinerUI();
+	UPlayerMinerUIComponent();
 
 protected:
 	UPROPERTY()

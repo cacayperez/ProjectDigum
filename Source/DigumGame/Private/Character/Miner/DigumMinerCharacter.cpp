@@ -1,7 +1,7 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Character/DigumMinerCharacter.h"
+#include "Character/Miner/DigumMinerCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"

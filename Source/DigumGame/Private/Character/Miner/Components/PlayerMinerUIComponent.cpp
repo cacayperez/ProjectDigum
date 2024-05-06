@@ -1,15 +1,15 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Character/Miner/Components/PlayerMinerUI.h"
+#include "Character/Miner/Components/PlayerMinerUIComponent.h"
 
-#include "Character/DigumMinerCharacter.h"
+#include "Character/Miner/DigumMinerCharacter.h"
 #include "Widgets/SWeakWidget.h"
 #include "Window/SDigumWindow.h"
 
 
 // Sets default values for this component's properties
-UPlayerMinerUI::UPlayerMinerUI()
+UPlayerMinerUIComponent::UPlayerMinerUIComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -18,13 +18,13 @@ UPlayerMinerUI::UPlayerMinerUI()
 	// ...
 }
 
-void UPlayerMinerUI::OnToggleInventory()
+void UPlayerMinerUIComponent::OnToggleInventory()
 {
 	if(InventorySlateWidget.IsValid())
 		InventorySlateWidget->ToggleVisibility();
 }
 
-void UPlayerMinerUI::OnToggleCharacterMenu()
+void UPlayerMinerUIComponent::OnToggleCharacterMenu()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UPlayerMinerInventoryUI::OnToggleInventory"));
 	
@@ -32,15 +32,14 @@ void UPlayerMinerUI::OnToggleCharacterMenu()
 		CharacterMenuSlateWidget->ToggleVisibility();
 }
 
-void UPlayerMinerUI::OnCancelAction()
+void UPlayerMinerUIComponent::OnCancelAction()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UPlayerMinerInventoryUI::OnCancelAction"));
 	PopLastWindow();
 }
 
 
 // Called when the game starts
-void UPlayerMinerUI::BeginPlay()
+void UPlayerMinerUIComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -54,21 +53,25 @@ void UPlayerMinerUI::BeginPlay()
 	}
  
 	InitializeUI();
-	
 }
 
-void UPlayerMinerUI::EndPlay(const EEndPlayReason::Type EndPlayReason)
+void UPlayerMinerUIComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (GEngine && GEngine->GameViewport)
+	if (GEngine && GEngine->GameViewport && _Container.IsValid())
 	{
-		// to do check for null lambda
-		GEngine->GameViewport->RemoveViewportWidgetContent(_Container.Pin().ToSharedRef());
 		
+		GEngine->GameViewport->RemoveViewportWidgetContent(_Container.Pin().ToSharedRef());
 	}
+
+	// Clean up
+	_Container.Reset();
+	Overlay.Reset();
+	InventorySlateWidget.Reset();
+	CharacterMenuSlateWidget.Reset();
 }
 
-void UPlayerMinerUI::InitializeUI()
+void UPlayerMinerUIComponent::InitializeUI()
 {
 	if(GEngine && GEngine->GameViewport)
 	{
@@ -88,12 +91,12 @@ void UPlayerMinerUI::InitializeUI()
 
 	if(OwningMiner.IsValid())
 	{
-		OwningMiner->OnToggleInventoryDelegate().AddUObject(this, &UPlayerMinerUI::OnToggleInventory);
-		OwningMiner->OnToggleCharacterMenuDelegate().AddUObject(this, &UPlayerMinerUI::OnToggleCharacterMenu);
+		OwningMiner->OnToggleInventoryDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnToggleInventory);
+		OwningMiner->OnToggleCharacterMenuDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnToggleCharacterMenu);
 	}
 }
 
-void UPlayerMinerUI::InitializeInventoryUI()
+void UPlayerMinerUIComponent::InitializeInventoryUI()
 {
 	// Initialize Inventory
 	InventorySlateWidget = SNew(SDigumWindow);
@@ -111,7 +114,7 @@ void UPlayerMinerUI::InitializeInventoryUI()
 	}
 }
 
-void UPlayerMinerUI::InitializeCharacterMenu()
+void UPlayerMinerUIComponent::InitializeCharacterMenu()
 {
 	CharacterMenuSlateWidget = SNew(SDigumWindow);
 	bShowCharacterMenu = false;
@@ -128,7 +131,7 @@ void UPlayerMinerUI::InitializeCharacterMenu()
 	}
 }
 
-void UPlayerMinerUI::PopLastWindow()
+void UPlayerMinerUIComponent::PopLastWindow()
 {
 	// TODO
 	int32 Length = Overlay->GetChildren()->Num();
