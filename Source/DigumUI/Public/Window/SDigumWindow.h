@@ -47,10 +47,12 @@ protected:
 	virtual TSharedPtr<SWidget> OnCreateWindow();
 	virtual TSharedPtr<SWidget> OnCreateContent();
 	virtual TSharedPtr<SWidget> OnCreateHeader();
-	
+
+	void DrawWindow();
 public:
 	FORCEINLINE float GetHeight() const { return Height.Get(); }
 	FORCEINLINE float GetWidth() const { return Width.Get(); }
 
 	void ToggleVisibility();
+	void Refresh();
 };

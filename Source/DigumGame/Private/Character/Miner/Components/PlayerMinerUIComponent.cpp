@@ -4,6 +4,7 @@
 #include "Character/Miner/Components/PlayerMinerUIComponent.h"
 
 #include "Character/Miner/DigumMinerCharacter.h"
+#include "Slate/SDigumInventoryWindow.h"
 #include "Widgets/SWeakWidget.h"
 #include "Window/SDigumWindow.h"
 
@@ -36,7 +37,6 @@ void UPlayerMinerUIComponent::OnCancelAction()
 {
 	PopLastWindow();
 }
-
 
 // Called when the game starts
 void UPlayerMinerUIComponent::BeginPlay()
@@ -99,9 +99,11 @@ void UPlayerMinerUIComponent::InitializeUI()
 void UPlayerMinerUIComponent::InitializeInventoryUI()
 {
 	// Initialize Inventory
-	InventorySlateWidget = SNew(SDigumWindow);
+	InventorySlateWidget = SNew(SDigumInventoryWindow).InventoryComponent(OwningMiner->GetInventoryComponent());
+	//InventorySlateWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+	
 	bShowInventory = false;
-	InventorySlateWidget->SetVisibility(EVisibility::Hidden);
+	InventorySlateWidget->SetVisibility(EVisibility::Hidden); 
 
 	if(_Container.IsValid())
 	{

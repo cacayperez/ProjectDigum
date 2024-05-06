@@ -15,6 +15,7 @@ DECLARE_MULTICAST_DELEGATE(FOnCancelAction);
 
 class USpringArmComponent;
 class UCameraComponent;
+class UDigumInventoryComponent;
 
 UCLASS()
 class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
@@ -26,7 +27,9 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCameraComponent> CameraComponent;
-	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UDigumInventoryComponent> InventoryComponent;
 
 protected:
 	void Move(const FInputActionValue& InputActionValue);
@@ -54,6 +57,7 @@ public:
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
+	FORCEINLINE UDigumInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 };

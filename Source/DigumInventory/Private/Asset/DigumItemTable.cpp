@@ -7,7 +7,7 @@
 
 UDigumItemAsset* UDigumItemTable::GetDigumItemAsset(const FName& InItemID, UDataTable* InItemTable)
 {
-	FItemTableRow ItemTableRow;
+	FDigumItemTableRow ItemTableRow;
 
 	if(GetItemTableRow(InItemID, InItemTable, ItemTableRow))
 	{
@@ -27,13 +27,13 @@ int32 UDigumItemTable::GetDigumItemStackSize(const FName& InItemID, UDataTable* 
 	return -1;
 }
 
-bool UDigumItemTable::GetItemTableRow(const FName& InItemID, UDataTable* InItemTable, FItemTableRow& OutItemTableRow)
+bool UDigumItemTable::GetItemTableRow(const FName& InItemID, UDataTable* InItemTable, FDigumItemTableRow& OutItemTableRow)
 {
 	bool bResult = false;
 
 	if(InItemTable)
 	{
-		FItemTableRow* ItemTableRow = InItemTable->FindRow<FItemTableRow>(InItemID, TEXT("Digum Item Get By ID"), true);
+		FDigumItemTableRow* ItemTableRow = InItemTable->FindRow<FDigumItemTableRow>(InItemID, TEXT("Digum Item Get By ID"), true);
 		if(ItemTableRow)
 		{
 			OutItemTableRow = *ItemTableRow;

@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "DigumInventory/Public/Components/DigumInventoryComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/DigumInputSettingsAsset.h"
 #include "Settings/DigumGameDeveloperSettings.h"
@@ -21,6 +22,8 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	InventoryComponent = CreateDefaultSubobject<UDigumInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void ADigumMinerCharacter::BeginPlay()

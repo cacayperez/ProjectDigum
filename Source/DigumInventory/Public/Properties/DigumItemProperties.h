@@ -6,7 +6,7 @@
 #include "UObject/Object.h"
 #include "DigumItemProperties.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDigumItemAffixProperties
 {
 	GENERATED_BODY()
@@ -17,7 +17,7 @@ public:
 	
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDigumItemProperties
 {
 	GENERATED_BODY()
@@ -28,10 +28,17 @@ public:
 		ItemID = InItemID;
 		ItemAmount = InAmount;
 	}
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	FName ItemID;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	int32 ItemAmount;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	TArray<FDigumItemAffixProperties> ItemPrefixes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	TArray<FDigumItemAffixProperties> ItemSuffixes;
 
 	FORCEINLINE bool IsValid() const

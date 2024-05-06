@@ -14,29 +14,13 @@ void SDigumWindow::Construct(const FArguments& InArgs)
 	Height = InArgs._Height;
 	Width = InArgs._Width;
 
-	WindowHeader = OnCreateHeader();
-	WindowContent = OnCreateContent();
-	
-	
-	ChildSlot
-	[
-		SNew(SHorizontalBox)
-		+SHorizontalBox::Slot()
-		.AutoWidth()
-		[
-			SNew(SBox)
-			.WidthOverride(Width.Get())
-			.HeightOverride(Height.Get())
-			[
-				OnCreateWindow().ToSharedRef()
-			]
-		]
-	];
+	DrawWindow();
 }
 
+
 int32 SDigumWindow::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
-	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle,
-	bool bParentEnabled) const
+                            FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle,
+                            bool bParentEnabled) const
 {
 	FVector2D WidgetSize = FVector2D(Width.Get(), Height.Get());
 
@@ -119,11 +103,37 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 	return Header;
 }
 
+void SDigumWindow::DrawWindow()
+{
+	WindowHeader = OnCreateHeader();
+	WindowContent = OnCreateContent();
+	
+	ChildSlot
+	[
+		SNew(SHorizontalBox)
+		+SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNew(SBox)
+			.WidthOverride(Width.Get())
+			.HeightOverride(Height.Get())
+			[
+				OnCreateWindow().ToSharedRef()
+			]
+		]
+	];
+}
+
 void SDigumWindow::ToggleVisibility()
 {
 	bool bVisible = GetVisibility() == EVisibility::Visible;
 
 	SetVisibility(bVisible ? EVisibility::Hidden : EVisibility::Visible);
+}
+
+void SDigumWindow::Refresh()
+{
+	DrawWindow();
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

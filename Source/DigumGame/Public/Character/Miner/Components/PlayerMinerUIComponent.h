@@ -7,6 +7,7 @@
 #include "PlayerMinerUIComponent.generated.h"
 
 class SDigumWindow;
+class SDigumInventoryWindow;
 class SWidget;
 class ADigumMinerCharacter;
 
@@ -22,7 +23,7 @@ class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 	TWeakObjectPtr<APlayerController> OwningController;
 	
 	TSharedPtr<SOverlay> Overlay;
-	TSharedPtr<SDigumWindow> InventorySlateWidget;
+	TSharedPtr<SDigumInventoryWindow> InventorySlateWidget;
 	TSharedPtr<SDigumWindow> CharacterMenuSlateWidget;
 	
 	TWeakPtr<SWidget> _Container;

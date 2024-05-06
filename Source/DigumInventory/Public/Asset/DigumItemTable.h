@@ -9,7 +9,7 @@
 class UDigumItemAsset;
 
 USTRUCT()
-struct FItemTableRow : public FTableRowBase
+struct FDigumItemTableRow : public FTableRowBase
 {
 	GENERATED_BODY()
 public:
@@ -35,5 +35,5 @@ public:
 	static int32 GetDigumItemStackSize(const FName& InItemID, UDataTable* InItemTable);
 	
 private:
-	static bool GetItemTableRow(const FName& InItemID, UDataTable* InItemTable, FItemTableRow& OutItemTableRow);
+	static bool GetItemTableRow(const FName& InItemID, UDataTable* InItemTable, FDigumItemTableRow& OutItemTableRow);
 };

@@ -14,5 +14,12 @@ class DIGUMINVENTORY_API UDigumItemAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 StackSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FText ItemDescription;
 };
