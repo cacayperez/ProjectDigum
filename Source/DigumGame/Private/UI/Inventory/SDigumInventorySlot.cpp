@@ -30,7 +30,6 @@ void SDigumInventorySlot::Construct(const FArguments& InArgs)
 			+ SOverlay::Slot()
 			[
 				SNew(SDigumInventorySlotContent)
-				.InventorySlot(InventorySlot.Get())
 			]
 		];
 	}

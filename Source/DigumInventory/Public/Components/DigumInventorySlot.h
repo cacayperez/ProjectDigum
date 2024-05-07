@@ -34,7 +34,4 @@ public:
 	void ClearItemProperties();
 	bool IsValid() const { return ItemProperties.IsValid(); }
 
-	
-	void SetOwningInventory(UDigumInventoryComponent* InOwningInventory);
-	UDigumInventoryComponent* GetOwningInventory() const { return OwningInventory.Get();}
 };

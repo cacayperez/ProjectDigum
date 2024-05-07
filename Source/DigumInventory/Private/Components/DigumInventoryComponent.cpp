@@ -34,7 +34,6 @@ void UDigumInventoryComponent::BeginPlay()
 	for(int32 i = 0; i < Size; i++)
 	{
 		UDigumInventorySlot* Slot = NewObject<UDigumInventorySlot>(this);
-		Slot->SetOwningInventory(this);
 		Slot->InventoryIndex = i;
 		InventoryItems.Add(Slot);
 	}

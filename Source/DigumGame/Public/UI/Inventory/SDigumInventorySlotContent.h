@@ -17,7 +17,6 @@ public:
 	: _HeightOverride(100.0f)
 	, _WidthOverride(100.0f)
 	{}
-	SLATE_ATTRIBUTE(UDigumInventorySlot*, InventorySlot)
 	SLATE_ATTRIBUTE(float, HeightOverride)
 	SLATE_ATTRIBUTE(float, WidthOverride)
 	SLATE_END_ARGS()

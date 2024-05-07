@@ -15,7 +15,6 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SDigumInventorySlotContent::Construct(const FArguments& InArgs)
 {
-	InventorySlot = InArgs._InventorySlot.Get();
 	SDigumWidget::Construct(SDigumWidget::FArguments()
 	.HeightOverride(InArgs._HeightOverride)
 	.WidthOverride(InArgs._WidthOverride));
@@ -30,7 +29,8 @@ void SDigumInventorySlotContent::Construct(const FArguments& InArgs)
 
 	OnMouseDragStartDelegate.AddLambda([&](const FVector2D& MousePosition)
 	{
-		TSubclassOf<UDragDropOperation> DragDropClass = UDigumGameDeveloperSettings::GetDragDropOperationClass();
+		// TODO: Implement Drag and Drop
+		/*TSubclassOf<UDragDropOperation> DragDropClass = UDigumGameDeveloperSettings::GetDragDropOperationClass();
 		TSubclassOf<UUserWidget> DragWidgetClass = UDigumGameDeveloperSettings::GetDragDropWidgetClass();
 
 		if(DragDropClass && DragWidgetClass && GEngine)
@@ -43,7 +43,7 @@ void SDigumInventorySlotContent::Construct(const FArguments& InArgs)
 			GEngine->GameViewport->AddViewportWidgetContent(Widget->TakeWidget());
 
 			UE_LOG(LogTemp, Warning, TEXT("I should be working"));
-		}
+		}*/
 	});
 }
 

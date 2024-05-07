@@ -56,8 +56,6 @@ void SDigumWidgetStack::Tick(const FGeometry& AllottedGeometry, const double InC
 		else
 			UE_LOG(LogTemp, Warning, TEXT("NOT"));
 	}
-
-	
 }
 
 void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
