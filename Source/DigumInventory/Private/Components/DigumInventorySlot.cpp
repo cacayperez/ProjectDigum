@@ -2,7 +2,7 @@
 
 
 #include "Components/DigumInventorySlot.h"
-
+#include "Components/DigumInventoryComponent.h"
 UDigumInventorySlot::UDigumInventorySlot()
 {
 }
@@ -24,4 +24,10 @@ void UDigumInventorySlot::ClearItemProperties()
 {
 	bEmpty = true;
 	ItemProperties = FDigumInventoryItemProperties();
+}
+
+void UDigumInventorySlot::SetOwningInventory(UDigumInventoryComponent* InOwningInventory)
+{
+	TWeakObjectPtr<UDigumInventoryComponent> Component = InOwningInventory;
+	OwningInventory = InOwningInventory; 
 }

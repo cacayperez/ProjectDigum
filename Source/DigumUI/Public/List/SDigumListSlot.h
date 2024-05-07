@@ -19,7 +19,6 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-	
 
 protected:
 	TAttribute<UObject*> ItemAttribute;

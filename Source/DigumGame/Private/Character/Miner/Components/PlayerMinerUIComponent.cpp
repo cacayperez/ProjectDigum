@@ -4,7 +4,8 @@
 #include "Character/Miner/Components/PlayerMinerUIComponent.h"
 
 #include "Character/Miner/DigumMinerCharacter.h"
-#include "Slate/SDigumInventoryWindow.h"
+#include "Core/SDigumWidgetStack.h"
+#include "UI/Inventory/SDigumInventoryWindow.h"
 #include "Widgets/SWeakWidget.h"
 #include "Window/SDigumWindow.h"
 
@@ -21,21 +22,20 @@ UPlayerMinerUIComponent::UPlayerMinerUIComponent()
 
 void UPlayerMinerUIComponent::OnToggleInventory()
 {
-	if(InventorySlateWidget.IsValid())
-		InventorySlateWidget->ToggleVisibility();
+	WidgetStack->AddItemToStack(InventorySlateWidget);
 }
 
 void UPlayerMinerUIComponent::OnToggleCharacterMenu()
 {
-	UE_LOG(LogTemp, Warning, TEXT("UPlayerMinerInventoryUI::OnToggleInventory"));
+	UE_LOG(LogTemp, Warning, TEXT("UPlayerMinerInventoryUI::OnToggleMenu"));
 	
-	if(CharacterMenuSlateWidget.IsValid())
-		CharacterMenuSlateWidget->ToggleVisibility();
+	WidgetStack->AddItemToStack(CharacterMenuSlateWidget);
 }
 
 void UPlayerMinerUIComponent::OnCancelAction()
 {
-	PopLastWindow();
+	UE_LOG(LogTemp, Warning, TEXT("UPlayerMinerInventoryUI::OnCancelAction"));
+	WidgetStack->RemoveLastItemFromStack();
 }
 
 // Called when the game starts
@@ -66,7 +66,7 @@ void UPlayerMinerUIComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 	// Clean up
 	_Container.Reset();
-	Overlay.Reset();
+	WidgetStack.Reset();
 	InventorySlateWidget.Reset();
 	CharacterMenuSlateWidget.Reset();
 }
@@ -75,70 +75,45 @@ void UPlayerMinerUIComponent::InitializeUI()
 {
 	if(GEngine && GEngine->GameViewport)
 	{
-		Overlay = SNew(SOverlay);
-		GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(_Container, SWeakWidget).PossiblyNullContent(Overlay.ToSharedRef()));
+		WidgetStack = SNew(SDigumWidgetStack);
+		WidgetStack->SetCanTick(true);
+		GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(_Container, SWeakWidget).PossiblyNullContent(WidgetStack.ToSharedRef()));
 		
-		InitializeInventoryUI();
-		InitializeCharacterMenu();
 		if(OwningController.IsValid())
 		{
 			FInputModeGameAndUI InputMode;
-			InputMode.SetWidgetToFocus(InventorySlateWidget);
+			InputMode.SetWidgetToFocus(WidgetStack);
 			OwningController->SetInputMode(InputMode);
 			OwningController->bShowMouseCursor = true;
 		}
+
+		// Initialize Stuff
+		InitializeInventoryWidget();
+		InitializeCharacterMenuWidget();
 	}
 
 	if(OwningMiner.IsValid())
 	{
 		OwningMiner->OnToggleInventoryDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnToggleInventory);
 		OwningMiner->OnToggleCharacterMenuDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnToggleCharacterMenu);
+		OwningMiner->OnCancelActionDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnCancelAction);
 	}
 }
 
-void UPlayerMinerUIComponent::InitializeInventoryUI()
+void UPlayerMinerUIComponent::InitializeInventoryWidget()
 {
 	// Initialize Inventory
-	InventorySlateWidget = SNew(SDigumInventoryWindow).InventoryComponent(OwningMiner->GetInventoryComponent());
-	//InventorySlateWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
-	
-	bShowInventory = false;
-	InventorySlateWidget->SetVisibility(EVisibility::Hidden); 
-
-	if(_Container.IsValid())
-	{
-		Overlay->AddSlot()
-		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
-		[
-			InventorySlateWidget.ToSharedRef()
-		];
-	}
+	InventorySlateWidget =
+		SNew(SDigumInventoryWindow)
+		.InventoryComponent(OwningMiner->GetInventoryComponent())
+		.HeightOverride(400)
+		.WidthOverride(400) ;
 }
 
-void UPlayerMinerUIComponent::InitializeCharacterMenu()
+void UPlayerMinerUIComponent::InitializeCharacterMenuWidget()
 {
-	CharacterMenuSlateWidget = SNew(SDigumWindow);
-	bShowCharacterMenu = false;
-	CharacterMenuSlateWidget->SetVisibility(EVisibility::Hidden);
-
-	if(_Container.IsValid())
-	{
-		Overlay->AddSlot()
-		.HAlign(HAlign_Center)
-		.VAlign(VAlign_Center)
-		[
-			CharacterMenuSlateWidget.ToSharedRef()
-		];
-	}
+	CharacterMenuSlateWidget =
+	SNew(SDigumWindow)
+	.HeightOverride(400)
+	.WidthOverride(400) ;
 }
-
-void UPlayerMinerUIComponent::PopLastWindow()
-{
-	// TODO
-	int32 Length = Overlay->GetChildren()->Num();
-	
-}
-
-
-

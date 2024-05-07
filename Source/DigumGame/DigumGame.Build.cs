@@ -10,14 +10,14 @@ public class DigumGame : ModuleRules
 		
 		// unreal engine dependencies
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput"});
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
+		PrivateDependencyModuleNames.AddRange(new string[] { "UMG" });
 		
 		// Utilities and Tools
 		PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" });
 		
 		// Digum Modules
 		PublicDependencyModuleNames.AddRange(new string[] { "DigumCore", "DigumUI", "DigumInventory"});
-		PrivateDependencyModuleNames.AddRange(new string[] { "DigumInventory"});
+		PrivateDependencyModuleNames.AddRange(new string[] { "DigumUI","DigumInventory"});
 		
 		// Uncomment if you are using Slate UI
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

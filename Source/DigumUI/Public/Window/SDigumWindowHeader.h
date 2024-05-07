@@ -3,41 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Core/SDigumWidget.h"
 #include "Widgets/SCompoundWidget.h"
 
 /**
  * 
  */
-class DIGUMUI_API SDigumWindowHeader : public SCompoundWidget
+class DIGUMUI_API SDigumWindowHeader : public SDigumWidget
 {
 public:
-	SLATE_BEGIN_ARGS(SDigumWindowHeader)
-		{
-		}
-
+	SLATE_BEGIN_ARGS(SDigumWindowHeader){}
+		SLATE_ATTRIBUTE(float, HeightOverride)
+		SLATE_ATTRIBUTE(float, WidthOverride)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
-
-	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	
-	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual void OnMouseEnter(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
-	
-protected:
-	DECLARE_DELEGATE_OneParam(FOnMouseDragStart, const FVector2D&);
-	DECLARE_DELEGATE_OneParam(FOnMouseDragStop, const FVector2D&);
-	DECLARE_DELEGATE_OneParam(FOnMouseDragMove, const FVector2D&);
-	
-	bool bCanDrag = false;
-	bool bIsDragging = false;
-
-
-public:
-	FOnMouseDragStart OnMouseDragStartDelegate;
-	FOnMouseDragStop OnMouseDragStopDelegate;
-	FOnMouseDragMove OnMouseDragMoveDelegate;
 };

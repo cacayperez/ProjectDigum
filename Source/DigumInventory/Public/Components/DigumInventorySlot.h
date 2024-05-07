@@ -7,10 +7,15 @@
 #include "UObject/Object.h"
 #include "DigumInventorySlot.generated.h"
 
+class UDigumInventoryComponent;
+
 UCLASS()
 class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 {
 	GENERATED_BODY()
+	
+	TWeakObjectPtr<UDigumInventoryComponent> OwningInventory;
+	
 public:
 	bool bEmpty = true;
 	
@@ -28,4 +33,8 @@ public:
 	void SetItemProperties(const FDigumInventoryItemProperties& InItemProperties);
 	void ClearItemProperties();
 	bool IsValid() const { return ItemProperties.IsValid(); }
+
+	
+	void SetOwningInventory(UDigumInventoryComponent* InOwningInventory);
+	UDigumInventoryComponent* GetOwningInventory() const { return OwningInventory.Get();}
 };

@@ -46,7 +46,6 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	virtual void Jump() override;
 	
-
 public:
 	virtual void PrimaryAction();
 	virtual void SecondaryAction();
@@ -60,4 +59,5 @@ public:
 	FORCEINLINE UDigumInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
+	FORCEINLINE FOnCancelAction& OnCancelActionDelegate() { return OnCancelAction; }
 };

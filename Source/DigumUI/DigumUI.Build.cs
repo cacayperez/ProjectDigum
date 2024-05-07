@@ -10,7 +10,9 @@ public class DigumUI : ModuleRules
             new string[]
             {
                 "Core",
-                "InputCore"
+                "InputCore",
+                "Slate",
+                "SlateCore"
             }
         );
 

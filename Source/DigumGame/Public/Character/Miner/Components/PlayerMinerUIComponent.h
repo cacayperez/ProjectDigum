@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PlayerMinerUIComponent.generated.h"
 
+class SDigumWidgetStack;
 class SDigumWindow;
 class SDigumInventoryWindow;
 class SWidget;
@@ -22,10 +23,10 @@ class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 	UPROPERTY()
 	TWeakObjectPtr<APlayerController> OwningController;
 	
-	TSharedPtr<SOverlay> Overlay;
+	TSharedPtr<SDigumWidgetStack> WidgetStack;
+
 	TSharedPtr<SDigumInventoryWindow> InventorySlateWidget;
 	TSharedPtr<SDigumWindow> CharacterMenuSlateWidget;
-	
 	TWeakPtr<SWidget> _Container;
 
 public:
@@ -52,8 +53,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void InitializeUI();
-	virtual void InitializeInventoryUI();
-	virtual void InitializeCharacterMenu();
+	virtual void InitializeInventoryWidget();
+	virtual void InitializeCharacterMenuWidget();
 
-	void PopLastWindow();
 };
