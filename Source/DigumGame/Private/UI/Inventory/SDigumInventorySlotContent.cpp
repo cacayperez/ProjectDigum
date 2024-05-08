@@ -4,12 +4,7 @@
 #include "UI/Inventory/SDigumInventorySlotContent.h"
 
 #include "SlateOptMacros.h"
-#include "Blueprint/DragDropOperation.h"
-#include "Blueprint/UserWidget.h"
-#include "Components/DigumInventoryComponent.h"
-#include "Components/DigumInventorySlot.h"
-#include "Settings/DigumGameDeveloperSettings.h"
-#include "Widgets/SViewport.h"
+#include "Core/SDigumWidgetStack.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -19,7 +14,31 @@ void SDigumInventorySlotContent::Construct(const FArguments& InArgs)
 	.HeightOverride(InArgs._HeightOverride)
 	.WidthOverride(InArgs._WidthOverride));
 
-	ChildSlot
+}
+
+int32 SDigumInventorySlotContent::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
+	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
+	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	FVector2D GeometrySize = AllottedGeometry.GetLocalSize();
+	
+	FGeometry NewGeometry = AllottedGeometry.MakeChild(GeometrySize, FSlateLayoutTransform( ));
+	// Draw the background
+	FSlateDrawElement::MakeBox(
+			OutDrawElements,
+			LayerId,
+			NewGeometry.ToPaintGeometry(),
+			FCoreStyle::Get().GetBrush("WhiteBrush"),  // Use a default brush
+			ESlateDrawEffect::None,
+			FLinearColor::Red
+		);
+	return SDigumWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle,
+	                             bParentEnabled);
+}
+
+void SDigumInventorySlotContent::OnConstruct()
+{
+	_Container->AddSlot()
 	[
 		SNew(STextBlock)
 		.Text(FText::FromString(TEXT("Hello")))
@@ -47,56 +66,5 @@ void SDigumInventorySlotContent::Construct(const FArguments& InArgs)
 	});
 }
 
-int32 SDigumInventorySlotContent::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry,
-	const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId,
-	const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
-{
-	FVector2D GeometrySize = AllottedGeometry.GetLocalSize();
-	
-	FGeometry NewGeometry = AllottedGeometry.MakeChild(GeometrySize, FSlateLayoutTransform( ));
-	// Draw the background
-	FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-			NewGeometry.ToPaintGeometry(),
-			FCoreStyle::Get().GetBrush("WhiteBrush"),  // Use a default brush
-			ESlateDrawEffect::None,
-			FLinearColor::Red
-		);
-	return SDigumWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle,
-	                             bParentEnabled);
-}
-
-/*
-void SDigumInventorySlotContent::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime,
-	const float InDeltaTime)
-{
-	if(bIsDragging)
-	{
-		FVector2D LocalCoordinates = AllottedGeometry.AbsoluteToLocal(PointerPosition);
-		WidgetPosition = LocalCoordinates;
-
-
-		// Get the viewport geometry
-		UGameViewportClient* GameViewportClient = GEngine->GameViewport;
-		FGeometry ViewportGeometry = GameViewportClient->GetGameViewportWidget()->GetCachedGeometry();
-		
-		// Get the widget's geometry
-		FGeometry WidgetGeometry = GetCachedGeometry();
-		if(ViewportGeometry.IsUnderLocation(PointerPosition))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Under Location"));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Not"));
-		}
-	}
-	else
-	{
-		WidgetPosition = FVector2D::ZeroVector;
-	}
-	
-}*/
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

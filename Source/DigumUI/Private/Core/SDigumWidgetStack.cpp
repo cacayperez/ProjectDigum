@@ -3,9 +3,15 @@
 
 #include "Core/SDigumWidgetStack.h"
 #include "Core/SDigumWidget.h"
+#include "Drag/SDigumDragWidget.h"
 #include "SlateOptMacros.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+SDigumWidgetStack::~SDigumWidgetStack()
+{
+	DraggedWidget = nullptr;
+}
 
 void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder)
 {
@@ -18,6 +24,7 @@ void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item
 		Shared
 	];
 
+	Shared->SetParentContainer(SharedThis(this));
 	StackItems.Add(Shared);
 }
 
@@ -33,6 +40,11 @@ void SDigumWidgetStack::RemoveFromStack_Internal(const TSharedPtr<SDigumWidget>&
 
 void SDigumWidgetStack::ClearStack_Internal()
 {
+	for(auto Item : StackItems)
+	{
+		RemoveSlot(Item);
+	}
+	
 	StackItems.Empty();
 }
 
@@ -45,9 +57,9 @@ void SDigumWidgetStack::Tick(const FGeometry& AllottedGeometry, const double InC
 {
 	SOverlay::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 
-	FVector2D MousePosition = FSlateApplication::Get().GetCursorPos();
+	
 
-	for(const TSharedRef<SDigumWidget>& Item : StackItems)
+	/*for(const TSharedRef<SDigumWidget>& Item : StackItems)
 	{
 		if(Item->GetWidgetGeometry().IsUnderLocation(MousePosition))
 		{
@@ -55,7 +67,22 @@ void SDigumWidgetStack::Tick(const FGeometry& AllottedGeometry, const double InC
 		}
 		else
 			UE_LOG(LogTemp, Warning, TEXT("NOT"));
+	}*/
+}
+
+
+bool SDigumWidgetStack::DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const
+{
+	for(const TSharedRef<SDigumWidget>& Item : StackItems)
+	{
+		if(Item->GetWidgetGeometry().IsUnderLocation(Position))
+		{
+			OutWidget = Item;
+			return true;
+		}
 	}
+
+	return false;
 }
 
 void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
@@ -75,6 +102,33 @@ void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
 	{
 		AddToStack_Internal(Item, ZOrder);
 	}
+}
+
+void SDigumWidgetStack::AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Adding draggable item to stack"));
+	DraggedWidget = Item;
+	AddItemToStack(Item);
+}
+
+void SDigumWidgetStack::RemoveDraggedItemFromStack()
+{
+	RemoveFromStack_Internal(DraggedWidget);
+
+	if(DraggedWidget.IsValid())
+	{
+		FVector2D MousePosition = FSlateApplication::Get().GetCursorPos();
+		TSharedPtr<SDigumWidget> OverlappedWidget;
+		
+		if(DoesOverlapAnyChildren(MousePosition, OverlappedWidget))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Mouse is over widget %s"), *OverlappedWidget->GetTypeAsString());
+		}
+		
+	}
+
+	
+	DraggedWidget = nullptr;
 }
 
 void SDigumWidgetStack::RemoveLastItemFromStack()

@@ -5,7 +5,9 @@
 
 #include "SlateOptMacros.h"
 #include "Components/DigumInventorySlot.h"
+#include "Core/SDigumWidgetStack.h"
 #include "UI/Inventory/SDigumInventorySlotContent.h"
+#include "UI/Inventory/SDigumInventoryWindow.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -16,23 +18,39 @@ void SDigumInventorySlot::Construct(const FArguments& InArgs)
 	SDigumWidget::Construct(SDigumWidget::FArguments()
 	.HeightOverride(InArgs._HeightOverride)
 	.WidthOverride(InArgs._WidthOverride));
+}
 
+void SDigumInventorySlot::OnConstruct()
+{
+	SetEnableDrag(true);
 	if(InventorySlot.IsValid())
 	{
-		ChildSlot
+		_Container->AddSlot()
 		[
 			SNew(SOverlay)
 			+ SOverlay::Slot()
 			[
 				SNew(STextBlock)
-				.Text(FText::FromString("Background"))
+				.Text(FText::FromName(InventorySlot->GetItemID()))
 			]
-			+ SOverlay::Slot()
-			[
-				SNew(SDigumInventorySlotContent)
-			]
+			
 		];
 	}
+
+	OnMouseDragStartDelegate.AddLambda([&](const FVector2D& Position)
+	{
+		if(InventoryWindow && InventorySlot.Get()) InventoryWindow->BeginDragItem(InventorySlot.Get());
+	});
+
+	OnMouseDragStopDelegate.AddLambda([&](const FVector2D& Position)
+	{
+		if(InventoryWindow) InventoryWindow->StopDragItem();
+	});
+}
+
+void SDigumInventorySlot::SetInventoryWindow(const TSharedPtr<SDigumInventoryWindow>& Window)
+{
+	InventoryWindow = Window;
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

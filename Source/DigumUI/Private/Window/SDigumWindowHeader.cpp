@@ -4,6 +4,7 @@
 #include "Window/SDigumWindowHeader.h"
 #include "Rendering/DrawElements.h"
 #include "SlateOptMacros.h"
+#include "Core/SDigumWidgetStack.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -14,14 +15,17 @@ void SDigumWindowHeader::Construct(const FArguments& InArgs)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride));
 	
-	
-	ChildSlot
+
+}
+
+void SDigumWindowHeader::OnConstruct()
+{
+	_Container->AddSlot()
 	[
 		SNew(STextBlock)
 		.Text(FText::FromString("Header"))
 	];
 }
-
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

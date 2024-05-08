@@ -6,24 +6,10 @@ public class DigumUI : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core",
-                "InputCore",
-                "Slate",
-                "SlateCore"
-            }
-        );
-
-        PrivateDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "CoreUObject",
-                "Engine",
-                "Slate",
-                "SlateCore"
-            }
-        );
+        PublicDependencyModuleNames.AddRange(new string[] { "Engine", "Core", "CoreUObject", "Slate", "SlateCore", "InputCore"});
+        // Utilities and Tools
+        PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" });
+        
+        PrivateDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Slate", "SlateCore"});
     }
 }

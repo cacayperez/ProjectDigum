@@ -4,6 +4,7 @@
 #include "Window/SDigumWindow.h"
 
 #include "SlateOptMacros.h"
+#include "Core/SDigumWidgetStack.h"
 #include "Window/SDigumWindowHeader.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -13,30 +14,27 @@ void SDigumWindow::Construct(const FArguments& InArgs)
 {
 	SDigumWidget::Construct(
 		SDigumWidget::FArguments()
+		.ParentContainer(InArgs._ParentContainer)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride));
 	
-	DrawWindow();
 }
 
+void SDigumWindow::OnConstruct()
+{
+	SDigumWidget::OnConstruct();
+	
+	DrawWindow();
+}
 
 int32 SDigumWindow::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
                             FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle,
                             bool bParentEnabled) const
 {
 	
-	FVector2D GeometrySize = AllottedGeometry.GetLocalSize();
-	FVector2D GeometryPosition = WindowPosition;
+	const FVector2D GeometrySize = AllottedGeometry.GetLocalSize();
 	
-	FGeometry NewGeometry = AllottedGeometry.MakeChild(GeometrySize, FSlateLayoutTransform( GeometryPosition));
-	// Draw the background
-	FSlateDrawElement::MakeBox(
-			OutDrawElements,
-			LayerId,
-			NewGeometry.ToPaintGeometry(),
-			FCoreStyle::Get().GetBrush("WhiteBrush"),  // Use a default brush
-			ESlateDrawEffect::None
-		);
+	const FGeometry NewGeometry = AllottedGeometry.MakeChild(GeometrySize, FSlateLayoutTransform( WindowPosition));
 
 	SetWidgetGeometry(NewGeometry);
 	
@@ -44,15 +42,13 @@ int32 SDigumWindow::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 									 bParentEnabled);
 }
 
-void SDigumWindow::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
+void SDigumWindow::OnTick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	SDigumWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
-
 	if(bDragWindow)
 	{
 		// TODO: Fix snapping issue
-		FVector2D MouseCoords = FSlateApplication::Get().GetCursorPos();
-		FVector2D LocalCoordinates = AllottedGeometry.AbsoluteToLocal(MouseCoords);
+		const FVector2D MouseCoords = FSlateApplication::Get().GetCursorPos();
+		const FVector2D LocalCoordinates = AllottedGeometry.AbsoluteToLocal(MouseCoords);
 		
 		WindowPosition = LocalCoordinates;
 	}
@@ -89,7 +85,7 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 		SNew(SDigumWindowHeader)
 		.HeightOverride(100)
 		.WidthOverride(WidthOverrideAttribute.Get());
-	Header->SetEnableDrag(true);
+		Header->SetEnableDrag(true);
 	
 	Header->OnMouseDragStartDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
@@ -117,19 +113,11 @@ void SDigumWindow::DrawWindow()
 	WindowHeader = OnCreateHeader();
 	WindowContent = OnCreateContent();
 	
-	ChildSlot
+	_Container->AddSlot()
+	.VAlign(VAlign_Fill)
+	.HAlign(HAlign_Fill)
 	[
-		SNew(SHorizontalBox)
-		+SHorizontalBox::Slot()
-		.AutoWidth()
-		[
-			SNew(SBox)
-			.WidthOverride(WidthOverrideAttribute.Get())
-			.HeightOverride(HeightOverrideAttribute.Get())
-			[
-				OnCreateWindow().ToSharedRef()
-			]
-		]
+		OnCreateWindow().ToSharedRef()
 	];
 }
 

@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PlayerMinerUIComponent.generated.h"
 
+class SDigumWidget;
 class SDigumWidgetStack;
 class SDigumWindow;
 class SDigumInventoryWindow;
@@ -56,4 +57,6 @@ protected:
 	virtual void InitializeInventoryWidget();
 	virtual void InitializeCharacterMenuWidget();
 
+public:
+	TSharedPtr<SDigumWidget> CreateDragDropWidget();
 };

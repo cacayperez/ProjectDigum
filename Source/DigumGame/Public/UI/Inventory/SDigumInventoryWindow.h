@@ -8,6 +8,7 @@
 
 class UDigumInventoryComponent;
 class UDigumInventorySlot;
+class SDigumInventorySlot;
 /**
  * 
  */
@@ -16,18 +17,25 @@ class DIGUMGAME_API SDigumInventoryWindow : public SDigumWindow
 public:
 	 SLATE_BEGIN_ARGS(SDigumInventoryWindow){}
 		SLATE_ATTRIBUTE(UDigumInventoryComponent*, InventoryComponent)
+		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)
 	 SLATE_END_ARGS()
-		
+
+	~SDigumInventoryWindow();
 	void Construct(const FArguments& InArgs);
-protected:
+	virtual void OnConstruct() override;
+	void BeginDragItem(UDigumInventorySlot* ItemSlot);
+	void StopDragItem();
+
+ protected:
 	int32 GridWidth = 5;
 	int32 GridHeight = 5;
 	
-	TSharedPtr<SGridPanel> _Container;
+	TSharedPtr<SGridPanel> _GridContainer;
 	TWeakObjectPtr<UDigumInventoryComponent> WeakInventoryComponent;
-
+	
 	virtual TSharedPtr<SWidget> OnCreateContent() override;
-	virtual TSharedPtr<SWidget> CreateWidgetItem(UDigumInventorySlot* Item) const;
+	virtual TSharedPtr<SDigumInventorySlot> CreateWidgetItem(UDigumInventorySlot* Item) const;
+
 };

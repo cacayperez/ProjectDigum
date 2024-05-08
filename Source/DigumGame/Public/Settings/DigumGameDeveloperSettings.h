@@ -6,6 +6,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "DigumGameDeveloperSettings.generated.h"
 
+class UDigumWindowStyle;
 class UDragDropOperation;
 class UDigumInputSettingsAsset;
 class UUserWidget;
@@ -20,12 +21,13 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Primary Miner Input"))
 	TSoftObjectPtr<UDigumInputSettingsAsset> PrimaryMinerInputSettings;
 	
-	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
+	
+	/*UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
 	TSoftClassPtr<UDragDropOperation> DragDropOperationClass;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
-	TSoftClassPtr<UUserWidget> DragDropWidgetClass;
+	TSoftClassPtr<UUserWidget> DragDropWidgetClass;*/
 
-	static TSubclassOf<UDragDropOperation> GetDragDropOperationClass();
-	static TSubclassOf<UUserWidget> GetDragDropWidgetClass();
+	/*static TSubclassOf<UDragDropOperation> GetDragDropOperationClass();
+	static TSubclassOf<UUserWidget> GetDragDropWidgetClass();*/
 };

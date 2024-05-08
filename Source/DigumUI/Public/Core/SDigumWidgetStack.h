@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+class SDigumDragWidget;
 class SDigumWidget;
 /**
  * 
@@ -12,11 +13,11 @@ class SDigumWidget;
 class DIGUMUI_API SDigumWidgetStack : public SOverlay
 {
 public:
+	~SDigumWidgetStack();
 	template<typename T>
 	static TSharedPtr<T> CreateWidget();
 
 protected:
-	TWeakObjectPtr<APlayerController> PlayerController;
 	
 	TArray<TSharedRef<SDigumWidget>> StackItems;
 	
@@ -27,11 +28,15 @@ protected:
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
-	
+	TSharedPtr<SDigumDragWidget> DraggedWidget;
+
+	bool DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const;
 public:
 	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
+	void AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item);
+	void RemoveDraggedItemFromStack();
 	void RemoveLastItemFromStack();
-	void SetPlayerController(APlayerController* Controller) { PlayerController = Controller; }
+	
 };
 
 template <typename T>
