@@ -6,10 +6,14 @@
 #include "Engine/DeveloperSettings.h"
 #include "DigumGameDeveloperSettings.generated.h"
 
+struct FDigumContentCategory;
 class UDigumWindowStyle;
 class UDragDropOperation;
 class UDigumInputSettingsAsset;
 class UUserWidget;
+
+
+
 /**
  * 
  */
@@ -19,15 +23,11 @@ class DIGUMGAME_API UDigumGameDeveloperSettings : public UDeveloperSettings
 	GENERATED_BODY()
 public:
 	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Primary Miner Input"))
+	TArray<FDigumContentCategory> ContentCategories;
+	
+	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Primary Miner Input"))
 	TSoftObjectPtr<UDigumInputSettingsAsset> PrimaryMinerInputSettings;
 	
-	
-	/*UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
-	TSoftClassPtr<UDragDropOperation> DragDropOperationClass;
-	
-	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
-	TSoftClassPtr<UUserWidget> DragDropWidgetClass;*/
-
-	/*static TSubclassOf<UDragDropOperation> GetDragDropOperationClass();
-	static TSubclassOf<UUserWidget> GetDragDropWidgetClass();*/
+	static const FDigumContentCategory* GetContentCategoryData(FName ContentCategoryName);
+	static const UDigumGameDeveloperSettings* Get();
 };

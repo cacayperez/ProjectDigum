@@ -1,8 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "Components/DigumInventoryComponent.h"
+
+#include "Asset/DigumItem.h"
 #include "Asset/DigumItemTable.h"
 #include "Components/DigumInventorySlot.h"
 #include "Properties/DigumInventoryItemProperties.h"
+#include "Properties/DigumItemPropertyBuilder.h"
 #include "Settings/DigumInventorySettings.h"
 
 DEFINE_LOG_CATEGORY(LogDigumInventory);
@@ -11,20 +14,20 @@ DEFINE_LOG_CATEGORY(LogDigumInventory);
 UDigumInventoryComponent::UDigumInventoryComponent(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = false;
 
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UDigumInventoryComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-	
 
 }
 
 void UDigumInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
 
 	// Initialize inventory array
 	// Initialize inventory array
@@ -56,6 +59,13 @@ void UDigumInventoryComponent::BeginPlay()
 void UDigumInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+}
+
+bool UDigumInventoryComponent::BuildItemProperties(const FDigumItemProperties& InItemProperties,
+	UDigumItem*& OutBuiltItem)
+{
+	// Override this function in a child class
+	return false;
 }
 
 UDigumInventorySlot* UDigumInventoryComponent::GetItemSlot(const int32 InIndex) const
@@ -101,13 +111,18 @@ int32 UDigumInventoryComponent::FindEmptySlot() const
 
 bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemProperties& InItemProperties, int32& OutExcessAmount)
 {
-	int32 RemainingAmount = InItemProperties.GetAmount();
-	const UDigumInventorySettings* Settings = GetDefault<UDigumInventorySettings>();
-
-	check(Settings);
 	
-	const int32 StackSize = UDigumItemTable::GetDigumItemStackSize(InItemProperties.ItemID, Settings->ItemTable.LoadSynchronous());
-
+	UDigumItem* BuiltItem;
+	BuildItemProperties(InItemProperties, BuiltItem);
+	if(BuiltItem == nullptr)
+	{
+		UE_LOG(LogDigumInventory, Error, TEXT("Item with ID %s could not be built"), *InItemProperties.ItemID.ToString());
+		return false;
+	}
+	
+	const int32 StackSize = BuiltItem->GetStackSize();
+	int32 RemainingAmount = BuiltItem->GetItemAmount();
+	
 	if(StackSize <= 0)
 	{
 		// Log assertion error

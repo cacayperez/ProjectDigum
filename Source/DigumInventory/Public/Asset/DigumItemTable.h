@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Engine/DataTable.h"
 #include "DigumItemTable.generated.h"
 
 class UDigumItemAsset;
+
+
 
 USTRUCT()
 struct FDigumItemTableRow : public FTableRowBase

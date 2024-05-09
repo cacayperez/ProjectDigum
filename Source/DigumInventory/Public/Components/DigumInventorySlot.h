@@ -15,7 +15,7 @@ class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 	GENERATED_BODY()
 	
 	TWeakObjectPtr<UDigumInventoryComponent> OwningInventory;
-	
+	TWeakObjectPtr<UTexture2D> ItemTexture;
 public:
 	bool bEmpty = true;
 	
@@ -35,5 +35,6 @@ public:
 	bool IsValid() const { return ItemProperties.IsValid(); }
 
 	void SwapContent(UDigumInventorySlot* InOtherSlot);
+	UTexture2D* GetItemTexture() const { return ItemTexture.Get(); }
 
 };

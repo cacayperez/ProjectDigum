@@ -28,7 +28,7 @@ public:
 		ItemID = InItemID;
 		ItemAmount = InAmount;
 	}
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	FName ItemID;
 	
@@ -40,6 +40,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	TArray<FDigumItemAffixProperties> ItemSuffixes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
+	FName ContentCategory;
 
 	FORCEINLINE bool IsValid() const
 	{

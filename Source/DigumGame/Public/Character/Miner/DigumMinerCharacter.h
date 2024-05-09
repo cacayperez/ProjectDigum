@@ -7,6 +7,7 @@
 #include "Character/DigumCharacter.h"
 #include "DigumMinerCharacter.generated.h"
 
+class UDigumGameInventoryComponent;
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumMinerCharacter, Log, All);
 
 DECLARE_MULTICAST_DELEGATE(FOnToggleInventory);
@@ -29,7 +30,7 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
 	TObjectPtr<UCameraComponent> CameraComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
-	TObjectPtr<UDigumInventoryComponent> InventoryComponent;
+	TObjectPtr<UDigumGameInventoryComponent> InventoryComponent;
 
 protected:
 	void Move(const FInputActionValue& InputActionValue);
@@ -56,7 +57,7 @@ public:
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
-	FORCEINLINE UDigumInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+	FORCEINLINE UDigumGameInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 	FORCEINLINE FOnCancelAction& OnCancelActionDelegate() { return OnCancelAction; }

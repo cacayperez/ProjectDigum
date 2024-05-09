@@ -7,6 +7,7 @@
 #include "DigumInventoryComponent.generated.h"
 
 
+class UDigumItem;
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumInventory, Log, All);
 
 USTRUCT(BlueprintType)
@@ -28,9 +29,10 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMINVENTORY_API UDigumInventoryComponent : public UActorComponent
 {
 	GENERATED_BODY()
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
 	TArray<UDigumInventorySlot*> InventoryItems;
+
 	
 public:
 	// Sets default values for this component's properties
@@ -39,7 +41,10 @@ public:
 	virtual void InitializeComponent() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	
+protected:
+	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
+	
 private:
 	UDigumInventorySlot* GetItemSlot(const int32 InIndex) const;
 	bool FindItemsWithItemID(const FName& InItemID, TArray<UDigumInventorySlot*>& OutResult);

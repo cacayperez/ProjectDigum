@@ -6,6 +6,8 @@
 #include "Engine/DeveloperSettings.h"
 #include "DigumInventorySettings.generated.h"
 
+class UDigumItemPropertyBuilder;
+
 /**
  * 
  */
@@ -17,5 +19,8 @@ class DIGUMINVENTORY_API UDigumInventorySettings : public UDeveloperSettings
 public:
 	UPROPERTY(Config, EditAnywhere, Category = "Digum Inventory")
 	TSoftObjectPtr<UDataTable> ItemTable;
+
+	UPROPERTY(Config, EditAnywhere, Category = "Digum Inventory")
+	TSoftClassPtr<UDigumItemPropertyBuilder> ItemBuilderClass;
 	
 };

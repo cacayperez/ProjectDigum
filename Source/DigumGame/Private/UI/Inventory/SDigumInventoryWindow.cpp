@@ -4,6 +4,7 @@
 #include "UI/Inventory/SDigumInventoryWindow.h"
 
 #include "SlateOptMacros.h"
+#include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Components/DigumInventoryComponent.h"
 #include "Components/DigumInventorySlot.h"
 #include "Core/SDigumWidgetStack.h"
@@ -78,7 +79,7 @@ void SDigumInventoryWindow::StopDragItem()
 		// Assume that it is dropped in the world
 		if(bWidgetHandled == false && OutPayload != nullptr)
 		{
-			UDigumInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
+			UDigumGameInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
 			const UDigumInventorySlot* ItemSlot = Cast<UDigumInventorySlot>(OutPayload);
 			
 			if(ItemSlot == nullptr)

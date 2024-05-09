@@ -2,6 +2,9 @@
 
 
 #include "Components/DigumInventorySlot.h"
+
+#include "Asset/DigumItemAsset.h"
+#include "Asset/DigumItemTable.h"
 #include "Components/DigumInventoryComponent.h"
 UDigumInventorySlot::UDigumInventorySlot()
 {
@@ -11,6 +14,7 @@ void UDigumInventorySlot::SetItemProperties(const FDigumInventoryItemProperties&
 {
 	if(InItemProperties.IsValid())
 	{
+		
 		ItemProperties = InItemProperties;
 		bEmpty = false;
 	}
