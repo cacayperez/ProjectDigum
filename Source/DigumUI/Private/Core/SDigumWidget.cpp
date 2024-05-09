@@ -34,14 +34,13 @@ void SDigumWidget::Construct(const FArguments& InArgs)
 	// WidgetStyleClass = InArgs._WidgetStyleClass;
 
 	const UDigumWidgetStyle* WidgetStyle = UUDigumUISettings::GetDefaultWidgetStyle();
-	
+
+	_BGContainer = SNew(SOverlay);
 	_Container = SNew(SDigumWidgetStack);
 
 	if(WidgetStyle && WidgetStyle->Image)
 	{
-		_Container->AddSlot()
-		.VAlign(VAlign_Fill)
-		.HAlign(HAlign_Fill)
+		_BGContainer->AddSlot()
 		[
 			SNew(SImage)
 			.Image(&WidgetStyle->Image->Brush)
@@ -50,7 +49,15 @@ void SDigumWidget::Construct(const FArguments& InArgs)
 	
 	ChildSlot
 	[
-		_Container.ToSharedRef()
+		SNew(SOverlay)
+		+ SOverlay::Slot()
+		[
+			_BGContainer.ToSharedRef()
+		]
+		+ SOverlay::Slot()
+		[
+			_Container.ToSharedRef()
+		]
 	];
 	
 	OnConstruct();

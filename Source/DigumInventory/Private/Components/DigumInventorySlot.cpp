@@ -14,27 +14,52 @@ void UDigumInventorySlot::SetItemProperties(const FDigumInventoryItemProperties&
 {
 	if(InItemProperties.IsValid())
 	{
-		
 		ItemProperties = InItemProperties;
 		bEmpty = false;
 	}
 	else
 	{
-		ClearItemProperties();
+		Clear();
 	}
 }
 
-void UDigumInventorySlot::ClearItemProperties()
+void UDigumInventorySlot::SetItemObject(UDigumItem* InItemObject)
+{
+	ItemObject = InItemObject;
+}
+
+void UDigumInventorySlot::Clear()
 {
 	bEmpty = true;
 	ItemProperties = FDigumInventoryItemProperties();
+	ItemObject = nullptr;
 }
 
 void UDigumInventorySlot::SwapContent(UDigumInventorySlot* InOtherSlot)
 {
+	if(InOtherSlot == nullptr)
+	{
+		return;
+	}
+	
 	const FDigumInventoryItemProperties ThisProperties = ItemProperties;
 	const FDigumInventoryItemProperties OtherProperties = InOtherSlot->ItemProperties;
-
+	UDigumItem* ThisItemObject = ItemObject.Get();
+	UDigumItem* OtherItemObject = InOtherSlot->GetItemObject();
+	
 	InOtherSlot->SetItemProperties(ThisProperties);
+	InOtherSlot->SetItemObject(ThisItemObject);
+	
 	SetItemProperties(OtherProperties);
+	SetItemObject(OtherItemObject);
+}
+
+UTexture2D* UDigumInventorySlot::GetItemTexture() const
+{
+	if(ItemObject.IsValid())
+	{
+		return ItemObject->GetItemTexture();
+	}
+	
+	return nullptr;
 }

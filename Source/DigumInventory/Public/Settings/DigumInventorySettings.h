@@ -17,10 +17,5 @@ class DIGUMINVENTORY_API UDigumInventorySettings : public UDeveloperSettings
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(Config, EditAnywhere, Category = "Digum Inventory")
-	TSoftObjectPtr<UDataTable> ItemTable;
-
-	UPROPERTY(Config, EditAnywhere, Category = "Digum Inventory")
-	TSoftClassPtr<UDigumItemPropertyBuilder> ItemBuilderClass;
 	
 };

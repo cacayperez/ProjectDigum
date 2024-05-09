@@ -16,9 +16,11 @@ class DIGUMUI_API SDigumDragWidget : public SDigumWidget
 public:
 	TWeakObjectPtr<UObject> Payload;
 	UObject* GetDragPayload() const;
-	virtual void OnConstruct() override;
+	
 	virtual void OnTick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
+
+	virtual void OnSetDragPayload(UObject* InPayload);
 	void SetDragPayload(UObject* InPayload);
 
 };

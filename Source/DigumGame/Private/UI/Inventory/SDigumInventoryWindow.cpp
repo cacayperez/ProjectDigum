@@ -12,11 +12,13 @@
 #include "UI/Inventory/SDigumInventorySlot.h"
 
 #include "Templates/SharedPointer.h"
+#include "UI/Inventory/SDigumInventoryDragWidget.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 SDigumInventoryWindow::~SDigumInventoryWindow()
 {
+
 	InventoryItemSlotsWidgets.Empty();
 }
 
@@ -28,20 +30,13 @@ void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride)
 	);
-
-	// Set Window Width and Height based on GridWidth and GridHeight
-	float Width = GridWidth * 100;
-	float Height = GridHeight * 100;
-
-	HeightOverrideAttribute = Height;
-	WidthOverrideAttribute = Width;
 }
 
 void SDigumInventoryWindow::OnConstruct()
 {
 	SDigumWindow::OnConstruct();
-	
 	DrawWindow();
+	UpdateInventoryGridPanel();
 }
 
 void SDigumInventoryWindow::OnReceiveDropPayload(UObject* InPayload)
@@ -59,12 +54,15 @@ void SDigumInventoryWindow::OnReceiveDropPayload(UObject* InPayload)
 }
 void SDigumInventoryWindow::BeginDragItem(UDigumInventorySlot* ItemSlot)
 {
-	TSharedPtr<SDigumDragWidget> DragWidget = SNew(SDigumDragWidget);
-
+	if(bIsTransactingItem) return;
+	
+	TSharedPtr<SDigumInventoryDragWidget> DragWidget = SNew(SDigumInventoryDragWidget);
 	DragWidget->SetDragPayload(ItemSlot);
-	if(DragWidget.IsValid() && _ParentContainer.IsValid())
+	
+	if(_ParentContainer.IsValid() && ItemSlot->HasValidItem())
 	{
 		_ParentContainer->AddDraggableItemToStack(DragWidget);
+		bIsTransactingItem = true;
 	}
 }
 
@@ -79,6 +77,7 @@ void SDigumInventoryWindow::StopDragItem()
 		// Assume that it is dropped in the world
 		if(bWidgetHandled == false && OutPayload != nullptr)
 		{
+			
 			UDigumGameInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
 			const UDigumInventorySlot* ItemSlot = Cast<UDigumInventorySlot>(OutPayload);
 			
@@ -95,14 +94,36 @@ void SDigumInventoryWindow::StopDragItem()
 			}
 		}
 	}
-
-	Refresh();
+	bIsTransactingItem = false;
+	UpdateInventoryGridPanel();
 }
 
 
 TSharedPtr<SWidget> SDigumInventoryWindow::OnCreateContent()
 {
-	TSharedPtr<SGridPanel> GridPanel = SNew(SGridPanel);
+	InventoryGridPanel = SNew(SGridPanel);
+	return InventoryGridPanel;
+}
+
+TSharedPtr<SDigumInventorySlot> SDigumInventoryWindow::CreateWidgetItem(UDigumInventorySlot* Item) const
+{
+	if(Item != nullptr)
+	{
+		TSharedPtr<SDigumInventorySlot> Slot
+			= SNew(SDigumInventorySlot)
+			.InventorySlot(Item)
+			.HeightOverride(100)
+			.WidthOverride(100);
+
+		
+		return Slot;
+	}
+	return nullptr;
+}
+
+void SDigumInventoryWindow::UpdateInventoryGridPanel()
+{
+	InventoryGridPanel->ClearChildren();
 	InventoryItemSlotsWidgets.Empty();
 
 	UDigumInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
@@ -119,33 +140,17 @@ TSharedPtr<SWidget> SDigumInventoryWindow::OnCreateContent()
 			
 			if(ItemWidget.IsValid())
 			{
-				GridPanel->AddSlot(Column, Row)
+				InventoryGridPanel->AddSlot(Column, Row)
+				.HAlign(HAlign_Center)
+				.VAlign(VAlign_Center)
+				.Padding(3)
 				[
 					ItemWidget.ToSharedRef()
 				];
 			}
 		}
 	}
-	return GridPanel;
 }
-
-TSharedPtr<SDigumInventorySlot> SDigumInventoryWindow::CreateWidgetItem(UDigumInventorySlot* Item) const
-{
-	if(Item != nullptr)
-	{
-		
-		TSharedPtr<SDigumInventorySlot> Slot
-			= SNew(SDigumInventorySlot)
-			.InventorySlot(Item)
-			.HeightOverride(100)
-			.WidthOverride(100);
-
-		
-		return Slot;
-	}
-	return nullptr;
-}
-
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

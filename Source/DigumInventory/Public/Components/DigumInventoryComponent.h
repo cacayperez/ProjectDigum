@@ -43,7 +43,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 protected:
+
 	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
+	// virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
+
 	
 private:
 	UDigumInventorySlot* GetItemSlot(const int32 InIndex) const;
@@ -61,5 +64,4 @@ public:
 	TArray<UDigumInventorySlot*> GetInventoryItems() const;
 
 	bool RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount = 1);
-	
 };

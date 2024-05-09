@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Asset/DigumItem.h"
 #include "Properties/DigumInventoryItemProperties.h"
 #include "UObject/Object.h"
 #include "DigumInventorySlot.generated.h"
@@ -15,7 +16,8 @@ class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 	GENERATED_BODY()
 	
 	TWeakObjectPtr<UDigumInventoryComponent> OwningInventory;
-	TWeakObjectPtr<UTexture2D> ItemTexture;
+	TWeakObjectPtr<UDigumItem> ItemObject;
+	
 public:
 	bool bEmpty = true;
 	
@@ -27,14 +29,18 @@ public:
 	UPROPERTY()
 	int32 InventoryIndex = INDEX_NONE;
 	
+	bool HasValidItem() const { return ItemProperties.IsValid(); }
 	FName GetItemID() const { return ItemProperties.ItemID; }
 	int32 GetAmount() const { return ItemProperties.ItemAmount; }
 	void SetAmount(const int32 InAmount) { ItemProperties.ItemAmount = InAmount; }
-	void SetItemProperties(const FDigumInventoryItemProperties& InItemProperties);
-	void ClearItemProperties();
-	bool IsValid() const { return ItemProperties.IsValid(); }
+	UDigumItem* GetItemObject() const { return ItemObject.Get(); }
 
+	
+	void SetItemProperties(const FDigumInventoryItemProperties& InItemProperties);
+	void SetItemObject(UDigumItem* InItemObject);
+	void Clear();
 	void SwapContent(UDigumInventorySlot* InOtherSlot);
-	UTexture2D* GetItemTexture() const { return ItemTexture.Get(); }
+	
+	UTexture2D* GetItemTexture() const;
 
 };

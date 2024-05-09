@@ -2,11 +2,8 @@
 #include "Components/DigumInventoryComponent.h"
 
 #include "Asset/DigumItem.h"
-#include "Asset/DigumItemTable.h"
 #include "Components/DigumInventorySlot.h"
 #include "Properties/DigumInventoryItemProperties.h"
-#include "Properties/DigumItemPropertyBuilder.h"
-#include "Settings/DigumInventorySettings.h"
 
 DEFINE_LOG_CATEGORY(LogDigumInventory);
 #define INVALID_SLOT_INDEX -1
@@ -27,12 +24,7 @@ void UDigumInventoryComponent::InitializeComponent()
 void UDigumInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
-
-	// Initialize inventory array
-	// Initialize inventory array
 	const int32 Size = InitProperties.InventorySize;
-	//InventoryItems.Init({}, Size);
 
 	for(int32 i = 0; i < Size; i++)
 	{
@@ -64,7 +56,6 @@ void UDigumInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 bool UDigumInventoryComponent::BuildItemProperties(const FDigumItemProperties& InItemProperties,
 	UDigumItem*& OutBuiltItem)
 {
-	// Override this function in a child class
 	return false;
 }
 
@@ -77,7 +68,6 @@ UDigumInventorySlot* UDigumInventoryComponent::GetItemSlot(const int32 InIndex) 
 	
 	return nullptr;
 }
-
 
 bool UDigumInventoryComponent::FindItemsWithItemID(const FName& InItemID, TArray<UDigumInventorySlot*>& OutResult)
 {
@@ -104,24 +94,29 @@ int32 UDigumInventoryComponent::FindEmptySlot() const
 {
 	for(auto Slot : InventoryItems)
 	{
-		if(!Slot->IsValid()) return Slot->InventoryIndex;
+		if(!Slot->HasValidItem()) return Slot->InventoryIndex;
 	}
 	return INVALID_SLOT_INDEX;
 }
 
 bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemProperties& InItemProperties, int32& OutExcessAmount)
 {
+	UDigumItem* BuiltItem = nullptr;
 	
-	UDigumItem* BuiltItem;
-	BuildItemProperties(InItemProperties, BuiltItem);
-	if(BuiltItem == nullptr)
+	if(!BuildItemProperties(InItemProperties, BuiltItem))
 	{
 		UE_LOG(LogDigumInventory, Error, TEXT("Item with ID %s could not be built"), *InItemProperties.ItemID.ToString());
 		return false;
 	}
+
+	if(BuiltItem == nullptr)
+	{
+		UE_LOG(LogDigumInventory, Error, TEXT("BuiltItem is null"));
+		return false;
+	}
 	
 	const int32 StackSize = BuiltItem->GetStackSize();
-	int32 RemainingAmount = BuiltItem->GetItemAmount();
+	int32 RemainingAmount = InItemProperties.ItemAmount;
 	
 	if(StackSize <= 0)
 	{
@@ -174,6 +169,7 @@ bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemPropert
 			ExcessAmount = RemainingAmount;
 
 			EmptySlot->SetItemProperties(NewItemProperties);
+			EmptySlot->SetItemObject(BuiltItem);
 		}
 		else
 		{
@@ -216,7 +212,7 @@ bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const
 	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
 	if(Slot != nullptr)
 	{
-		Slot->ClearItemProperties();
+		Slot->Clear();
 		return true;
 	}
 	

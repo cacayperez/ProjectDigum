@@ -21,6 +21,7 @@ void SDigumWindowHeader::Construct(const FArguments& InArgs)
 void SDigumWindowHeader::OnConstruct()
 {
 	_Container->AddSlot()
+	.VAlign(VAlign_Center)
 	[
 		SNew(STextBlock)
 		.Text(FText::FromString("Header"))

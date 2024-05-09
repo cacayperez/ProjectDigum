@@ -17,6 +17,10 @@ public:
 	
 };
 
+/**
+ * Base struct for item properties
+ * that are stored in a save file, or sent thru network
+ */
 USTRUCT(BlueprintType)
 struct FDigumItemProperties
 {

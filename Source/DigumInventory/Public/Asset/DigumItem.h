@@ -6,13 +6,9 @@
 #include "UObject/Object.h"
 #include "DigumItem.generated.h"
 
-
-
-
-
-
 /**
- * 
+ * For storing database information about an item
+ * that are not stored in a save file
  */
 UCLASS()
 class DIGUMINVENTORY_API UDigumItem : public UObject
@@ -20,17 +16,14 @@ class DIGUMINVENTORY_API UDigumItem : public UObject
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	UTexture2D* DisplayTexture = nullptr;
+	TWeakObjectPtr<UTexture2D> DisplayTexture = nullptr;
 
 	UPROPERTY()
 	FName ItemID;
-
-	UPROPERTY()
-	int32 ItemAmount;
-
+	
 	UPROPERTY()
 	int32 StackSize;
 
 	int32 GetStackSize() const { return StackSize; }
-	int32 GetItemAmount() const { return ItemAmount; }
+	UTexture2D* GetItemTexture() const { return DisplayTexture.Get(); }
 };

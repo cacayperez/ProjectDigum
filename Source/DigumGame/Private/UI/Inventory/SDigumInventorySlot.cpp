@@ -6,7 +6,6 @@
 #include "SlateOptMacros.h"
 #include "Components/DigumInventorySlot.h"
 #include "Core/SDigumWidgetStack.h"
-#include "UI/Inventory/SDigumInventorySlotContent.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -22,31 +21,46 @@ void SDigumInventorySlot::Construct(const FArguments& InArgs)
 
 void SDigumInventorySlot::OnConstruct()
 {
-	SetEnableDrag(true);
+	
 	if(InventorySlot.IsValid())
 	{
-		_Container->AddSlot()
-		[
-			SNew(SOverlay)
-			+ SOverlay::Slot()
+	
+		if(InventorySlot->HasValidItem())
+		{
+			UTexture2D* Texture = InventorySlot->GetItemTexture();
+			if(Texture)
+			{
+				FSlateImageBrush* Brush = new FSlateImageBrush(Texture, FVector2D(100.0f, 100.0f));
+				_Container->AddSlot()
+				[
+					SNew(SImage)
+					.Image(Brush)
+				];
+			}
+			_Container->AddSlot()
 			[
 				SNew(STextBlock)
 				.Text(FText::FromName(InventorySlot->GetItemID()))
-			]
+			];
 			
-		];
+			SetEnableDrag(true);
+        	
+			OnMouseDragStartDelegate.AddLambda([&](const FVector2D& Position)
+			{
+				if(InventoryWindow && InventorySlot.Get()) InventoryWindow->BeginDragItem(InventorySlot.Get());
+			});
+    
+			OnMouseDragStopDelegate.AddLambda([&](const FVector2D& Position)
+			{
+				if(InventoryWindow) InventoryWindow->StopDragItem();
+			});
+		}
+	
 	}
 
-	OnMouseDragStartDelegate.AddLambda([&](const FVector2D& Position)
-	{
-		
-		if(InventoryWindow && InventorySlot.Get()) InventoryWindow->BeginDragItem(InventorySlot.Get());
-	});
+	
+	
 
-	OnMouseDragStopDelegate.AddLambda([&](const FVector2D& Position)
-	{
-		if(InventoryWindow) InventoryWindow->StopDragItem();
-	});
 }
 
 void SDigumInventorySlot::OnReceiveDropPayload(UObject* InPayload)
@@ -54,6 +68,8 @@ void SDigumInventorySlot::OnReceiveDropPayload(UObject* InPayload)
 	UE_LOG(LogTemp, Warning, TEXT("SDigumInventorySlot::OnReceiveDropPayload"));
 	if(InventorySlot.IsValid())
 	{
+		if(InventorySlot.Get() == InPayload) return;
+		
 		if(UDigumInventorySlot* OtherSlot = Cast<UDigumInventorySlot>(InPayload))
 		{
 			InventorySlot->SwapContent(OtherSlot);

@@ -30,14 +30,16 @@ public:
 	void StopDragItem();
 
 protected:
+	TSharedPtr<SGridPanel> InventoryGridPanel;
 	int32 GridWidth = 5;
 	int32 GridHeight = 5;
+	bool bIsTransactingItem = false;
 
 	TArray<TSharedRef<SDigumInventorySlot>> InventoryItemSlotsWidgets;
 	TWeakObjectPtr<UDigumGameInventoryComponent> WeakInventoryComponent;
 
 	virtual TSharedPtr<SWidget> OnCreateContent() override;
 	virtual TSharedPtr<SDigumInventorySlot> CreateWidgetItem(UDigumInventorySlot* Item) const;
-	
 
+	void UpdateInventoryGridPanel();
 };

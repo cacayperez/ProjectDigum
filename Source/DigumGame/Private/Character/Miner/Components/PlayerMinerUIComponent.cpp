@@ -106,8 +106,8 @@ void UPlayerMinerUIComponent::InitializeInventoryWidget()
 	InventorySlateWidget =
 		SNew(SDigumInventoryWindow)
 		.InventoryComponent(OwningMiner->GetInventoryComponent())
-		.HeightOverride(400)
-		.WidthOverride(400) ;
+		.HeightOverride(280)
+		.WidthOverride(560) ;
 }
 
 void UPlayerMinerUIComponent::InitializeCharacterMenuWidget()

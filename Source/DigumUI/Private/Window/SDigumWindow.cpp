@@ -57,17 +57,26 @@ void SDigumWindow::OnTick(const FGeometry& AllottedGeometry, const double InCurr
 
 TSharedPtr<SWidget> SDigumWindow::OnCreateWindow()
 {
-	return SNew(SVerticalBox)
-	+ SVerticalBox::Slot()
-	.AutoHeight()
+	return SNew(SBox)
+	.VAlign(VAlign_Fill)
+	.HAlign(HAlign_Fill)
 	[
-		OnCreateHeader().ToSharedRef()
-	]
-	+ SVerticalBox::Slot()
-	.AutoHeight()
-	[
-		OnCreateContent().ToSharedRef()
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Center)
+		.AutoHeight()
+		[
+			OnCreateHeader().ToSharedRef()
+		]
+		+ SVerticalBox::Slot()
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
+		[
+			OnCreateContent().ToSharedRef()
+		]
 	];
+	
+
 			
 }
 
@@ -84,7 +93,7 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 {
 	TSharedPtr<SDigumWindowHeader> Header =
 		SNew(SDigumWindowHeader)
-		.HeightOverride(100)
+		.HeightOverride(50)
 		.WidthOverride(WidthOverrideAttribute.Get());
 		Header->SetEnableDrag(true);
 	
@@ -111,7 +120,7 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 
 void SDigumWindow::DrawWindow()
 {
-	
+	_Container->ClearChildren();
 	_Container->AddSlot()
 	.VAlign(VAlign_Fill)
 	.HAlign(HAlign_Fill)

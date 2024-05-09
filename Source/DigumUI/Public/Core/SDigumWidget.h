@@ -50,6 +50,7 @@ private:
 	
 protected:
 	mutable FGeometry WidgetGeometry;
+	TSharedPtr<SOverlay> _BGContainer;
 	TSharedPtr<SDigumWidgetStack> _Container;
 	TSharedPtr<SDigumWidgetStack> _ParentContainer;
 	

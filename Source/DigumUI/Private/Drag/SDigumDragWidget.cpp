@@ -8,17 +8,6 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SDigumDragWidget::OnConstruct()
-{
-	SDigumWidget::OnConstruct();
-
-	_Container->AddSlot()
-	[
-		SNew(STextBlock)
-		.Text(FText::FromString("Drag me"))
-	];
-}
-
 void SDigumDragWidget::OnTick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
 	SDigumWidget::OnTick(AllottedGeometry, InCurrentTime, InDeltaTime);
@@ -38,9 +27,14 @@ int32 SDigumDragWidget::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	                             bParentEnabled);
 }
 
+void SDigumDragWidget::OnSetDragPayload(UObject* InPayload)
+{
+}
+
 void SDigumDragWidget::SetDragPayload(UObject* InPayload)
 {
 	Payload = InPayload;
+	OnSetDragPayload(Payload.Get());
 }
 
 

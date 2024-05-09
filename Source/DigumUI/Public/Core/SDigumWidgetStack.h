@@ -30,6 +30,7 @@ protected:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 	TSharedPtr<SDigumDragWidget> DraggedWidget;
+	bool bHasDraggedWidget = false;
 
 	bool DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const;
 public:

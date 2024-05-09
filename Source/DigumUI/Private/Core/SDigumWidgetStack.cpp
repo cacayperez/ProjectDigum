@@ -31,6 +31,8 @@ void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item
 
 void SDigumWidgetStack::RemoveFromStack_Internal(const TSharedPtr<SDigumWidget>& Item)
 {
+	if(Item == nullptr) return;
+	
 	int32 OutIndex;
 	if(StackItems.Find(Item.ToSharedRef(), OutIndex))
 	{
@@ -107,15 +109,18 @@ void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
 
 void SDigumWidgetStack::AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Adding draggable item to stack with payload"));
-	DraggedWidget = Item;
-	AddItemToStack(Item);
+	if(!bHasDraggedWidget)
+	{
+		bHasDraggedWidget = true;
+		DraggedWidget = Item;
+		AddItemToStack(Item);
+	}
 }
 
 bool SDigumWidgetStack::RemoveDraggedItemFromStack(UObject*& OutPayload)
 {
 	RemoveFromStack_Internal(DraggedWidget);
-
+	bHasDraggedWidget = false;
 	if(DraggedWidget.IsValid())
 	{
 		FVector2D MousePosition = FSlateApplication::Get().GetCursorPos();
@@ -128,6 +133,7 @@ bool SDigumWidgetStack::RemoveDraggedItemFromStack(UObject*& OutPayload)
 			return true;
 		}
 	}
+
 	
 	DraggedWidget = nullptr;
 	return false;

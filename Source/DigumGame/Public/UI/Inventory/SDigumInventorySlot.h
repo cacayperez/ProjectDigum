@@ -31,6 +31,7 @@ protected:
 	TSharedPtr<SDigumInventoryWindow> InventoryWindow;
 
 	virtual void OnReceiveDropPayload(UObject* InPayload) override;
+	
 public:
 	void SetInventoryWindow(const TSharedPtr<SDigumInventoryWindow>& Window);
 	
