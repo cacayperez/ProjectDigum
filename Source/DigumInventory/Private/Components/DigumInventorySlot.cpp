@@ -25,3 +25,12 @@ void UDigumInventorySlot::ClearItemProperties()
 	bEmpty = true;
 	ItemProperties = FDigumInventoryItemProperties();
 }
+
+void UDigumInventorySlot::SwapContent(UDigumInventorySlot* InOtherSlot)
+{
+	const FDigumInventoryItemProperties ThisProperties = ItemProperties;
+	const FDigumInventoryItemProperties OtherProperties = InOtherSlot->ItemProperties;
+
+	InOtherSlot->SetItemProperties(ThisProperties);
+	SetItemProperties(OtherProperties);
+}

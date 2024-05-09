@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+struct FDigumDragPayload;
 class UDigumWidgetStyle;
 class SDigumWidgetStack;
 /**
@@ -40,7 +41,7 @@ public:
 	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 
-
+	virtual void OnReceiveDropPayload(UObject* InPayload);
 private:
 	void StartDrag(const FVector2D& Position);
 	void StopDrag(const FVector2D& Position);
@@ -83,5 +84,6 @@ public:
 	
 	TSharedPtr<SDigumWidgetStack> GetParentContainer() const { return _ParentContainer; }
 	void SetParentContainer(TSharedPtr<SDigumWidgetStack> ParentContainer) { _ParentContainer = ParentContainer; }
+	void ReceiveDropPayload(UObject* InPayload);
 	
 };

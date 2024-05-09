@@ -185,6 +185,7 @@ bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemPropert
 	return false;
 }
 
+
 TArray<UDigumInventorySlot*> UDigumInventoryComponent::GetInventoryItems_Internal() const
 {
 	return InventoryItems;
@@ -193,6 +194,18 @@ TArray<UDigumInventorySlot*> UDigumInventoryComponent::GetInventoryItems_Interna
 TArray<UDigumInventorySlot*> UDigumInventoryComponent::GetInventoryItems() const
 {
 	return GetInventoryItems_Internal();
+}
+
+bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount)
+{
+	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	if(Slot != nullptr)
+	{
+		Slot->ClearItemProperties();
+		return true;
+	}
+	
+	return false;
 }
 
 

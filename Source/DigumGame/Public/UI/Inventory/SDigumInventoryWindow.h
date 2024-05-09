@@ -25,6 +25,7 @@ public:
 	~SDigumInventoryWindow();
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct() override;
+	virtual void OnReceiveDropPayload(UObject* InPayload) override;
 	void BeginDragItem(UDigumInventorySlot* ItemSlot);
 	void StopDragItem();
 
@@ -32,10 +33,11 @@ public:
 	int32 GridWidth = 5;
 	int32 GridHeight = 5;
 	
-	TSharedPtr<SGridPanel> _GridContainer;
+	TArray<TSharedRef<SDigumInventorySlot>> InventoryItemSlotsWidgets;
 	TWeakObjectPtr<UDigumInventoryComponent> WeakInventoryComponent;
 	
 	virtual TSharedPtr<SWidget> OnCreateContent() override;
 	virtual TSharedPtr<SDigumInventorySlot> CreateWidgetItem(UDigumInventorySlot* Item) const;
+	
 
 };

@@ -54,5 +54,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Digum Inventory", meta=(DisplayName="Get Inventory Items"))
 	TArray<UDigumInventorySlot*> GetInventoryItems() const;
+
+	bool RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount = 1);
 	
 };

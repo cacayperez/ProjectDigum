@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+struct FDigumDragPayload;
 class SDigumDragWidget;
 class SDigumWidget;
 /**
@@ -34,7 +35,7 @@ protected:
 public:
 	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
 	void AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item);
-	void RemoveDraggedItemFromStack();
+	bool RemoveDraggedItemFromStack(UObject*& OutPayload);
 	void RemoveLastItemFromStack();
 	
 };

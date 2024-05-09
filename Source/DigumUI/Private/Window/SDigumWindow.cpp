@@ -54,18 +54,19 @@ void SDigumWindow::OnTick(const FGeometry& AllottedGeometry, const double InCurr
 	}
 }
 
+
 TSharedPtr<SWidget> SDigumWindow::OnCreateWindow()
 {
 	return SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
 	.AutoHeight()
 	[
-		WindowHeader.ToSharedRef()
+		OnCreateHeader().ToSharedRef()
 	]
 	+ SVerticalBox::Slot()
 	.AutoHeight()
 	[
-		WindowContent.ToSharedRef()
+		OnCreateContent().ToSharedRef()
 	];
 			
 }
@@ -110,8 +111,6 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 
 void SDigumWindow::DrawWindow()
 {
-	WindowHeader = OnCreateHeader();
-	WindowContent = OnCreateContent();
 	
 	_Container->AddSlot()
 	.VAlign(VAlign_Fill)

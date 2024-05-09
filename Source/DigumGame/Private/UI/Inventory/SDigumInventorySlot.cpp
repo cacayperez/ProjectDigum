@@ -39,6 +39,7 @@ void SDigumInventorySlot::OnConstruct()
 
 	OnMouseDragStartDelegate.AddLambda([&](const FVector2D& Position)
 	{
+		
 		if(InventoryWindow && InventorySlot.Get()) InventoryWindow->BeginDragItem(InventorySlot.Get());
 	});
 
@@ -46,6 +47,18 @@ void SDigumInventorySlot::OnConstruct()
 	{
 		if(InventoryWindow) InventoryWindow->StopDragItem();
 	});
+}
+
+void SDigumInventorySlot::OnReceiveDropPayload(UObject* InPayload)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SDigumInventorySlot::OnReceiveDropPayload"));
+	if(InventorySlot.IsValid())
+	{
+		if(UDigumInventorySlot* OtherSlot = Cast<UDigumInventorySlot>(InPayload))
+		{
+			InventorySlot->SwapContent(OtherSlot);
+		}
+	}
 }
 
 void SDigumInventorySlot::SetInventoryWindow(const TSharedPtr<SDigumInventoryWindow>& Window)

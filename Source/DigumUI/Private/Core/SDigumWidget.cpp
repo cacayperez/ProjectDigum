@@ -97,6 +97,10 @@ void SDigumWidget::OnMouseLeave(const FPointerEvent& MouseEvent)
 FReply SDigumWidget::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
 	const FVector2D MousePosition =  MouseEvent.GetScreenSpacePosition();
+	if(WidgetGeometry.IsUnderLocation(MousePosition) == false)
+	{
+		return FReply::Unhandled();
+	}
 	
 	if(EKeys::LeftMouseButton == MouseEvent.GetEffectingButton())
 	{
@@ -147,6 +151,10 @@ FReply SDigumWidget::OnMouseMove(const FGeometry& MyGeometry, const FPointerEven
 	return FReply::Unhandled();
 }
 
+void SDigumWidget::OnReceiveDropPayload(UObject* InPayload)
+{
+}
+
 void SDigumWidget::StartDrag(const FVector2D& Position)
 {
 	bIsDragging = true;
@@ -179,6 +187,11 @@ FVector2D SDigumWidget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 bool SDigumWidget::CanBeginDrag() const
 {
 	return bEnableDrag;
+}
+
+void SDigumWidget::ReceiveDropPayload(UObject* InPayload)
+{
+	OnReceiveDropPayload(InPayload);
 }
 
 

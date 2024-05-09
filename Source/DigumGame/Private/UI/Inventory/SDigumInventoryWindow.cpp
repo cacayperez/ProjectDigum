@@ -16,7 +16,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 SDigumInventoryWindow::~SDigumInventoryWindow()
 {
-	_GridContainer = nullptr;
+	InventoryItemSlotsWidgets.Empty();
 }
 
 void SDigumInventoryWindow::Construct(const FArguments& InArgs)
@@ -39,12 +39,28 @@ void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 void SDigumInventoryWindow::OnConstruct()
 {
 	SDigumWindow::OnConstruct();
-
+	
+	DrawWindow();
 }
 
+void SDigumInventoryWindow::OnReceiveDropPayload(UObject* InPayload)
+{
+	FVector2D CursorPosition = FSlateApplication::Get().GetCursorPos();
+	for(auto ItemSlot : InventoryItemSlotsWidgets)
+	{
+		if(ItemSlot->GetWidgetGeometry().IsUnderLocation(CursorPosition))
+		{
+			ItemSlot->ReceiveDropPayload(InPayload);
+			return;
+		}
+	}
+	
+}
 void SDigumInventoryWindow::BeginDragItem(UDigumInventorySlot* ItemSlot)
 {
 	TSharedPtr<SDigumDragWidget> DragWidget = SNew(SDigumDragWidget);
+
+	DragWidget->SetDragPayload(ItemSlot);
 	if(DragWidget.IsValid() && _ParentContainer.IsValid())
 	{
 		_ParentContainer->AddDraggableItemToStack(DragWidget);
@@ -54,13 +70,39 @@ void SDigumInventoryWindow::BeginDragItem(UDigumInventorySlot* ItemSlot)
 void SDigumInventoryWindow::StopDragItem()
 {
 	if(_ParentContainer.IsValid())
-		_ParentContainer->RemoveDraggedItemFromStack();
+	{
+		UObject* OutPayload;
+		// True if dropped on another widget
+		bool bWidgetHandled = _ParentContainer->RemoveDraggedItemFromStack(OutPayload);
+
+		// Assume that it is dropped in the world
+		if(bWidgetHandled == false && OutPayload != nullptr)
+		{
+			UDigumInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
+			const UDigumInventorySlot* ItemSlot = Cast<UDigumInventorySlot>(OutPayload);
+			
+			if(ItemSlot == nullptr)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("ItemSlot is null"));
+			}
+			
+			if(InventoryComponent && ItemSlot)
+			{
+				int32 Index = ItemSlot->InventoryIndex;
+				InventoryComponent->RemoveItemFromSlot(ItemSlot->InventoryIndex);
+			
+			}
+		}
+	}
+
+	Refresh();
 }
 
 
 TSharedPtr<SWidget> SDigumInventoryWindow::OnCreateContent()
 {
-	_GridContainer = SNew(SGridPanel);
+	TSharedPtr<SGridPanel> GridPanel = SNew(SGridPanel);
+	InventoryItemSlotsWidgets.Empty();
 
 	UDigumInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
 	if(InventoryComponent != nullptr)
@@ -72,19 +114,18 @@ TSharedPtr<SWidget> SDigumInventoryWindow::OnCreateContent()
 			int32 Column = i % GridWidth;
 			TSharedPtr<SDigumInventorySlot> ItemWidget = CreateWidgetItem(InventoryItems[i]);
 			ItemWidget->SetInventoryWindow(SharedThis(this));
+			InventoryItemSlotsWidgets.Add(ItemWidget.ToSharedRef());
 			
 			if(ItemWidget.IsValid())
 			{
-				_GridContainer->AddSlot(Column, Row)
+				GridPanel->AddSlot(Column, Row)
 				[
 					ItemWidget.ToSharedRef()
 				];
 			}
 		}
 	}
-
-
-	return _GridContainer;
+	return GridPanel;
 }
 
 TSharedPtr<SDigumInventorySlot> SDigumInventoryWindow::CreateWidgetItem(UDigumInventorySlot* Item) const

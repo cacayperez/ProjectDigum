@@ -38,6 +38,18 @@ int32 SDigumDragWidget::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	                             bParentEnabled);
 }
 
+void SDigumDragWidget::SetDragPayload(UObject* InPayload)
+{
+	Payload = InPayload;
+}
+
+
+UObject* SDigumDragWidget::GetDragPayload() const
+{
+
+	return Payload.Get();
+}
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
 

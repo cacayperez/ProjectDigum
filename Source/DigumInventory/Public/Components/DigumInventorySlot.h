@@ -34,4 +34,6 @@ public:
 	void ClearItemProperties();
 	bool IsValid() const { return ItemProperties.IsValid(); }
 
+	void SwapContent(UDigumInventorySlot* InOtherSlot);
+
 };
