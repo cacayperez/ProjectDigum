@@ -6,6 +6,7 @@
 #include "Core/SDigumWidget.h"
 #include "Widgets/SCompoundWidget.h"
 
+struct FDigumWindowStyle;
 class SDigumWindowHeader;
 class SDigumWindowContent;
 class SDigumWindowContainer;
@@ -23,7 +24,7 @@ public:
 	SLATE_BEGIN_ARGS(SDigumWindow){}
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
 		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
-		SLATE_ATTRIBUTE(FText, WindowTitle)
+		SLATE_ATTRIBUTE(FDigumWindowStyle*, WindowStyle)
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)
 	SLATE_END_ARGS()
@@ -35,6 +36,7 @@ public:
 	virtual void OnTick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 protected:
+	TAttribute<FDigumWindowStyle*> WindowStyle;
 	FVector2D StartDrag;
 	FVector2D DragMovePosition;
 	
@@ -52,5 +54,6 @@ public:
 
 	void ToggleVisibility();
 	void Refresh();
+	void CloseWindow();
 	
 };

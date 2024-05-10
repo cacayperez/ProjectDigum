@@ -16,9 +16,5 @@ class DIGUMUI_API UUDigumUISettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Drag Inventory Slot Widget"))
-	TSoftClassPtr<UDigumWidgetStyle> DefaultWindowStyle;
 
-	static TSubclassOf<UDigumWidgetStyle> GetDefaultWidgetStyleClass();
-	static UDigumWidgetStyle* GetDefaultWidgetStyle();
 };

@@ -19,6 +19,9 @@ class DIGUMGAME_API UDigumInventoryWidget : public UDigumWindow
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, Category = "Digum Window")
+	TObjectPtr<UMaterialInterface> InventorySlotMaterial;
+	
 	TSharedPtr<SDigumInventoryWindow> InventorySlate;
 	
 public:

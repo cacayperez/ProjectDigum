@@ -5,6 +5,7 @@
 
 #include "SlateOptMacros.h"
 #include "Core/SDigumWidgetStack.h"
+#include "Object/DigumWindow.h"
 #include "Window/SDigumWindowHeader.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -12,6 +13,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SDigumWindow::Construct(const FArguments& InArgs)
 {
+	WindowStyle = InArgs._WindowStyle;
 	SDigumWidget::Construct(
 		SDigumWidget::FArguments()
 		.ParentContainer(InArgs._ParentContainer)
@@ -94,6 +96,7 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 {
 	TSharedPtr<SDigumWindowHeader> Header =
 		SNew(SDigumWindowHeader)
+		.WindowStyle(WindowStyle.Get())
 		.HeightOverride(50)
 		.WidthOverride(WidthOverrideAttribute.Get());
 		Header->SetEnableDrag(true);
@@ -114,6 +117,13 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 	Header->OnMouseDragMoveDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
 		MousePosition = DragOffset;
+	});
+
+
+	Header->OnCloseWindow.BindLambda([&]()
+	{
+		CloseWindow();
+		
 	});
 	
 	return Header;
@@ -140,6 +150,12 @@ void SDigumWindow::ToggleVisibility()
 void SDigumWindow::Refresh()
 {
 	DrawWindow();
+}
+
+void SDigumWindow::CloseWindow()
+{
+	if(_ParentContainer.IsValid())
+		_ParentContainer->RemoveWidget(SharedThis(this));
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -24,7 +24,9 @@ SDigumInventoryWindow::~SDigumInventoryWindow()
 void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 {
 	WeakInventoryComponent = InArgs._InventoryComponent.Get();
+	InventorySlotMaterialAttribute = InArgs._InventorySlotMaterial;
 	SDigumWindow::Construct(SDigumWindow::FArguments()
+		.WindowStyle(InArgs._WindowStyle)
 		.BackgroundMaterial(InArgs._BackgroundMaterial)
 		.ParentContainer(InArgs._ParentContainer)
 		.HeightOverride(InArgs._HeightOverride)
@@ -111,9 +113,10 @@ TSharedPtr<SDigumInventorySlot> SDigumInventoryWindow::CreateWidgetItem(UDigumIn
 	{
 		TSharedPtr<SDigumInventorySlot> Slot
 			= SNew(SDigumInventorySlot)
+			.BackgroundMaterial(InventorySlotMaterialAttribute.Get())
 			.InventorySlot(Item)
-			.HeightOverride(100)
-			.WidthOverride(100);
+			.HeightOverride(120)
+			.WidthOverride(120);
 
 		
 		return Slot;

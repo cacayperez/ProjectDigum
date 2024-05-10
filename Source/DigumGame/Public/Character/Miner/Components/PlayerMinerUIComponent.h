@@ -32,7 +32,7 @@ class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 	TSharedPtr<SWidget> _Container;
 
 	UPROPERTY(EditAnywhere)
-	TSoftClassPtr<UDigumInventoryWidget> InventoryWidgetClass;
+	TSubclassOf<UDigumInventoryWidget> InventoryWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<UDigumInventoryWidget> InventoryWidget;

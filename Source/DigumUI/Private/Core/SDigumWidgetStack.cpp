@@ -118,6 +118,11 @@ void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject)
 	AddItemToStack(WidgetObject->GetWidget());
 }
 
+void SDigumWidgetStack::RemoveWidget(const TSharedPtr<SDigumWidget>& Item)
+{
+	RemoveFromStack_Internal(Item);
+}
+
 void SDigumWidgetStack::AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item)
 {
 	if(!bHasDraggedWidget)

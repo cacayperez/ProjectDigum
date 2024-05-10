@@ -5,6 +5,8 @@
 
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Core/SDigumWidgetStack.h"
+#include "Settings/DigumContentDefinition.h"
+#include "Settings/DigumGameDeveloperSettings.h"
 #include "UI/Inventory/DigumInventoryWidget.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
 #include "Widgets/SWeakWidget.h"
@@ -102,13 +104,23 @@ void UPlayerMinerUIComponent::InitializeUI()
 
 void UPlayerMinerUIComponent::InitializeInventoryWidget()
 {
-	if(InventoryWidgetClass == nullptr) return;
-	InventoryWidget = UDigumWidget::Create<UDigumInventoryWidget>(this, InventoryWidgetClass.LoadSynchronous());
-	
-	if(InventoryWidget)
+	// TODO add default class to settings
+	if(InventoryWidgetClass == nullptr)
 	{
-		// InventoryWidget->OnCreateWidget();
-		InventoryWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+		const FDigumContentCategory* Content = UDigumGameDeveloperSettings::Get()->GetContentCategoryData(TEXT("Primary"));
+		InventoryWidgetClass = Content->PlayerInventoryWidgetClass.LoadSynchronous();
+	}
+
+	if(InventoryWidgetClass)
+	{
+		InventoryWidget = UDigumWidget::Create<UDigumInventoryWidget>(this, InventoryWidgetClass);
+	
+		if(InventoryWidget)
+		{
+			// InventoryWidget->OnCreateWidget();
+			InventoryWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+		}
+		
 	}
 }
 

@@ -187,7 +187,7 @@ void SDigumWidget::MouseClickLeftUp()
 
 FVector2D SDigumWidget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 {
-	return FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get()) * LayoutScaleMultiplier;
+	return FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get());
 }
 
 bool SDigumWidget::CanBeginDrag() const

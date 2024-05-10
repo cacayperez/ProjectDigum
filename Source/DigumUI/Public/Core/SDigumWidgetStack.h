@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Window/SDigumWindow.h"
 
 class UDigumWidget;
 struct FDigumDragPayload;
@@ -16,6 +17,7 @@ class DIGUMUI_API SDigumWidgetStack : public SOverlay
 {
 public:
 	~SDigumWidgetStack();
+	
 	template<typename T>
 	static TSharedPtr<T> CreateWidget();
 
@@ -37,6 +39,7 @@ protected:
 public:
 	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
 	void AddItemToStack(const UDigumWidget* WidgetObject);
+	void RemoveWidget(const TSharedPtr<SDigumWidget>& Item);
 	void AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item);
 	bool RemoveDraggedItemFromStack(UObject*& OutPayload);
 	void RemoveLastItemFromStack();

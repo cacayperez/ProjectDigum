@@ -15,16 +15,15 @@ void SDigumInventorySlot::Construct(const FArguments& InArgs)
 	InventorySlot = InArgs._InventorySlot.Get();
 	
 	SDigumWidget::Construct(SDigumWidget::FArguments()
+	.BackgroundMaterial(InArgs._BackgroundMaterial)
 	.HeightOverride(InArgs._HeightOverride)
 	.WidthOverride(InArgs._WidthOverride));
 }
 
 void SDigumInventorySlot::OnConstruct()
 {
-	
 	if(InventorySlot.IsValid())
 	{
-	
 		if(InventorySlot->HasValidItem())
 		{
 			UTexture2D* Texture = InventorySlot->GetItemTexture();

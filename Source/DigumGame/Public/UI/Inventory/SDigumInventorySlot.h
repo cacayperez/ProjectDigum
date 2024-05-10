@@ -20,6 +20,7 @@ public:
 	{}
 	SLATE_ATTRIBUTE(float, HeightOverride)
 	SLATE_ATTRIBUTE(float, WidthOverride)
+	SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
 	SLATE_ATTRIBUTE(UDigumInventorySlot*, InventorySlot)
 	SLATE_END_ARGS()
 

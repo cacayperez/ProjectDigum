@@ -15,11 +15,12 @@ void UDigumInventoryWidget::OnCreateWidget()
 {
 	const float Width = ConstructParameters.Size.X;
 	const float Height = ConstructParameters.Size.Y;
-
-	UE_LOG(LogTemp, Warning, TEXT("UDigumInventoryWidget::OnCreateWidget, Width: %f, Height: %f"), Width, Height);
+	
 	InventorySlate =
 		SNew(SDigumInventoryWindow)
 		.BackgroundMaterial(BackgroundMaterial)
+		.InventorySlotMaterial(InventorySlotMaterial)
+		.WindowStyle(&WindowStyle)
 		.HeightOverride(Height)
 		.WidthOverride(Width) ;
 }

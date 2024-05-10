@@ -9,6 +9,7 @@
 class UDigumGameInventoryComponent;
 class UDigumInventorySlot;
 class SDigumInventorySlot;
+struct FDigumWindowStyle;
 /**
  * 
  */
@@ -19,6 +20,8 @@ public:
 		SLATE_ATTRIBUTE(UDigumGameInventoryComponent*, InventoryComponent)
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
 		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
+		SLATE_ATTRIBUTE(UMaterialInterface*, InventorySlotMaterial)
+		SLATE_ATTRIBUTE(FDigumWindowStyle*, WindowStyle);
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)
 	 SLATE_END_ARGS()
@@ -31,6 +34,8 @@ public:
 	void StopDragItem();
 
 protected:
+	TAttribute<UMaterialInterface*> InventorySlotMaterialAttribute;
+	
 	TSharedPtr<SGridPanel> InventoryGridPanel;
 	int32 GridWidth = 5;
 	int32 GridHeight = 5;

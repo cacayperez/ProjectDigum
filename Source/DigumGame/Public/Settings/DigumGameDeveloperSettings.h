@@ -22,7 +22,7 @@ class DIGUMGAME_API UDigumGameDeveloperSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Primary Miner Input"))
+	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Game Content"))
 	TArray<FDigumContentCategory> ContentCategories;
 	
 	UPROPERTY(Config, EditAnywhere, Category = "Game", meta=(DisplayName="Primary Miner Input"))

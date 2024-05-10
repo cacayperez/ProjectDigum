@@ -7,6 +7,7 @@
 #include "DigumContentDefinition.generated.h"
 
 
+class UDigumInventoryWidget;
 // Used for organizing primary game content, dlc, etc.
 USTRUCT(BlueprintType)
 struct FDigumContentCategory
@@ -24,6 +25,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UDataTable> PrefixTable;
+
+	UPROPERTY(EditAnywhere, Category="User Interface")
+	TSoftClassPtr<UDigumInventoryWidget> PlayerInventoryWidgetClass;
 };
 
 /**
