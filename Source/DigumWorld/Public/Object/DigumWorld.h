@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "DigumWorld.generated.h"
+struct FDigumWorldLayer;
 
 USTRUCT()
 struct FDigumWorldSize
@@ -68,8 +69,15 @@ public:
 /**
  * Not a child of UWorld, but a separate UObject that holds the settings for the DigumWorld subsystem.
  */
-UCLASS()
+UCLASS(Blueprintable)
 class DIGUMWORLD_API UDigumWorld : public UObject
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TArray<FDigumWorldLayer> Layers;
+	
+public:
+	
+	TArray<FDigumWorldLayer> GetLayers() const;
 };
