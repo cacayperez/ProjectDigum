@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Asset/DigumItem.h"
+#include "Properties/DigumItem.h"
 #include "Properties/DigumInventoryItemProperties.h"
 #include "UObject/Object.h"
 #include "DigumInventorySlot.generated.h"
@@ -16,7 +16,9 @@ class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 	GENERATED_BODY()
 	
 	TWeakObjectPtr<UDigumInventoryComponent> OwningInventory;
-	TWeakObjectPtr<UDigumItem> ItemObject;
+
+	UPROPERTY()
+	TObjectPtr<UDigumItem> ItemObject;
 	
 public:
 	bool bEmpty = true;

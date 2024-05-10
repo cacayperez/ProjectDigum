@@ -3,15 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Properties/DigumItem.h"
+#include "DigumWidget.h"
 #include "UObject/Object.h"
-#include "DigumGameItem.generated.h"
+#include "DigumWindow.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DIGUMGAME_API UDigumGameItem : public UDigumItem
+class DIGUMUI_API UDigumWindow : public UDigumWidget
 {
 	GENERATED_BODY()
+
+		
 };

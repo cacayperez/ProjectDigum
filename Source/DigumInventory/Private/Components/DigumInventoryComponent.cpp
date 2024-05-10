@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "Components/DigumInventoryComponent.h"
 
-#include "Asset/DigumItem.h"
+#include "Properties/DigumItem.h"
 #include "Components/DigumInventorySlot.h"
 #include "Properties/DigumInventoryItemProperties.h"
 

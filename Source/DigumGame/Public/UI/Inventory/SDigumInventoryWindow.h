@@ -18,6 +18,7 @@ public:
 	 SLATE_BEGIN_ARGS(SDigumInventoryWindow){}
 		SLATE_ATTRIBUTE(UDigumGameInventoryComponent*, InventoryComponent)
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
+		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)
 	 SLATE_END_ARGS()
@@ -42,4 +43,7 @@ protected:
 	virtual TSharedPtr<SDigumInventorySlot> CreateWidgetItem(UDigumInventorySlot* Item) const;
 
 	void UpdateInventoryGridPanel();
+
+public:
+	void SetInventoryComponent(UDigumGameInventoryComponent* InInventoryComponent);
 };

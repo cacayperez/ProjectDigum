@@ -22,6 +22,7 @@ private:
 public:
 	SLATE_BEGIN_ARGS(SDigumWindow){}
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
+		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
 		SLATE_ATTRIBUTE(FText, WindowTitle)
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)

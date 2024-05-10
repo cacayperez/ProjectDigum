@@ -15,6 +15,7 @@ void SDigumWindow::Construct(const FArguments& InArgs)
 	SDigumWidget::Construct(
 		SDigumWidget::FArguments()
 		.ParentContainer(InArgs._ParentContainer)
+		.BackgroundMaterial(InArgs._BackgroundMaterial)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride));
 	

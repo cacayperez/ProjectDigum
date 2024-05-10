@@ -5,6 +5,7 @@
 
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Core/SDigumWidgetStack.h"
+#include "UI/Inventory/DigumInventoryWidget.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
 #include "Widgets/SWeakWidget.h"
 #include "Window/SDigumWindow.h"
@@ -22,7 +23,7 @@ UPlayerMinerUIComponent::UPlayerMinerUIComponent()
 
 void UPlayerMinerUIComponent::OnToggleInventory()
 {
-	WidgetStack->AddItemToStack(InventorySlateWidget);
+	WidgetStack->AddItemToStack(InventoryWidget);
 }
 
 void UPlayerMinerUIComponent::OnToggleCharacterMenu()
@@ -61,13 +62,12 @@ void UPlayerMinerUIComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	if (GEngine && GEngine->GameViewport && _Container.IsValid())
 	{
 		
-		GEngine->GameViewport->RemoveViewportWidgetContent(_Container.Pin().ToSharedRef());
+		GEngine->GameViewport->RemoveViewportWidgetContent(_Container.ToSharedRef());
 	}
 
 	// Clean up
 	_Container.Reset();
 	WidgetStack.Reset();
-	InventorySlateWidget.Reset();
 	CharacterMenuSlateWidget.Reset();
 }
 
@@ -102,12 +102,14 @@ void UPlayerMinerUIComponent::InitializeUI()
 
 void UPlayerMinerUIComponent::InitializeInventoryWidget()
 {
-	// Initialize Inventory
-	InventorySlateWidget =
-		SNew(SDigumInventoryWindow)
-		.InventoryComponent(OwningMiner->GetInventoryComponent())
-		.HeightOverride(280)
-		.WidthOverride(560) ;
+	if(InventoryWidgetClass == nullptr) return;
+	InventoryWidget = UDigumWidget::Create<UDigumInventoryWidget>(this, InventoryWidgetClass.LoadSynchronous());
+	
+	if(InventoryWidget)
+	{
+		// InventoryWidget->OnCreateWidget();
+		InventoryWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+	}
 }
 
 void UPlayerMinerUIComponent::InitializeCharacterMenuWidget()

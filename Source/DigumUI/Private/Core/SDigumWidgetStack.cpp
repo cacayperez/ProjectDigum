@@ -5,6 +5,7 @@
 #include "Core/SDigumWidget.h"
 #include "Drag/SDigumDragWidget.h"
 #include "SlateOptMacros.h"
+#include "Object/DigumWidget.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -105,6 +106,16 @@ void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
 	{
 		AddToStack_Internal(Item, ZOrder);
 	}
+}
+
+void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject)
+{
+	if(WidgetObject == nullptr)
+	{
+		return;
+	}
+
+	AddItemToStack(WidgetObject->GetWidget());
 }
 
 void SDigumWidgetStack::AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item)

@@ -37,6 +37,11 @@ void SDigumInventorySlot::OnConstruct()
 					.Image(Brush)
 				];
 			}
+			else
+			{
+                UE_LOG(LogTemp, Warning, TEXT("SDigumInventorySlot::OnConstruct - No Texture"));
+            }
+			
 			_Container->AddSlot()
 			[
 				SNew(STextBlock)

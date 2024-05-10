@@ -18,7 +18,6 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 SDigumInventoryWindow::~SDigumInventoryWindow()
 {
-
 	InventoryItemSlotsWidgets.Empty();
 }
 
@@ -26,6 +25,7 @@ void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 {
 	WeakInventoryComponent = InArgs._InventoryComponent.Get();
 	SDigumWindow::Construct(SDigumWindow::FArguments()
+		.BackgroundMaterial(InArgs._BackgroundMaterial)
 		.ParentContainer(InArgs._ParentContainer)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride)
@@ -150,6 +150,14 @@ void SDigumInventoryWindow::UpdateInventoryGridPanel()
 			}
 		}
 	}
+}
+
+void SDigumInventoryWindow::SetInventoryComponent(UDigumGameInventoryComponent* InInventoryComponent)
+{
+	if(InInventoryComponent == nullptr) return;
+	
+	WeakInventoryComponent = InInventoryComponent;
+	UpdateInventoryGridPanel();
 }
 
 

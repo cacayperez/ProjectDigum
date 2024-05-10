@@ -33,7 +33,6 @@ class DIGUMINVENTORY_API UDigumInventoryComponent : public UActorComponent
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
 	TArray<UDigumInventorySlot*> InventoryItems;
 
-	
 public:
 	// Sets default values for this component's properties
 	UDigumInventoryComponent(const FObjectInitializer& ObjectInitializer);

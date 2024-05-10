@@ -3,11 +3,9 @@
 
 #include "Core/SDigumWidget.h"
 
+#include "SlateMaterialBrush.h"
 #include "SlateOptMacros.h"
 #include "Core/SDigumWidgetStack.h"
-#include "Settings/UDigumUISettings.h"
-#include "Slate/SlateBrushAsset.h"
-#include "Style/DigumWidgetStyle.h"
 #include "Styling/SlateBrush.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -29,21 +27,22 @@ void SDigumWidget::Construct(const FArguments& InArgs)
 {
 	HeightOverrideAttribute = InArgs._HeightOverride;
 	WidthOverrideAttribute = InArgs._WidthOverride;
+	BackgroundMaterialAttribute = InArgs._BackgroundMaterial;
 	_ParentContainer = InArgs._ParentContainer.Get();
-	WidgetStyleClassAttribute = InArgs._WidgetStyleClass;
-	// WidgetStyleClass = InArgs._WidgetStyleClass;
-
-	const UDigumWidgetStyle* WidgetStyle = UUDigumUISettings::GetDefaultWidgetStyle();
+	
 
 	_BGContainer = SNew(SOverlay);
 	_Container = SNew(SDigumWidgetStack);
 
-	if(WidgetStyle && WidgetStyle->Image)
+	UMaterialInterface* Material = BackgroundMaterialAttribute.Get();
+	const FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get()));
+
+	if(Material && MaterialBrush)
 	{
 		_BGContainer->AddSlot()
 		[
 			SNew(SImage)
-			.Image(&WidgetStyle->Image->Brush)
+			.Image(MaterialBrush)
 		];
 	}
 	

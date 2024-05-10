@@ -3,7 +3,7 @@
 
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
 
-#include "Asset/DigumItem.h"
+#include "Properties/DigumItem.h"
 #include "Asset/DigumItemAsset.h"
 #include "Asset/DigumItemTable.h"
 #include "Item/DigumGameItem.h"

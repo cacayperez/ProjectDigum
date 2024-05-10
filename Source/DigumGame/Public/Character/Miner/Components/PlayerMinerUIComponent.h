@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "PlayerMinerUIComponent.generated.h"
 
+class UDigumWidget;
+class UDigumInventoryWidget;
 class SDigumWidget;
 class SDigumWidgetStack;
 class SDigumWindow;
@@ -26,10 +28,19 @@ class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 	
 	TSharedPtr<SDigumWidgetStack> WidgetStack;
 
-	TSharedPtr<SDigumInventoryWindow> InventorySlateWidget;
 	TSharedPtr<SDigumWindow> CharacterMenuSlateWidget;
-	TWeakPtr<SWidget> _Container;
+	TSharedPtr<SWidget> _Container;
 
+	UPROPERTY(EditAnywhere)
+	TSoftClassPtr<UDigumInventoryWidget> InventoryWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UDigumInventoryWidget> InventoryWidget;
+
+	UPROPERTY()
+	TObjectPtr<UDigumWidget> CharacterWidget;
+	
+	
 public:
 	// Sets default values for this component's properties
 	UPlayerMinerUIComponent();
@@ -57,6 +68,4 @@ protected:
 	virtual void InitializeInventoryWidget();
 	virtual void InitializeCharacterMenuWidget();
 
-public:
-	TSharedPtr<SDigumWidget> CreateDragDropWidget();
 };

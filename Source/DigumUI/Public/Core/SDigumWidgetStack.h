@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
 
+class UDigumWidget;
 struct FDigumDragPayload;
 class SDigumDragWidget;
 class SDigumWidget;
@@ -35,6 +36,7 @@ protected:
 	bool DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const;
 public:
 	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
+	void AddItemToStack(const UDigumWidget* WidgetObject);
 	void AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item);
 	bool RemoveDraggedItemFromStack(UObject*& OutPayload);
 	void RemoveLastItemFromStack();

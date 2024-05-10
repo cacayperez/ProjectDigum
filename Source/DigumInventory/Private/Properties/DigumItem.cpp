@@ -1,4 +1,4 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Asset/DigumItem.h"
+#include "Properties/DigumItem.h"

@@ -56,10 +56,10 @@ void UDigumInventorySlot::SwapContent(UDigumInventorySlot* InOtherSlot)
 
 UTexture2D* UDigumInventorySlot::GetItemTexture() const
 {
-	if(ItemObject.IsValid())
+	if(ItemObject)
 	{
 		return ItemObject->GetItemTexture();
 	}
-	
+	UE_LOG(LogTemp, Warning, TEXT("UDigumInventorySlot::GetItemTexture - ItemObject is null"));
 	return nullptr;
 }

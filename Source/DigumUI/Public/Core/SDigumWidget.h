@@ -18,8 +18,8 @@ public:
 		: _HeightOverride(100.0f)
 		, _WidthOverride(100.0f)
 	{}
-	SLATE_ARGUMENT(UDigumWidgetStyle*, WidgetStyleClass)
 	SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
+	SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
 	SLATE_ATTRIBUTE(float, HeightOverride)
 	SLATE_ATTRIBUTE(float, WidthOverride)
 	SLATE_END_ARGS()
@@ -57,6 +57,7 @@ protected:
 	TAttribute<float> HeightOverrideAttribute;
 	TAttribute<float> WidthOverrideAttribute;
 	TAttribute<UDigumWidgetStyle*> WidgetStyleClassAttribute;
+	TAttribute<UMaterialInterface*> BackgroundMaterialAttribute;
 	
 	FVector2D PointerPosition;
 	bool bHovered = false;
