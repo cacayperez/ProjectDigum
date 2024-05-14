@@ -1,0 +1,3 @@
+[submodule "DigumAssets"]
+	path = Plugins
+	url = https://github.com/SCSPlay/DigumAssets.git
