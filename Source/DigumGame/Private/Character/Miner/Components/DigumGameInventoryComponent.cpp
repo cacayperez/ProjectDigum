@@ -3,10 +3,12 @@
 
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
 
+#include "DigumAction.h"
 #include "Properties/DigumItem.h"
 #include "Asset/DigumItemAsset.h"
 #include "Asset/DigumItemTable.h"
 #include "Item/DigumGameItem.h"
+#include "Item/DigumGameItemAsset.h"
 #include "Settings/DigumContentDefinition.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 
@@ -19,18 +21,27 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 	
 	if(const FDigumContentCategory* ContentCategoryData = UDigumGameDeveloperSettings::GetContentCategoryData(ContentCategory))
 	{
-		if(const UDigumItemAsset* Asset =
+		if(UDigumItemAsset* Asset =
 			UDigumItemTable::GetDigumItemAsset(
 				ItemID,
 				ContentCategoryData->ItemTable.LoadSynchronous()))
 		{
-			UDigumGameItem* Item = NewObject<UDigumGameItem>();
-			Item->ItemID = ItemID;
-			Item->StackSize = Asset->StackSize;
-			Item->DisplayTexture = Asset->DisplayTexture;
+			UDigumGameItemAsset* GameItemAsset = Cast<UDigumGameItemAsset>(Asset);
+			if(GameItemAsset)
+			{
+				UDigumGameItem* Item = NewObject<UDigumGameItem>();
+				Item->ItemID = ItemID;
+				Item->StackSize = GameItemAsset->StackSize;
+				Item->ItemName = GameItemAsset->ItemName;
+				Item->ItemDescription = GameItemAsset->ItemDescription;
+				Item->DisplayTexture = GameItemAsset->DisplayTexture;
+				Item->DisplayMaterial = GameItemAsset->DisplayMaterial;
+				Item->ActionClass = GameItemAsset->Action.LoadSynchronous();
 
-			OutBuiltItem = Item;
-			return true;
+
+				OutBuiltItem = Item;
+				return true;
+			}
 		}
 	}
 

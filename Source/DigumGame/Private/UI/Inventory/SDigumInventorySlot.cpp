@@ -3,6 +3,7 @@
 
 #include "UI/Inventory/SDigumInventorySlot.h"
 
+#include "SlateMaterialBrush.h"
 #include "SlateOptMacros.h"
 #include "Components/DigumInventorySlot.h"
 #include "Core/SDigumWidgetStack.h"
@@ -26,14 +27,18 @@ void SDigumInventorySlot::OnConstruct()
 	{
 		if(InventorySlot->HasValidItem())
 		{
-			UTexture2D* Texture = InventorySlot->GetItemTexture();
-			if(Texture)
+			const UTexture2D* Texture = InventorySlot->GetItemTexture();
+			UMaterialInterface* Material = InventorySlot->GetDisplayMaterial();
+			const FText ItemName = InventorySlot->GetItemObject()->ItemName;
+
+			if(Material)
 			{
-				FSlateImageBrush* Brush = new FSlateImageBrush(Texture, FVector2D(100.0f, 100.0f));
+				// FSlateImageBrush* Brush = new FSlateImageBrush(Texture, FVector2D(100.0f, 100.0f));
+				FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(100.0f, 100.0f));
 				_Container->AddSlot()
 				[
 					SNew(SImage)
-					.Image(Brush)
+					.Image(MaterialBrush)
 				];
 			}
 			else
@@ -44,7 +49,7 @@ void SDigumInventorySlot::OnConstruct()
 			_Container->AddSlot()
 			[
 				SNew(STextBlock)
-				.Text(FText::FromName(InventorySlot->GetItemID()))
+				.Text(ItemName)
 			];
 			
 			SetEnableDrag(true);

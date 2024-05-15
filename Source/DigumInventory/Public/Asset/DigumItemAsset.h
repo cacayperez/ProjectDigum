@@ -16,6 +16,9 @@ class DIGUMINVENTORY_API UDigumItemAsset : public UPrimaryDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* DisplayTexture;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UMaterialInterface* DisplayMaterial;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int32 StackSize;

@@ -2,36 +2,127 @@
 
 
 #include "Character/Miner/DigumMinerCharacter.h"
+
+#include "DigumAction.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "Character/Miner/Components/DigumGameActionBarComponent.h"
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/DigumActionComponent.h"
+#include "Components/DigumInventorySlot.h"
+#include "Components/DigumPickupHandlerComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/DigumInputSettingsAsset.h"
+#include "Item/DigumGameItem.h"
+#include "Net/UnrealNetwork.h"
+#include "Properties/DigumActionProperties.h"
+#include "Properties/DigumItem.h"
+#include "Settings/DigumCollisionProfile.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 
 DEFINE_LOG_CATEGORY(LogDigumMinerCharacter);
+
+constexpr int32 GDigum_ActionBarIndex_0 = 0;
+constexpr int32 GDigum_ActionBarIndex_1 = 1;
+constexpr int32 GDigum_ActionBarIndex_2 = 2;
+constexpr int32 GDigum_ActionBarIndex_3 = 3;
+constexpr int32 GDigum_ActionBarIndex_4 = 4;
+
+void ADigumMinerCharacter::Server_TryActivateAction_Implementation(const int32& InItemIndex)
+{
+	if(HasAuthority())
+		Multicast_TryActivateAction(InItemIndex);
+}
+
+void ADigumMinerCharacter::Multicast_TryActivateAction_Implementation(const int32& InItemIndex)
+{
+	if(!IsLocallyControlled())
+		ActivateAction_Internal(InItemIndex);
+}
+
+void ADigumMinerCharacter::Server_SetFaceDirection_Implementation(float InDirection)
+{
+	if(HasAuthority())
+		Multicast_SetFaceDirection(InDirection);
+}
+
+void ADigumMinerCharacter::Multicast_SetFaceDirection_Implementation(float InDirection)
+{
+	if(!IsLocallyControlled())
+		SetFaceDirection(InDirection);
+}
+
+void ADigumMinerCharacter::ActivateAction_Internal(const int32& InItemIndex)
+{
+	if(GetInventoryComponent())
+	{
+		const UDigumGameItem* Item = GetInventoryComponent()->GetItem<UDigumGameItem>(InItemIndex);
+		if(Item && Item->ActionClass && GetActionComponent())
+		{
+			FDigumActionProperties Properties;
+			Properties.ActionClass = Item->ActionClass;
+			Properties.ActionInstigator = this;
+
+			GetActionComponent()->TryExecutionAction(Properties);
+			
+			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Activated: %s"), *Item->ItemName.ToString());
+			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Action: %s"), *Item->ActionClass->GetName());
+
+		}
+	}
+}
 
 // Sets default values
 ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	bReplicates = true;
+	PrimaryActorTick.bCanEverTick = true;
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComponent"));
 	SpringArmComponent->SetupAttachment(RootComponent);
 	SpringArmComponent->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	SpringArmComponent->bDoCollisionTest = false;
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
+	// Collision
+	// GetCapsuleComponent()->SetCollisionObjectType(COLLISION_Miner);
+	// GetCapsuleComponent()->SetCollisionResponseToChannel(COLLISION_Miner, ECR_Ignore);
+	
+	// Custom Components
 	InventoryComponent = CreateDefaultSubobject<UDigumGameInventoryComponent>(TEXT("InventoryComponent"));
+	PickupHandlerComponent = CreateDefaultSubobject<UDigumPickupHandlerComponent>(TEXT("PickupHandlerComponent"));
+	ActionBarComponent = CreateDefaultSubobject<UDigumGameActionBarComponent>(TEXT("ActionBarComponent"));
+	ActionComponent = CreateDefaultSubobject<UDigumActionComponent>(TEXT("ActionComponent"));
+}
+
+void ADigumMinerCharacter::OnActivateItemAction(const int32& InItemIndex)
+{
+	// Call function for predition
+	ActivateAction_Internal(InItemIndex);
+	
+	// Call Server function
+	Server_TryActivateAction(InItemIndex);
 }
 
 void ADigumMinerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Enable pickup detection
+	if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(true);
+	
+	// constraint movement to the xz plane
+	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, 1.0f, 0.0f));
+	GetCharacterMovement()->bConstrainToPlane = true;
 	
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
+		
 		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if (DigumGameDeveloperSettings && Subsystem)
@@ -55,6 +146,28 @@ void ADigumMinerCharacter::BeginPlay()
 			UE_LOG(LogDigumMinerCharacter, Error, TEXT("Failed to add mapping context"));
 		}
 	}
+
+	// Bind Action Bar Event
+	if(GetActionBarComponent() && GetInventoryComponent())
+	{
+		TArray<UDigumInventorySlot*> Slots = GetInventoryComponent()->GetInventoryItems();
+		TArray<int32> SlotIndices;
+		for(int32 i = 0; i < 5; i++)
+		{
+			int32 SlotIndex = Slots[i]->GetInventoryIndex();
+			SlotIndices.Add(SlotIndex);
+		}
+		GetActionBarComponent()->InitializeActionKeys(SlotIndices);
+		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::OnActivateItemAction);
+	}
+	
+}
+
+void ADigumMinerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADigumMinerCharacter, FacedDirection);
 }
 
 void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
@@ -63,9 +176,15 @@ void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 
 	if (Controller != nullptr)
 	{
-		// add movement
 		// we only want to move on the x axis
 		AddMovementInput(GetActorForwardVector(), MovementVector.X);
+
+		// Predict
+		SetFaceDirection(MovementVector.X);
+		
+		// Server Call
+		Server_SetFaceDirection(MovementVector.X);
+		UE_LOG(LogDigumMinerCharacter, Log, TEXT("Move: %s"), *MovementVector.ToString());
 	}
 }
 
@@ -94,7 +213,16 @@ void ADigumMinerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 			BindActionLambda("Cancel",InputSettings->CancelAction, ETriggerEvent::Started,&ADigumMinerCharacter::CancelAction);
 			BindActionLambda("Toggle Inventory", InputSettings->CharacterContextAction1, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleInventory);
 			BindActionLambda("Toggle Character Menu", InputSettings->CharacterContextAction2, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleCharacterMenu);
-			
+
+			if(GetActionBarComponent())
+			{
+
+				BindActionLambda("ActionBar 0", InputSettings->ActionBar_Action_0, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_0);
+				BindActionLambda("ActionBar 1", InputSettings->ActionBar_Action_1, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_1);
+				BindActionLambda("ActionBar 2", InputSettings->ActionBar_Action_2, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_2);
+				BindActionLambda("ActionBar 3", InputSettings->ActionBar_Action_3, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_3);
+				BindActionLambda("ActionBar 4", InputSettings->ActionBar_Action_4, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_4);
+			}
 		}
 	}
 	else
@@ -109,8 +237,22 @@ void ADigumMinerCharacter::Jump()
 	Super::Jump();
 }
 
+void ADigumMinerCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	
+}
+
+void ADigumMinerCharacter::SetFaceDirection(float InDirection)
+{
+	FacedDirection = InDirection;
+	UpdateMeshScale();
+}
+
 void ADigumMinerCharacter::PrimaryAction()
 {
+	if(GetActionBarComponent())
+		GetActionBarComponent()->ActivateDefaultAction();
 }
 
 void ADigumMinerCharacter::SecondaryAction()
@@ -132,4 +274,47 @@ void ADigumMinerCharacter::CancelAction()
 	OnCancelAction.Broadcast();
 }
 
+void ADigumMinerCharacter::SelectActionBar_0()
+{
+	if(GetActionBarComponent())
+		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_0);
+}
 
+void ADigumMinerCharacter::SelectActionBar_1()
+{
+	if(GetActionBarComponent())
+		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_1);
+}
+
+void ADigumMinerCharacter::SelectActionBar_2()
+{
+	if(GetActionBarComponent())
+		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_2);
+}
+
+void ADigumMinerCharacter::SelectActionBar_3()
+{
+	if(GetActionBarComponent())
+		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_3);
+}
+
+void ADigumMinerCharacter::SelectActionBar_4()
+{
+	if(GetActionBarComponent())
+		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_4);
+}
+
+void ADigumMinerCharacter::UpdateMeshScale()
+{
+	FVector Scale = GetMesh()->GetRelativeScale3D();
+	if(FacedDirection < 0)
+	{
+		Scale.X = FMath::Abs(Scale.X) * -1;
+		GetMesh()->SetRelativeScale3D(Scale);
+	}
+	else
+	{
+		Scale.X = FMath::Abs(Scale.X);
+		GetMesh()->SetRelativeScale3D(Scale);
+	}
+}

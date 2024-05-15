@@ -63,3 +63,13 @@ UTexture2D* UDigumInventorySlot::GetItemTexture() const
 	UE_LOG(LogTemp, Warning, TEXT("UDigumInventorySlot::GetItemTexture - ItemObject is null"));
 	return nullptr;
 }
+
+UMaterialInterface* UDigumInventorySlot::GetDisplayMaterial()
+{
+	if(ItemObject)
+	{
+		return ItemObject->GetDisplayMaterial();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("UDigumInventorySlot::GetDisplayMaterial - ItemObject is null"));
+	return nullptr;
+}

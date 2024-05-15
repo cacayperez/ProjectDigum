@@ -1,6 +1,5 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 #include "Components/DigumInventoryComponent.h"
-
 #include "Properties/DigumItem.h"
 #include "Components/DigumInventorySlot.h"
 #include "Properties/DigumInventoryItemProperties.h"
@@ -218,5 +217,20 @@ bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const
 	
 	return false;
 }
+/*
+template<typename T>
+T* UDigumInventoryComponent::GetItem(const int32 InSlotIndex) const
+{
+	static_assert(std::is_base_of<UDigumInventoryComponent, T>::value, "T must be a derived class of UDigumItem");
+	
+	/*UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	if(Slot != nullptr)
+	{
+		return Slot->GetItemObject();
+	}#1#
+	
+	return nullptr;
+}
+*/
 
 

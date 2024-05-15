@@ -3,23 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Properties/DigumItem.h"
+#include "Asset/DigumItemAsset.h"
 #include "UObject/Object.h"
-#include "DigumGameItem.generated.h"
+#include "DigumGameItemAsset.generated.h"
 
 class UDigumAction;
-
 /**
  * 
  */
 UCLASS()
-class DIGUMGAME_API UDigumGameItem : public UDigumItem
+class DIGUMGAME_API UDigumGameItemAsset : public UDigumItemAsset
 {
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<UDigumAction> ActionClass;
-
-	
-	TSubclassOf<UDigumAction> GetAction() const { return ActionClass; }
+	TSoftClassPtr<UDigumAction> Action;
 };

@@ -50,5 +50,21 @@ public:
 	// Context Action for viewing other advanced information, etc.
 	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="Context Action 2"))
 	TObjectPtr<UInputAction> CharacterContextAction2;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="ActionBar Actions"))
+	TObjectPtr<UInputAction> ActionBar_Action_0;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="ActionBar Actions"))
+	TObjectPtr<UInputAction> ActionBar_Action_1;
+
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="ActionBar Actions"))
+	TObjectPtr<UInputAction> ActionBar_Action_2;
+	
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="ActionBar Actions"))
+	TObjectPtr<UInputAction> ActionBar_Action_3;
+	
+	UPROPERTY(EditAnywhere, Category = "Input", meta=(DisplayName="ActionBar Actions"))
+	TObjectPtr<UInputAction> ActionBar_Action_4;
+	
 	
 };

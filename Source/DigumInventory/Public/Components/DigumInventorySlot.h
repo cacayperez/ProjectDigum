@@ -34,6 +34,7 @@ public:
 	bool HasValidItem() const { return ItemProperties.IsValid(); }
 	FName GetItemID() const { return ItemProperties.ItemID; }
 	int32 GetAmount() const { return ItemProperties.ItemAmount; }
+	int32 GetInventoryIndex() const { return InventoryIndex; } 
 	void SetAmount(const int32 InAmount) { ItemProperties.ItemAmount = InAmount; }
 	UDigumItem* GetItemObject() const { return ItemObject.Get(); }
 
@@ -44,5 +45,5 @@ public:
 	void SwapContent(UDigumInventorySlot* InOtherSlot);
 	
 	UTexture2D* GetItemTexture() const;
-
+	UMaterialInterface* GetDisplayMaterial();
 };

@@ -24,3 +24,6 @@ void ADigumPickupActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ADigumPickupActor::OnPickup(AActor* InPickupInstigator)
+{
+}

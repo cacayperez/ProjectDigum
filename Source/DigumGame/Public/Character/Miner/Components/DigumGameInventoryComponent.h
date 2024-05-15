@@ -8,6 +8,8 @@
 #include "DigumGameInventoryComponent.generated.h"
 
 
+class UDigumGameItem;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMGAME_API UDigumGameInventoryComponent : public UDigumInventoryComponent
 {
@@ -15,5 +17,6 @@ class DIGUMGAME_API UDigumGameInventoryComponent : public UDigumInventoryCompone
 
 protected:
 	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem) override;
+	
 	
 };

@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interface/DigumPickupInterface.h"
 #include "DigumPickupActor.generated.h"
 
 UCLASS()
-class DIGUMINVENTORY_API ADigumPickupActor : public AActor
+class DIGUMINVENTORY_API ADigumPickupActor : public AActor, public IDigumPickupInterface
 {
 	GENERATED_BODY()
 
@@ -22,4 +23,5 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void OnPickup(AActor* InPickupInstigator) override;
 };

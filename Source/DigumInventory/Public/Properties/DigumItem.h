@@ -16,8 +16,17 @@ class DIGUMINVENTORY_API UDigumItem : public UObject
 	GENERATED_BODY()
 public:
 	UPROPERTY()
+	TWeakObjectPtr<UMaterialInterface> DisplayMaterial = nullptr;
+	
+	UPROPERTY()
 	TWeakObjectPtr<UTexture2D> DisplayTexture = nullptr;
 
+	UPROPERTY()
+	FText ItemName;
+
+	UPROPERTY()
+	FText ItemDescription;
+	
 	UPROPERTY()
 	FName ItemID;
 	
@@ -26,4 +35,6 @@ public:
 
 	int32 GetStackSize() const { return StackSize; }
 	UTexture2D* GetItemTexture() const { return DisplayTexture.Get(); }
+	UMaterialInterface* GetItemMaterial() const { return DisplayMaterial.Get(); }
+	UMaterialInterface* GetDisplayMaterial() const { return DisplayMaterial.Get(); }
 };

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DigumInventorySlot.h"
 #include "Properties/DigumInventoryItemProperties.h"
 #include "DigumInventoryComponent.generated.h"
 
@@ -63,4 +64,20 @@ public:
 	TArray<UDigumInventorySlot*> GetInventoryItems() const;
 
 	bool RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount = 1);
+
+	template<typename T>
+	T* GetItem(const int32 InSlotIndex) const;
 };
+
+template <typename T>
+T* UDigumInventoryComponent::GetItem(const int32 InSlotIndex) const
+{
+	static_assert(std::is_base_of<UDigumItem, T>::value, "T must be a derived class of UDigumItem");
+	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	if(Slot != nullptr)
+	{
+		return static_cast<T*>(Slot->GetItemObject());
+	}
+	
+	return nullptr;
+}
