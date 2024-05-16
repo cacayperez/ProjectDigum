@@ -23,6 +23,7 @@ SDigumInventoryWindow::~SDigumInventoryWindow()
 
 void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 {
+	bCanSupportFocus = true;
 	WeakInventoryComponent = InArgs._InventoryComponent.Get();
 	InventorySlotMaterialAttribute = InArgs._InventorySlotMaterial;
 	SDigumWindow::Construct(SDigumWindow::FArguments()

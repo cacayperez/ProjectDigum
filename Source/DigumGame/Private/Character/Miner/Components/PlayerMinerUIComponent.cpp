@@ -26,6 +26,7 @@ UPlayerMinerUIComponent::UPlayerMinerUIComponent()
 void UPlayerMinerUIComponent::OnToggleInventory()
 {
 	WidgetStack->AddItemToStack(InventoryWidget);
+	
 }
 
 void UPlayerMinerUIComponent::OnToggleCharacterMenu()
@@ -85,7 +86,10 @@ void UPlayerMinerUIComponent::InitializeUI()
 		{
 			FInputModeGameAndUI InputMode;
 			InputMode.SetWidgetToFocus(WidgetStack);
+			InputMode.SetHideCursorDuringCapture(false);
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);	
 			OwningController->SetInputMode(InputMode);
+		
 			OwningController->bShowMouseCursor = true;
 		}
 
@@ -100,6 +104,8 @@ void UPlayerMinerUIComponent::InitializeUI()
 		OwningMiner->OnToggleCharacterMenuDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnToggleCharacterMenu);
 		OwningMiner->OnCancelActionDelegate().AddUObject(this, &UPlayerMinerUIComponent::OnCancelAction);
 	}
+
+	// OnToggleInventory();
 }
 
 void UPlayerMinerUIComponent::InitializeInventoryWidget()

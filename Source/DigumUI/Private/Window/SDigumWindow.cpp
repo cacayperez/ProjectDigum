@@ -103,12 +103,14 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 	
 	Header->OnMouseDragStartDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
+		UE_LOG(LogTemp, Error, TEXT("I am dragging"));
 		MousePosition = DragOffset;
 		bDragWindow = true;
 	});
 
 	Header->OnMouseDragStopDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
+		UE_LOG(LogTemp, Error, TEXT("I am stopping drag"));
 		MousePosition = DragOffset;
 		bDragWindow = false;
 

@@ -89,6 +89,16 @@ bool SDigumWidgetStack::DoesOverlapAnyChildren(const FVector2D& Position, TShare
 	return false;
 }
 
+bool SDigumWidgetStack::IsInteractable() const
+{
+	return true;
+}
+
+bool SDigumWidgetStack::SupportsKeyboardFocus() const
+{
+	return true;
+}
+
 void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
 {
 	if(Item == nullptr)

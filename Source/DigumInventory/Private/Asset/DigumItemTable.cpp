@@ -8,8 +8,6 @@
 
 UDigumItemAsset* UDigumItemTable::GetDigumItemAsset(const FName& InItemID, UDataTable* InItemTable)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hello"));
-
 	FDigumItemTableRow ItemTableRow;
 
 	if(GetItemTableRow(InItemID, InItemTable, ItemTableRow))

@@ -23,6 +23,7 @@ void UDigumInventoryWidget::OnCreateWidget()
 		.WindowStyle(&WindowStyle)
 		.HeightOverride(Height)
 		.WidthOverride(Width) ;
+
 }
 
 TSharedPtr<SDigumWidget> UDigumInventoryWidget::GetWidget() const

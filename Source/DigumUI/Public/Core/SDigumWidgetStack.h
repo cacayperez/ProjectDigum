@@ -36,6 +36,8 @@ protected:
 	bool bHasDraggedWidget = false;
 
 	bool DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const;
+	virtual bool IsInteractable() const override;
+	virtual bool SupportsKeyboardFocus() const override;
 public:
 	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
 	void AddItemToStack(const UDigumWidget* WidgetObject);

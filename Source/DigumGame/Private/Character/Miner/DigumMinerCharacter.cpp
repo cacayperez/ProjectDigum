@@ -184,7 +184,6 @@ void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 		
 		// Server Call
 		Server_SetFaceDirection(MovementVector.X);
-		UE_LOG(LogDigumMinerCharacter, Log, TEXT("Move: %s"), *MovementVector.ToString());
 	}
 }
 
