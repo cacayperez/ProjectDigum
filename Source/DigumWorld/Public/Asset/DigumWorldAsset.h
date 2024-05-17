@@ -54,6 +54,9 @@ struct FDigumWorldAssetLayer
 	
 	UPROPERTY()
 	TArray<FDigumWorldAssetCoordinate> Coordinates;
+
+	UPROPERTY()
+	bool bIsVisible = true;
 public:
 	
 	void AddCoordinate(FDigumWorldAssetCoordinate InCoordinate)
@@ -73,7 +76,8 @@ public:
 		return Coordinate != nullptr;
 	}
 
-	
+	bool IsVisible() const { return bIsVisible; }
+	void SetVisibility(const bool InVisibility) { bIsVisible = InVisibility; }
 };
 
 

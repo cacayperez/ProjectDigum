@@ -24,6 +24,7 @@ protected:
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 public:
+	void OnSelectCanvasCoordinate(const int32& InX, const int32& InY);
 	virtual void DrawTab() override;
 	// void RenderGrid();
 };

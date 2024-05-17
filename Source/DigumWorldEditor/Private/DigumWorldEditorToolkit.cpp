@@ -192,3 +192,17 @@ void FDigumWorldEditorToolkit::AddNewLayer()
 void FDigumWorldEditorToolkit::DeleteLayer(const int32& InIndex)
 {
 }
+
+void FDigumWorldEditorToolkit::SetActiveLayerIndex(const int32 InLayerIndex)
+{
+	ActiveLayerIndex = InLayerIndex;
+}
+
+void FDigumWorldEditorToolkit::SetActiveSwatchIndex(const int32 InSwatchIndex)
+{
+	ActiveSwatchIndex = InSwatchIndex;
+}
+
+void FDigumWorldEditorToolkit::PlaceCoordinate(const int32& InX, const int32& InY)
+{
+}

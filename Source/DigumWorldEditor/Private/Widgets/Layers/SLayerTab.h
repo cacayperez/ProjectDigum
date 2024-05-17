@@ -27,6 +27,8 @@ protected:
 
 	void AddNewLayer();
 
+	int32 ActiveLayerIndex = 0;
+	
 public:
 	virtual void DrawTab() override;
 	

@@ -22,6 +22,11 @@ int32 SCanvasTab::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeome
 	                                bParentEnabled);
 }
 
+void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
+}
+
 void SCanvasTab::DrawTab()
 {
 	_Container->ClearChildren();
@@ -29,15 +34,24 @@ void SCanvasTab::DrawTab()
 	if(ToolkitPtr.IsValid())
 	{
 		UDigumWorldAsset* Asset = GetAsset();
+
+		TSharedPtr<SCanvasView> CanvasView = SNew(SCanvasView)
+					.CanvasHeight(Asset->GetHeight())
+					.CanvasWidth(Asset->GetWidth())
+					.Layers(Asset->GetLayers());
+
+		CanvasView->OnSelectCanvasCoordinate.AddSP(this, &SCanvasTab::OnSelectCanvasCoordinate);
 		
 		if(Asset)
 		{
 			_Container->AddSlot()
 			[
-				SNew(SCanvasView)
-				.CanvasHeight(Asset->GetHeight())
-				.CanvasWidth(Asset->GetWidth())
-				.Layers(Asset->GetLayers())
+				SNew(SBox)
+				.VAlign(VAlign_Center)
+				.HAlign(HAlign_Center)
+				[
+					CanvasView.ToSharedRef()
+				]
 			];
 		}
 	}

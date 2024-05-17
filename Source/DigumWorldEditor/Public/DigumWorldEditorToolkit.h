@@ -24,6 +24,9 @@ protected:
 	
 	TObjectPtr<UDigumWorldAsset> AssetBeingEdited;
 
+	int32 ActiveLayerIndex = -1;
+	int32 ActiveSwatchIndex = -1;
+
 public:
 	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
@@ -31,4 +34,8 @@ public:
 	void AddSwatchItem(UDigumWorldEditorSwatch* InSwatch);
 	void AddNewLayer();
 	void DeleteLayer(const int32& InIndex);
+
+	void SetActiveLayerIndex(const int32 InLayerIndex);
+	void SetActiveSwatchIndex(const int32 InSwatchIndex);
+	void PlaceCoordinate(const int32& InX, const int32& InY);
 };

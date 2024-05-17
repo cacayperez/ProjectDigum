@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Base/SWidgetBase.h"
 
+class SCanvasViewBackground;
 struct FDigumWorldAssetLayer;
 /**
  * 
@@ -32,5 +33,10 @@ protected:
 	TAttribute<TArray<FDigumWorldAssetLayer>> LayersAttribute;
 	TAttribute<int32> CanvasWidthAttribute;
 	TAttribute<int32> CanvasHeightAttribute;
-	TSharedPtr<SGridPanel> _BackgroundGridPanel;
+	TSharedPtr<SCanvasViewBackground> _BackgroundGridPanel;
+
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectCanvasCoordinate, const int32&, const int32&);
+
+public:
+	FOnSelectCanvasCoordinate OnSelectCanvasCoordinate;
 };

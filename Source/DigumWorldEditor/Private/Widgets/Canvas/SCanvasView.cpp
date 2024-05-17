@@ -3,6 +3,7 @@
 
 #include "SCanvasView.h"
 
+#include "SCanvasViewBackground.h"
 #include "SlateOptMacros.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Widgets/Base/SWidgetBase.h"
@@ -14,7 +15,10 @@ void SCanvasView::Construct(const FArguments& InArgs)
 	CanvasHeightAttribute = InArgs._CanvasHeight;
 	CanvasWidthAttribute = InArgs._CanvasWidth;
 	LayersAttribute = InArgs._Layers;
-	_BackgroundGridPanel = SNew(SGridPanel);
+	_BackgroundGridPanel = SNew(SCanvasViewBackground)
+		.Width(CanvasWidthAttribute.Get())
+		.Height(CanvasHeightAttribute.Get())
+		.SquareSize(SquareSize);
 	
 	SWidgetBase::Construct(SWidgetBase::FArguments());
 }
@@ -60,26 +64,15 @@ void SCanvasView::OnConstruct()
 		_BackgroundGridPanel.ToSharedRef()
 	];
 
-	// FVector()
-	FGeometry TestGeometry = FGeometry(FVector2D(0, 0), FVector2D::Zero(), _BackgroundGridPanel->GetDesiredSize(), 1.0f);
-
 }
 
 FReply SCanvasView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
+	FVector2D LocalPosition = MyGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
+	int32 X = FMath::FloorToInt(LocalPosition.X / SquareSize);
+	int32 Y = FMath::FloorToInt(LocalPosition.Y / SquareSize);
 
-	FGeometry BackgroundGeometry = _Container->GetCachedGeometry();
-	// FVector2D LocalPosition = TestGeometry.AbsoluteToLocal(MouseEvent.GetScreenSpacePosition());
-
-	// UE_LOG(LogTemp, Warning, TEXT("Local Position: %s"), *LocalPosition.ToString());
-	if(MyGeometry.IsUnderLocation(MouseEvent.GetScreenSpacePosition()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Under Location"));
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Under Location"));
-	}
+	OnSelectCanvasCoordinate.Broadcast(X, Y);
 	
 	return SWidgetBase::OnMouseButtonDown(MyGeometry, MouseEvent);
 }
