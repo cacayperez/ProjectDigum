@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Asset/DigumWorldAsset.h"
 #include "UObject/Object.h"
 #include "DigumWorldEditorSwatch.generated.h"
 
+class UDigumWorldSwatchAsset;
 /**
  * 
  */
@@ -19,10 +19,8 @@ public:
 	FName SwatchName;
 	
 	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UDigumWorldSwatch> SoftSwatchAsset;
+	TSoftObjectPtr<UDigumWorldSwatchAsset> SoftSwatchAsset;
 
-	bool IsValidSwatch() const
-	{
-		return SoftSwatchAsset.IsValid();
-	}
+	bool IsValidSwatch() const;
+	
 };

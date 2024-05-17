@@ -2,3 +2,9 @@
 
 
 #include "DigumWorldEditorSwatch.h"
+#include "Asset/DigumWorldSwatchAsset.h"
+
+bool UDigumWorldEditorSwatch::IsValidSwatch() const
+{
+	return SoftSwatchAsset.IsValid();
+}

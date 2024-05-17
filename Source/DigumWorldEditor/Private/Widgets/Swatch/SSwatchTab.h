@@ -18,17 +18,20 @@ public:
 	SLATE_BEGIN_ARGS(SSwatchTab)
 		{
 		}
-	SLATE_ATTRIBUTE(UDigumWorldAsset*, AssetBeingEdited)
 	SLATE_END_ARGS()
-
-	FReply OnNewSwatchClicked();
-	/** Constructs this widget with InArgs */
-	// void Construct(const FArguments& InArgs);
+	
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
 	virtual void OnConstruct() override;
+	void OnAddNewSwatch();	
+	FReply OpenNewSwatchModal();
+	void OnSelectSwatchIndex(const int32 InIndex);
 
 protected:
-	TSharedPtr<SWindow> NewSwatchWindow;
+	bool bHasWindowActive = false;
+	mutable int32 SelectedSwatcIndex = 0;
+	TSharedPtr<SWindow> ModalWindowPtr;
+
 public:
+	void OnNewSwatchWindowClosed( const TSharedRef<SWindow>& Window);
 	virtual void DrawTab() override;
 };

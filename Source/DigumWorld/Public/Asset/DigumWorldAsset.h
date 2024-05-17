@@ -6,10 +6,10 @@
 #include "Engine/DataAsset.h"
 #include "DigumWorldAsset.generated.h"
 
-class UDigumWorldSwatch;
+class UDigumWorldSwatchAsset;
 
 USTRUCT()
-struct FDigumWorldAssetSwatch
+struct FDigumWorldAssetCoordinate
 {
 	GENERATED_BODY()
 public:
@@ -19,9 +19,11 @@ public:
 	UPROPERTY()
 	int32 Y;
 
-	bool operator==(const FDigumWorldAssetSwatch& InSwatch) const
+	FName SwatchName = NAME_None;
+
+	bool operator==(const FDigumWorldAssetCoordinate& InCoordinate) const
 	{
-		return InSwatch.X == X && InSwatch.Y == Y;
+		return InCoordinate.X == X && InCoordinate.Y == Y;
 	}
 };
 
@@ -34,7 +36,7 @@ public:
 	FName SwatchName;
 	
 	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UDigumWorldSwatch> SoftSwatchAsset;
+	TSoftObjectPtr<UDigumWorldSwatchAsset> SoftSwatchAsset;
 
 	bool operator==(const FDigumWorldSwatchPaletteItem& InSwatchPallette) const
 	{
@@ -51,16 +53,27 @@ struct FDigumWorldAssetLayer
 	FText LayerName;
 	
 	UPROPERTY()
-	TArray<FDigumWorldAssetSwatch> Swatches;
+	TArray<FDigumWorldAssetCoordinate> Coordinates;
 public:
-
-
-	void AddSwatch(FDigumWorldAssetSwatch InSwatch)
+	
+	void AddCoordinate(FDigumWorldAssetCoordinate InCoordinate)
 	{
-		Swatches.Add(InSwatch);
+		Coordinates.Add(InCoordinate);
 	}
 
 	FText GetLayerName() const { return LayerName; }
+	
+	bool HasCoordinate(const FDigumWorldAssetCoordinate& InCoordinate) const
+	{
+		const FDigumWorldAssetCoordinate* Coordinate =  Coordinates.FindByPredicate([&InCoordinate](const FDigumWorldAssetCoordinate& Coordinate)
+		{
+			return Coordinate == InCoordinate;
+		});
+
+		return Coordinate != nullptr;
+	}
+
+	
 };
 
 
@@ -94,6 +107,8 @@ public:
 	
 	FDigumWorldAssetLayer* GetLayer(int InIndex);
 	void RemoveLayer(const int32& InIndex);
+	int32 GetWidth() const { return Width; }
+	int32 GetHeight() const { return Height; }
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

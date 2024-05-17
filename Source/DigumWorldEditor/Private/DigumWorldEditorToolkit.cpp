@@ -3,6 +3,7 @@
 #include "SSingleObjectDetailsPanel.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Objects/DigumWorldEditorSwatch.h"
+#include "Widgets/Canvas/SCanvasTab.h"
 #include "Widgets/Layers/SLayerTab.h"
 #include "Widgets/Swatch/SSwatchTab.h"
 
@@ -11,8 +12,8 @@ struct FDigumWorldEditorTabs
 	// Tab identifiers
 	static const FName DetailsID;
 	static const FName CanvasViewportID;
-	static const FName ActionsPaletteID;
-	static const FName ActionsSubMenuID;
+	// static const FName ActionsPaletteID;
+	// static const FName ActionsSubMenuID;
 	static const FName SwatchesID;
 	static const FName LayersID;
 	
@@ -20,8 +21,8 @@ struct FDigumWorldEditorTabs
 
 const FName FDigumWorldEditorTabs::DetailsID(TEXT("DigumGridMapLayoutEditor_Details"));
 const FName FDigumWorldEditorTabs::CanvasViewportID(TEXT("DigumGridMapLayoutEditor_CanvasViewport"));
-const FName FDigumWorldEditorTabs::ActionsPaletteID(TEXT("DigumGridMapLayoutEditor_ActionsPalette"));
-const FName FDigumWorldEditorTabs::ActionsSubMenuID(TEXT("DigumGridMapLayoutEditor_ActionsSubMenu"));
+// const FName FDigumWorldEditorTabs::ActionsPaletteID(TEXT("DigumGridMapLayoutEditor_ActionsPalette"));
+// const FName FDigumWorldEditorTabs::ActionsSubMenuID(TEXT("DigumGridMapLayoutEditor_ActionsSubMenu"));
 const FName FDigumWorldEditorTabs::SwatchesID(TEXT("DigumGridMapLayoutEditor_Swatches"));
 const FName FDigumWorldEditorTabs::LayersID(TEXT("DigumGridMapLayoutEditor_Layers"));
 
@@ -90,8 +91,18 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Swatches(const FSpawnTab
 	[
 		//SNew(SBorder)
 		SNew(SSwatchTab, WorldEditorToolkit)
-		.AssetBeingEdited(AssetBeingEdited)
 	];	
+}
+
+TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_CanvasViewport(const FSpawnTabArgs& SpawnTabArgs)
+{
+	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
+	return SNew(SDockTab)
+	.Label(NSLOCTEXT("DetailsTab_Title", "CanvasTab", "Canvas"))
+	[
+		//SNew(SBorder)
+		SNew(SCanvasTab, WorldEditorToolkit)
+	];
 }
 
 void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -109,6 +120,10 @@ void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>
 
 	InTabManager->RegisterTabSpawner(FDigumWorldEditorTabs::SwatchesID, FOnSpawnTab::CreateSP(this, &FDigumWorldEditorToolkit::SpawnTab_Swatches))
 	.SetDisplayName(NSLOCTEXT("DigumWorldEditor", "SwatchesTab", "Swatches"))
+	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
+
+	InTabManager->RegisterTabSpawner(FDigumWorldEditorTabs::CanvasViewportID, FOnSpawnTab::CreateSP(this, &FDigumWorldEditorToolkit::SpawnTab_CanvasViewport))
+	.SetDisplayName(NSLOCTEXT("DigumWorldEditor", "CanvasTab", "Canvas"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
 }
 
@@ -130,7 +145,7 @@ void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdi
 		(
 					
 			FTabManager::NewStack()
-				->AddTab(FDigumWorldEditorTabs::ActionsSubMenuID, ETabState::OpenedTab)
+				->AddTab(FDigumWorldEditorTabs::LayersID, ETabState::OpenedTab)
 				->SetHideTabWell(true)
 		)
 	);

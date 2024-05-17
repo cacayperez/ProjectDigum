@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "DigumWorldSwatch.generated.h"
+#include "DigumWorldSwatchAsset.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DIGUMWORLD_API UDigumWorldSwatch : public UPrimaryDataAsset
+class DIGUMWORLD_API UDigumWorldSwatchAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 public:

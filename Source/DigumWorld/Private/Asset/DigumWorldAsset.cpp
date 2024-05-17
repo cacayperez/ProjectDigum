@@ -60,6 +60,7 @@ void UDigumWorldAsset::RemoveLayer(const int32& InIndex)
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
+	OnDigumWorldAssetUpdated.Broadcast();
 }
 
 void UDigumWorldAsset::PostEditUndo()
