@@ -21,11 +21,13 @@ protected:
 	TSharedRef<SDockTab> SpawnTab_Layers(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Swatches(const FSpawnTabArgs& SpawnTabArgs);
 	
-	TObjectPtr<UDigumWorldAsset> WorldAssetBeingEdited;
+	TObjectPtr<UDigumWorldAsset> AssetBeingEdited;
 
 public:
 	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
-	UDigumWorldAsset* GetAssetBeingEdited() const { return WorldAssetBeingEdited; };
+	UDigumWorldAsset* GetAssetBeingEdited() const { return AssetBeingEdited; };
 	void AddSwatchItem(UDigumWorldEditorSwatch* InSwatch);
+	void AddNewLayer();
+	void DeleteLayer(const int32& InIndex);
 };

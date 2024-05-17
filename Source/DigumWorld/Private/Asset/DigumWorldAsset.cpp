@@ -65,4 +65,5 @@ void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 void UDigumWorldAsset::PostEditUndo()
 {
 	Super::PostEditUndo();
+	OnDigumWorldAssetUpdated.Broadcast();
 }

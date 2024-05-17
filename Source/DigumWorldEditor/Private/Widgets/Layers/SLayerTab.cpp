@@ -3,27 +3,15 @@
 
 #include "SLayerTab.h"
 
+#include "DigumWorldEditorToolkit.h"
 #include "SlateOptMacros.h"
 #include "Asset/DigumWorldAsset.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SLayerTab::Construct(const FArguments& InArgs)
+void SLayerTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit)
 {
-	AssetBeingEditedAttribute = InArgs._AssetBeingEdited;
-
-	if(AssetBeingEditedAttribute.Get() != nullptr)
-	{
-		AssetBeingEditedAttribute.Get()->OnDigumWorldAssetUpdated.AddSP(this, &SLayerTab::Refresh);
-	}
-	
-	_Container = SNew(SOverlay);
-	ChildSlot
-	[
-		_Container.ToSharedRef()
-	];
-
-	DrawTab();
+	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
 
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
@@ -46,21 +34,21 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 
 void SLayerTab::OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg, int InIndex)
 {
-	if(AssetBeingEditedAttribute.Get() != nullptr)
+	if(GetAsset() != nullptr)
 	{
-		FDigumWorldAssetLayer* Layer = AssetBeingEditedAttribute.Get()->GetLayer(InIndex);
+		FDigumWorldAssetLayer* Layer = GetAsset()->GetLayer(InIndex);
 		Layer->LayerName = Text;
 
-		Refresh();
+		RefreshTab();
 	}
 }
 
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 {
 	TSharedPtr<SVerticalBox> VerticalContainer = SNew(SVerticalBox);
-	if(AssetBeingEditedAttribute.Get() != nullptr)
+	if(GetAsset() != nullptr)
 	{
-		TArray<FDigumWorldAssetLayer> Layers = AssetBeingEditedAttribute.Get()->GetLayers();
+		TArray<FDigumWorldAssetLayer> Layers = GetAsset()->GetLayers();
 		for(int32 i = 0; i < Layers.Num(); i++)
 		{
 			const int32 LayerIndex = i;
@@ -83,7 +71,7 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 					.Text(FText::FromString("X"))
 					.OnClicked_Lambda([this, LayerIndex]()
 					{
-						AssetBeingEditedAttribute.Get()->RemoveLayer(LayerIndex);
+						GetAsset()->RemoveLayer(LayerIndex);
 						return FReply::Handled();
 					})
 				]
@@ -101,15 +89,13 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 
 void SLayerTab::AddNewLayer()
 {
-	if(AssetBeingEditedAttribute.Get() == nullptr) return;
-
-	AssetBeingEditedAttribute.Get()->AddNewLayer();
+	if(ToolkitPtr.Pin())
+	{
+		ToolkitPtr.Pin()->AddNewLayer();
+		RefreshTab();
+	}
 }
 
-void SLayerTab::Refresh()
-{
-	DrawTab();
-}
 
 void SLayerTab::DrawTab()
 {

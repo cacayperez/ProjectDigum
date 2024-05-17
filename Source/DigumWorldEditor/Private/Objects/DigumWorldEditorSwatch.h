@@ -20,4 +20,9 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UDigumWorldSwatch> SoftSwatchAsset;
+
+	bool IsValidSwatch() const
+	{
+		return SoftSwatchAsset.IsValid();
+	}
 };

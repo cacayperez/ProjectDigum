@@ -28,4 +28,9 @@ protected:
 	TWeakPtr<FDigumWorldEditorToolkit> ToolkitPtr;
 	FDigumWorldSwatchPaletteItem SwatchItem;
 	TAttribute<UDigumWorldEditorSwatch*> Swatch;
+
+	DECLARE_DELEGATE(FOnAddSwatch);
+
+public:
+	FOnAddSwatch OnAddSwatch;
 };

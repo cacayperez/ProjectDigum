@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/Base/SBaseTab.h"
 
 class FDigumWorldEditorToolkit;
 class UDigumWorldAsset;
@@ -11,7 +12,7 @@ class UDigumWorldAsset;
 /**
  * 
  */
-class DIGUMWORLDEDITOR_API SSwatchTab : public SCompoundWidget
+class DIGUMWORLDEDITOR_API SSwatchTab : public SBaseTab
 {
 public:
 	SLATE_BEGIN_ARGS(SSwatchTab)
@@ -23,12 +24,11 @@ public:
 	FReply OnNewSwatchClicked();
 	/** Constructs this widget with InArgs */
 	// void Construct(const FArguments& InArgs);
-	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkitPtr);
+	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
+	virtual void OnConstruct() override;
+
 protected:
-	TWeakPtr<FDigumWorldEditorToolkit> ToolkitPtr;
-	TAttribute<UDigumWorldAsset*> AssetBeingEditedAttribute;
-	TSharedPtr<SOverlay> _Container;
-	
-	void DrawTab();
-	void Refresh();
+	TSharedPtr<SWindow> NewSwatchWindow;
+public:
+	virtual void DrawTab() override;
 };

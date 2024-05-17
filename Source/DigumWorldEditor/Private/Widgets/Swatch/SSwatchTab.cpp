@@ -3,6 +3,7 @@
 
 #include "SSwatchTab.h"
 
+#include "DigumWorldEditorToolkit.h"
 #include "SlateMaterialBrush.h"
 #include "SlateOptMacros.h"
 #include "SNewSwatchWindow.h"
@@ -13,46 +14,51 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 FReply SSwatchTab::OnNewSwatchClicked()
 {
-	UDigumWorldEditorSwatch* SwatchObject = NewObject<UDigumWorldEditorSwatch>();
-	TSharedRef<SWindow> NewSwatchWindow = SNew(SWindow)
-		.Title(FText::FromString("New Swatch"))
-		.ClientSize(FVector2D(400, 100));
-
-	TSharedPtr<FDigumWorldEditorToolkit> Toolkit = ToolkitPtr.Pin();
-	NewSwatchWindow->SetContent(
-		SNew(SBox)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot()
-			[
-				SNew(SNewSwatchWindow, Toolkit)
-				.Swatch(SwatchObject)
-			]
-		]
-	);
+	if(NewSwatchWindow.IsValid())
+	{
+		FSlateApplication::Get().AddWindow(NewSwatchWindow.ToSharedRef());
+	}
 	
-	FSlateApplication::Get().AddWindow(NewSwatchWindow);
 	return FReply::Handled();
 }
 
 
-void SSwatchTab::Construct(const FArguments& InArgs,  TSharedPtr<FDigumWorldEditorToolkit>& InToolkitPtr)
+void SSwatchTab::Construct(const FArguments& InArgs,  TSharedPtr<FDigumWorldEditorToolkit>& InToolkit)
 {
-	ToolkitPtr = InToolkitPtr;
-	AssetBeingEditedAttribute = InArgs._AssetBeingEdited;
-	_Container = SNew(SOverlay);
-	
-	if(AssetBeingEditedAttribute.Get() != nullptr)
-	{
-		AssetBeingEditedAttribute.Get()->OnDigumWorldAssetUpdated.AddSP(this, &SSwatchTab::Refresh);
-	}
-	
-	ChildSlot
-	[
-		_Container.ToSharedRef()
-	];
+	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
+}
 
-	DrawTab();
+void SSwatchTab::OnConstruct()
+{
+	SBaseTab::OnConstruct();
+	UDigumWorldEditorSwatch* SwatchObject = NewObject<UDigumWorldEditorSwatch>();
+	
+	TSharedPtr<FDigumWorldEditorToolkit> Toolkit = ToolkitPtr.Pin();
+	
+	TSharedPtr<SNewSwatchWindow> WindowContent =
+		SNew(SNewSwatchWindow, Toolkit)
+		.Swatch(SwatchObject);
+	
+	WindowContent->OnAddSwatch.BindLambda([&]()
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Swatch Added"));
+		FSlateApplication::Get().RequestDestroyWindow(NewSwatchWindow.ToSharedRef());
+	});
+	
+	NewSwatchWindow = SNew(SWindow)
+	.Title(FText::FromString("New Swatch"))
+	.ClientSize(FVector2D(400, 400));
+
+	NewSwatchWindow->SetContent(
+	SNew(SBox)
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot()
+		[
+			WindowContent.ToSharedRef()
+		]
+	]
+);
 }
 
 void SSwatchTab::DrawTab()
@@ -78,7 +84,7 @@ void SSwatchTab::DrawTab()
 		]
 	];
 
-	for(auto Swatch : AssetBeingEditedAttribute.Get()->GetSwatches())
+	for(auto Swatch : ToolkitPtr.Pin()->GetAssetBeingEdited()->GetSwatches())
 	{
 		UDigumWorldSwatch* Asset = Swatch.SoftSwatchAsset.LoadSynchronous();
 		if(Asset)
@@ -104,10 +110,4 @@ void SSwatchTab::DrawTab()
 		}
 	}
 }
-
-void SSwatchTab::Refresh()
-{
-	DrawTab();
-}
-
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

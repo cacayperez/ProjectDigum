@@ -50,6 +50,7 @@ FReply SNewSwatchWindow::OnAddClicked()
 	if(ToolkitPtr.Pin() != nullptr)
 	{
 		ToolkitPtr.Pin()->AddSwatchItem(Swatch.Get());
+		OnAddSwatch.ExecuteIfBound();
 	}
 	return FReply::Handled();
 }

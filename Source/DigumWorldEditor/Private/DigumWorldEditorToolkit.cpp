@@ -77,8 +77,7 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Layers(const FSpawnTabAr
 		.Label(NSLOCTEXT("DetailsTab_Title", "LayersTab", "Layers"))
 		[
 			//SNew(SBorder)
-			SNew(SLayerTab)
-			.AssetBeingEdited(WorldAssetBeingEdited)
+			SNew(SLayerTab, WorldEditorToolkit)
 		];	
 }
 
@@ -91,7 +90,7 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Swatches(const FSpawnTab
 	[
 		//SNew(SBorder)
 		SNew(SSwatchTab, WorldEditorToolkit)
-		.AssetBeingEdited(WorldAssetBeingEdited)
+		.AssetBeingEdited(AssetBeingEdited)
 	];	
 }
 
@@ -121,7 +120,7 @@ void FDigumWorldEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabManage
 void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode,
 	const TSharedPtr<IToolkitHost>& InInitToolkitHost)
 {
-	WorldAssetBeingEdited = InWorldAssetBeingEdited;
+	AssetBeingEdited = InWorldAssetBeingEdited;
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("Standalone_DigumWorldEditor_Layout_v1")
 	->AddArea
 	(
@@ -143,16 +142,38 @@ void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdi
 		StandaloneDefaultLayout,
 		true,
 		true,
-		WorldAssetBeingEdited
+		AssetBeingEdited
 		);
 }
 
 void FDigumWorldEditorToolkit::AddSwatchItem(UDigumWorldEditorSwatch* InSwatch)
 {
-	// GetAssetBeingEdited()
-	FDigumWorldSwatchPaletteItem NewSwatchItem = FDigumWorldSwatchPaletteItem();
-	NewSwatchItem.SwatchName = InSwatch->SwatchName;
-	NewSwatchItem.SoftSwatchAsset = InSwatch->SoftSwatchAsset;
+	if(!InSwatch->IsValidSwatch()) return;
 
-	GetAssetBeingEdited()->AddSwatchPaletteItem(NewSwatchItem);
+	if(GEditor)
+	{
+		FDigumWorldSwatchPaletteItem NewSwatchItem = FDigumWorldSwatchPaletteItem();
+		NewSwatchItem.SwatchName = InSwatch->SwatchName;
+		NewSwatchItem.SoftSwatchAsset = InSwatch->SoftSwatchAsset;
+		
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: Add Swatch"));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->AddSwatchPaletteItem(NewSwatchItem);
+		GEditor->EndTransaction();
+	}
+}
+
+void FDigumWorldEditorToolkit::AddNewLayer()
+{
+	if(GEditor)
+	{
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: Add Layer"));
+		GetAssetBeingEdited()->Modify();
+		AssetBeingEdited->AddNewLayer();
+		GEditor->EndTransaction();
+	}
+}
+
+void FDigumWorldEditorToolkit::DeleteLayer(const int32& InIndex)
+{
 }
