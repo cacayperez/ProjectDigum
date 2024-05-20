@@ -113,6 +113,7 @@ public:
 	void RemoveLayer(const int32& InIndex);
 	int32 GetWidth() const { return Width; }
 	int32 GetHeight() const { return Height; }
+	void DeleteLayer(int32 InIndex);
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

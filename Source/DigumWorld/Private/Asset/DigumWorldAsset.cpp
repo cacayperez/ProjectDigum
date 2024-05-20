@@ -57,6 +57,14 @@ void UDigumWorldAsset::RemoveLayer(const int32& InIndex)
 
 }
 
+void UDigumWorldAsset::DeleteLayer(int32 InIndex)
+{
+	if(Layers.IsValidIndex(InIndex))
+	{
+		Layers.RemoveAt(InIndex);
+	}
+}
+
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);

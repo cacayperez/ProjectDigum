@@ -16,6 +16,7 @@ public:
 	virtual FString GetWorldCentricTabPrefix() const override { return NSLOCTEXT("DigumWorldEditor", "DigumWorldEditorTabPrefix", "DigumWorldEditor").ToString(); }
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
 
+
 protected:
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Layers(const FSpawnTabArgs& SpawnTabArgs);
@@ -35,6 +36,7 @@ public:
 	void AddNewLayer();
 	void DeleteLayer(const int32& InIndex);
 
+	void DeleteActiveLayer();
 	void SetActiveLayerIndex(const int32 InLayerIndex);
 	void SetActiveSwatchIndex(const int32 InSwatchIndex);
 	void PlaceCoordinate(const int32& InX, const int32& InY);

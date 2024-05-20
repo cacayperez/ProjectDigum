@@ -29,6 +29,18 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 			return FReply::Handled();
 		})
 	];
+
+	Widget->AddSlot()
+	[
+		SNew(SButton)
+		.Text(FText::FromString("Delete Layer"))
+		.OnClicked_Lambda([&]()
+		{
+			DeleteSelectedLayer();
+			return FReply::Handled();
+		})
+	];
+	
 	
 	return Widget;
 }
@@ -130,4 +142,14 @@ void SLayerTab::DrawTab()
 		]
 	];
 }
+
+void SLayerTab::DeleteSelectedLayer()
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->DeleteActiveLayer();
+		RefreshTab();
+	}
+}
+
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -191,6 +191,27 @@ void FDigumWorldEditorToolkit::AddNewLayer()
 
 void FDigumWorldEditorToolkit::DeleteLayer(const int32& InIndex)
 {
+	if(GEditor && GetAssetBeingEdited())
+	{
+		int32 TempIndex = ActiveLayerIndex;
+		const int32 LastIndex = GetAssetBeingEdited()->GetLayers().Num() -1;
+		if(ActiveLayerIndex == LastIndex)
+		{
+			TempIndex = FMath::Clamp<int32>(ActiveLayerIndex-1, 0, LastIndex - 1);
+		}
+		GEditor->BeginTransaction(FText::FromString(("DigumWorldEditor: DeleteLayer")));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->DeleteLayer(InIndex);
+		GEditor->EndTransaction();
+
+		ActiveLayerIndex = TempIndex;
+		
+	}
+}
+
+void FDigumWorldEditorToolkit::DeleteActiveLayer()
+{
+	DeleteLayer(ActiveLayerIndex);
 }
 
 void FDigumWorldEditorToolkit::SetActiveLayerIndex(const int32 InLayerIndex)

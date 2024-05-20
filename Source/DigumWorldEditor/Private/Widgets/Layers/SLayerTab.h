@@ -20,6 +20,8 @@ public:
 	SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
+
+
 protected:
 	TSharedPtr<SWidget> OnCreateLayerMenu();
 	void OnLayerNameCommitted(const FText& Text, ETextCommit::Type Arg, int InIndex);
@@ -31,5 +33,5 @@ protected:
 	
 public:
 	virtual void DrawTab() override;
-	
+	void DeleteSelectedLayer();	
 };
