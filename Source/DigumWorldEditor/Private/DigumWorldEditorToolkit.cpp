@@ -58,6 +58,11 @@ public:
 	}
 };
 
+void FDigumWorldEditorToolkit::OnLayerUpdated()
+{
+	
+}
+
 TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs)
 {
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
@@ -199,13 +204,27 @@ void FDigumWorldEditorToolkit::DeleteLayer(const int32& InIndex)
 		{
 			TempIndex = FMath::Clamp<int32>(ActiveLayerIndex-1, 0, LastIndex - 1);
 		}
-		GEditor->BeginTransaction(FText::FromString(("DigumWorldEditor: DeleteLayer")));
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: DeleteLayer"));
 		GetAssetBeingEdited()->Modify();
 		GetAssetBeingEdited()->DeleteLayer(InIndex);
 		GEditor->EndTransaction();
 
 		ActiveLayerIndex = TempIndex;
 		
+	}
+}
+
+void FDigumWorldEditorToolkit::UpdateLayer(const int32& InLayerIndex, const FDigumWorldAssetLayer& InLayer)
+{
+	
+	FDigumWorldAssetLayer* Layer = GetAssetBeingEdited()->GetLayer(InLayerIndex);
+	if(GEditor && GetAssetBeingEdited())
+	{
+		GetAssetBeingEdited()->UpdateLayer(InLayerIndex, InLayer);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HEllo I AM NULL"));
 	}
 }
 
@@ -236,4 +255,58 @@ int32 FDigumWorldEditorToolkit::GetActiveLayerIndex() const
 int32 FDigumWorldEditorToolkit::GetActiveSwatchIndex() const
 {
 	return ActiveSwatchIndex;
+}
+
+void FDigumWorldEditorToolkit::AddCoordinate(const int32& LayerIndex, const int32& X, const int32& Y)
+{
+	if(GEditor && GetAssetBeingEdited())
+	{
+		FDigumWorldSwatchPaletteItem* Swatch = GetAssetBeingEdited()->GetSwatch(ActiveSwatchIndex);
+		FDigumWorldAssetLayer* Layer = GetAssetBeingEdited()->GetLayer(ActiveLayerIndex);
+		if(Swatch && Layer)
+		{
+			FName SwatchName = Swatch->SwatchName;
+			
+			FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(X, Y, SwatchName);
+			GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: AddCoordinate"));
+			GetAssetBeingEdited()->Modify();
+			Layer->AddCoordinate(Coordinate);
+			GEditor->EndTransaction();
+		}
+	}
+}
+
+void FDigumWorldEditorToolkit::AddCoordinateToActiveLayer(const int32& InX, const int32& InY)
+{
+	AddCoordinate(ActiveLayerIndex, InX, InY);
+}
+
+void FDigumWorldEditorToolkit::SetLayerName(const int32& InLayerIndex, const FText& InLayerName)
+{
+	if(GetAssetBeingEdited() == nullptr) return;
+
+	if(GEditor)
+	{
+		FText Name = InLayerName;
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: SetLayerName"));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->SetLayerName(InLayerIndex, Name);
+		GEditor->EndTransaction();
+	}
+
+	
+}
+
+void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, const bool& bInLayerVisibility)
+{
+	if(GetAssetBeingEdited() == nullptr) return;
+
+	if(GEditor)
+	{
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: SetLayerVisibility"));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->SetLayerVisibility(InLayerIndex, bInLayerVisibility);
+		GEditor->EndTransaction();
+		
+	}
 }

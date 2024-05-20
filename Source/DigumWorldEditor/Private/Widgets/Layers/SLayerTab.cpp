@@ -15,6 +15,30 @@ void SLayerTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditor
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
 
+void SLayerTab::OnLayerUpdated()
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->OnLayerUpdated();
+	}
+}
+
+void SLayerTab::OnSetLayerName(const int32& InLayerIndex, const FText& Text)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetLayerName(InLayerIndex, Text);
+	}
+}
+
+void SLayerTab::OnSetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetLayerVisibility(InLayerIndex, bInVisibility);
+	}
+}
+
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 {
 	TSharedPtr<SHorizontalBox> Widget = SNew(SHorizontalBox);
@@ -75,8 +99,8 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 			const int32 LayerIndex = i;
 
 			const bool bIsActive = (i == GetActiveLayerIndex());
-			FDigumWorldAssetLayer Layer = Layers[i];
-			FText LayerName = Layer.GetLayerName();
+			FDigumWorldAssetLayer* Layer = ToolkitPtr.Pin()->GetAssetBeingEdited()->GetLayer(i);
+			FText LayerName = Layer->GetLayerName();
 
 			TSharedPtr<SLayerItem> LayerItem = SNew(SLayerItem)
 			.bIsActive(bIsActive)
@@ -85,6 +109,16 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 			LayerItem->OnSelectWidget.AddLambda([this, i]()
 			{
 				OnSelectActiveLayerIndex(i);
+			});
+
+			LayerItem->OnSetLayerName.AddLambda([this, i](const FText& InName)
+			{
+				OnSetLayerName(i, InName);
+			});
+
+			LayerItem->OnSetLayerVisibility.AddLambda([this, i](const bool& bInVisibility)
+			{
+				OnSetLayerVisibility(i, bInVisibility);
 			});
 			
 			VerticalContainer->AddSlot()
@@ -116,7 +150,7 @@ void SLayerTab::OnSelectActiveLayerIndex(const int32 InIndex)
 	if(ToolkitPtr.IsValid())
 	{
 		ToolkitPtr.Pin()->SetActiveLayerIndex(InIndex);
-		UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
+		// UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
 		RefreshTab();
 	}
 }
@@ -151,5 +185,4 @@ void SLayerTab::DeleteSelectedLayer()
 		RefreshTab();
 	}
 }
-
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -3,6 +3,7 @@
 
 #include "SCanvasTab.h"
 
+#include "DigumWorldEditorToolkit.h"
 #include "SCanvasView.h"
 #include "SlateOptMacros.h"
 #include "Asset/DigumWorldAsset.h"
@@ -24,7 +25,13 @@ int32 SCanvasTab::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeome
 
 void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
+		UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
+		RefreshTab();
+	}
+	
 }
 
 void SCanvasTab::DrawTab()
@@ -38,7 +45,7 @@ void SCanvasTab::DrawTab()
 		TSharedPtr<SCanvasView> CanvasView = SNew(SCanvasView)
 					.CanvasHeight(Asset->GetHeight())
 					.CanvasWidth(Asset->GetWidth())
-					.Layers(Asset->GetLayers());
+					.Asset(ToolkitPtr.Pin()->GetAssetBeingEdited());
 
 		CanvasView->OnSelectCanvasCoordinate.AddSP(this, &SCanvasTab::OnSelectCanvasCoordinate);
 		

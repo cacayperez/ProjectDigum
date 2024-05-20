@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Asset/DigumWorldAsset.h"
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Base/SBaseTab.h"
 
@@ -20,7 +21,9 @@ public:
 	SLATE_END_ARGS()
 	
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
-
+	void OnLayerUpdated();
+	void OnSetLayerName(const int32& InLayerIndex, const FText& Text);
+	void OnSetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 
 protected:
 	TSharedPtr<SWidget> OnCreateLayerMenu();
@@ -34,4 +37,5 @@ protected:
 public:
 	virtual void DrawTab() override;
 	void DeleteSelectedLayer();	
+	// void UpdateLayer(const int32& InLayerIndex, const FDigumWorldAssetLayer& Layer);
 };

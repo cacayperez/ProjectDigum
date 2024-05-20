@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Base/SWidgetBase.h"
 
+class UDigumWorldAsset;
 class SCanvasViewBackground;
 struct FDigumWorldAssetLayer;
 /**
@@ -20,23 +21,30 @@ public:
 	SLATE_ARGUMENT(int32, CanvasWidth)
 	SLATE_ARGUMENT(int32, CanvasHeight)
 	SLATE_ARGUMENT(TArray<FDigumWorldAssetLayer>, Layers)
+	SLATE_ATTRIBUTE(UDigumWorldAsset*, Asset)
 	SLATE_END_ARGS()
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct() override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override;
 protected:
 	float SquareSize = 24.0f;
-	
-	TAttribute<TArray<FDigumWorldAssetLayer>> LayersAttribute;
+	bool bIsDragging = false;
+	TAttribute<UDigumWorldAsset*> Asset;
 	TAttribute<int32> CanvasWidthAttribute;
 	TAttribute<int32> CanvasHeightAttribute;
 	TSharedPtr<SCanvasViewBackground> _BackgroundGridPanel;
+	TSharedPtr<SGridPanel> _LayersPanel;
 
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectCanvasCoordinate, const int32&, const int32&);
 
 public:
 	FOnSelectCanvasCoordinate OnSelectCanvasCoordinate;
+	void SelectCoordinate(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
+	void StartDrag();
+	void StopDrag();
 };
