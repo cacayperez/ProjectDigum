@@ -30,6 +30,7 @@ protected:
 	bool bHasWindowActive = false;
 	mutable int32 SelectedSwatcIndex = 0;
 	TSharedPtr<SWindow> ModalWindowPtr;
+	int32 GetActiveSwatchIndex() const;
 
 public:
 	void OnNewSwatchWindowClosed( const TSharedRef<SWindow>& Window);

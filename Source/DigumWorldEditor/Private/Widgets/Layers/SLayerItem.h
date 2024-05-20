@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Asset/DigumWorldAsset.h"
 #include "Widgets/Base/SWidgetBase.h"
 
 struct FDigumWorldAssetLayer;

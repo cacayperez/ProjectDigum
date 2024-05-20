@@ -206,3 +206,13 @@ void FDigumWorldEditorToolkit::SetActiveSwatchIndex(const int32 InSwatchIndex)
 void FDigumWorldEditorToolkit::PlaceCoordinate(const int32& InX, const int32& InY)
 {
 }
+
+int32 FDigumWorldEditorToolkit::GetActiveLayerIndex() const
+{
+	return ActiveLayerIndex;
+}
+
+int32 FDigumWorldEditorToolkit::GetActiveSwatchIndex() const
+{
+	return ActiveSwatchIndex;
+}

@@ -69,7 +69,8 @@ void SSwatchTab::OnAddNewSwatch()
 
 void SSwatchTab::OnSelectSwatchIndex(const int32 InIndex)
 {
-	SelectedSwatcIndex = InIndex;
+	// SelectedSwatcIndex = InIndex;
+	ToolkitPtr.Pin()->SetActiveSwatchIndex(InIndex);
 	UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
 	RefreshTab();
 }
@@ -80,6 +81,13 @@ SSwatchTab::~SSwatchTab()
 }
 */
 
+
+int32 SSwatchTab::GetActiveSwatchIndex() const
+{
+	if(ToolkitPtr.IsValid())
+		return ToolkitPtr.Pin()->GetActiveSwatchIndex();
+	return INDEX_NONE;
+}
 
 void SSwatchTab::OnNewSwatchWindowClosed(const TSharedRef<SWindow>& Window)
 {
@@ -101,7 +109,7 @@ void SSwatchTab::DrawTab()
 		UDigumWorldSwatchAsset* SwatchAsset = Swatch.SoftSwatchAsset.LoadSynchronous();
 		if(SwatchAsset)
 		{
-			bool bIsActive = (i == SelectedSwatcIndex);
+			const bool bIsActive = (i == GetActiveSwatchIndex());
 			TSharedPtr<SSwatchItem> SwatchItem
 				= SNew(SSwatchItem)
 				.SwatchAsset(SwatchAsset)
