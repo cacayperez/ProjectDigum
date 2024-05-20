@@ -70,9 +70,12 @@ void SSwatchTab::OnAddNewSwatch()
 void SSwatchTab::OnSelectSwatchIndex(const int32 InIndex)
 {
 	// SelectedSwatcIndex = InIndex;
-	ToolkitPtr.Pin()->SetActiveSwatchIndex(InIndex);
-	UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
-	RefreshTab();
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetActiveSwatchIndex(InIndex);
+		UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
+		RefreshTab();
+	}
 }
 /*
 SSwatchTab::~SSwatchTab()
@@ -113,7 +116,7 @@ void SSwatchTab::DrawTab()
 			TSharedPtr<SSwatchItem> SwatchItem
 				= SNew(SSwatchItem)
 				.SwatchAsset(SwatchAsset)
-				.bIsActiveSwatch(bIsActive);
+				.bIsActive(bIsActive);
 			
 			SwatchItem->OnSelectWidget.AddLambda([this, i]()
 			{

@@ -22,12 +22,12 @@ public:
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
 protected:
 	TSharedPtr<SWidget> OnCreateLayerMenu();
-	void OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg, int InIndex);
+	void OnLayerNameCommitted(const FText& Text, ETextCommit::Type Arg, int InIndex);
+	int32 GetActiveLayerIndex() const;
 	TSharedPtr<SWidget> OnCreateLayerList();
 
 	void AddNewLayer();
-
-	int32 ActiveLayerIndex = 0;
+	void OnSelectActiveLayerIndex(const int32 InIndex);
 	
 public:
 	virtual void DrawTab() override;

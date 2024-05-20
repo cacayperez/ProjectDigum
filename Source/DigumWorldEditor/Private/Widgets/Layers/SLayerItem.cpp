@@ -7,15 +7,10 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-void SLayerItem::SelectLayer()
-{
-	OnLayerSelected.ExecuteIfBound(LayerIndexAttribute.Get());
-}
-
 void SLayerItem::Construct(const FArguments& InArgs)
 {
 	LayerAttribute = InArgs._Layer;
-	OnSelectWidget.AddSP(this, &SLayerItem::SelectLayer);
+	bIsActiveLayer = InArgs._bIsActive;
 	bVisible = LayerAttribute.Get().IsVisible();
 	SWidgetBase::Construct(SWidgetBase::FArguments());
 }
@@ -24,15 +19,47 @@ void SLayerItem::OnConstruct()
 {
 	_Container->ClearChildren();
 
+	const FLinearColor SelectedColor = FLinearColor::Yellow;
+	const FLinearColor ClearColor = FLinearColor(0.1f,0.1f, 0.1f, 1.0f);
+	FLinearColor SelectionColor = ClearColor;
 	
+	if(bIsActiveLayer)
+	{
+		SelectionColor = SelectedColor;
+	}
+
+	FSlateBorderBrush* SelectionBorderBrush = new FSlateBorderBrush(TEXT("Background"), FMargin(2.0f));
+	FSlateColor BorderSlateColor = FSlateColor(SelectionColor);
+	// Border
+
 	_Container->AddSlot()
 	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
+		SNew(SBox)
+		[
+			SNew(SBorder)
+			.BorderBackgroundColor(BorderSlateColor)
+			.BorderImage(SelectionBorderBrush)
+		]
+
+	];
+	
+	_Container->AddSlot()
+	.Padding(20.0f)
+	[
+		// spacing
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
+		[
+			SNew(SSpacer)
+			.Size(FVector2D(20.0f, 0.0f))
+		]
+		+ SHorizontalBox::Slot()
+		.AutoWidth()
 		[
 			OnCreateVisibilityWidget().ToSharedRef()
 		]
-		+ SVerticalBox::Slot()
+		+ SHorizontalBox::Slot()
 		[
 			OnCreateLayerNameWidget().ToSharedRef()
 		]
@@ -47,7 +74,7 @@ void SLayerItem::OnVisibilityChanged(ECheckBoxState NewState)
 	Layer.SetVisibility(bVisible);
 	LayerAttribute.Set(Layer);
 	
-	OnLayerUpdated.ExecuteIfBound(LayerIndexAttribute.Get(), Layer);
+	OnLayerUpdated.Broadcast(Layer);
 }
 
 ECheckBoxState SLayerItem::GetVisibilityState() const
@@ -77,17 +104,24 @@ void SLayerItem::OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg)
 	FDigumWorldAssetLayer Layer = LayerAttribute.Get();
 	Layer.LayerName = LayerName;
 	LayerAttribute.Set(Layer);
-	OnLayerUpdated.ExecuteIfBound(LayerIndexAttribute.Get(), Layer);
+	OnLayerUpdated.Broadcast(Layer);
 }
 
 TSharedPtr<SWidget> SLayerItem::OnCreateLayerNameWidget()
 {
+	FSlateColorBrush* Brush = new FSlateColorBrush(FLinearColor::Black);
 	TSharedPtr<SEditableText> EditableText =
 		SNew(SEditableText)
 		.Text(this, &SLayerItem::GetLayerName)
+		// .BackgroundImageComposing(&Brush)
 		.OnTextCommitted(this, &SLayerItem::OnLayerNameCommited);
 
-	return EditableText;
+	return SNew(SBorder)
+	.BorderImage(Brush)
+	[
+		EditableText.ToSharedRef()
+	];
+	
 }
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

@@ -14,7 +14,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SSwatchItem::Construct(const FArguments& InArgs)
 {
 	AssetAttribute = InArgs._SwatchAsset;
-	bIsActiveSwatch = InArgs._bIsActiveSwatch;
+	bIsActiveSwatch = InArgs._bIsActive;
 	OnSelectWidget.AddSP(this, &SSwatchItem::OnSelectSwatch);
 	OnDeselectWidget.AddSP(this, &SSwatchItem::OnDeselectSwatch);
 	

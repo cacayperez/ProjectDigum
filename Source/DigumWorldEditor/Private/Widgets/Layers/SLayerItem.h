@@ -17,32 +17,29 @@ public:
 	SLATE_BEGIN_ARGS(SLayerItem)
 		{
 		}
-	SLATE_ATTRIBUTE(int32, LayerIndex)
+	SLATE_ARGUMENT(bool, bIsActive);
 	SLATE_ATTRIBUTE(FDigumWorldAssetLayer, Layer)
 	SLATE_END_ARGS()
 
-	void SelectLayer();
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct() override;
 protected:
 	TAttribute<int32> LayerIndexAttribute;
 	TAttribute<FDigumWorldAssetLayer> LayerAttribute;
-	bool bSelected = false;
+	bool bIsActiveLayer = false;
 	bool bVisible = true;
 	void OnVisibilityChanged(ECheckBoxState NewState);
 
-	DECLARE_DELEGATE_TwoParams(FOnLayerUpdated, const int32&, const FDigumWorldAssetLayer&);
-	DECLARE_DELEGATE_OneParam(FOnLayerSelected, const int32&)
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnLayerUpdated, const FDigumWorldAssetLayer&);
 
 public:
 	FOnLayerUpdated OnLayerUpdated;
-	FOnLayerSelected OnLayerSelected;
-	void SetSelected(const bool bValue) { bSelected = bValue; }
 
 	ECheckBoxState GetVisibilityState() const;
 	TSharedPtr<SWidget> OnCreateVisibilityWidget();
 	FText GetLayerName() const;
 	void OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg);
-	TSharedPtr<SWidget> OnCreateLayerNameWidget();	
+	TSharedPtr<SWidget> OnCreateLayerNameWidget();
+
 };

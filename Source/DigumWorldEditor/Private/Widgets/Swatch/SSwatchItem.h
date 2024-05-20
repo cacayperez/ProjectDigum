@@ -16,7 +16,7 @@ class DIGUMWORLDEDITOR_API SSwatchItem : public SWidgetBase
 {
 public:
 	SLATE_BEGIN_ARGS(SSwatchItem) {}
-	SLATE_ARGUMENT(bool, bIsActiveSwatch);
+	SLATE_ARGUMENT(bool, bIsActive);
 	SLATE_ATTRIBUTE(UDigumWorldSwatchAsset*, SwatchAsset);
 	SLATE_END_ARGS()
 

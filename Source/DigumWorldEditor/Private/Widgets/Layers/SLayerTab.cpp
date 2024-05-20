@@ -5,6 +5,7 @@
 
 #include "DigumWorldEditorToolkit.h"
 #include "SlateOptMacros.h"
+#include "SLayerItem.h"
 #include "Asset/DigumWorldAsset.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
@@ -32,7 +33,7 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 	return Widget;
 }
 
-void SLayerTab::OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg, int InIndex)
+void SLayerTab::OnLayerNameCommitted(const FText& Text, ETextCommit::Type Arg, int InIndex)
 {
 	if(GetAsset() != nullptr)
 	{
@@ -41,6 +42,14 @@ void SLayerTab::OnLayerNameCommited(const FText& Text, ETextCommit::Type Arg, in
 
 		RefreshTab();
 	}
+}
+
+int32 SLayerTab::GetActiveLayerIndex() const
+{
+	if(ToolkitPtr.IsValid())
+		return ToolkitPtr.Pin()->GetActiveLayerIndex();
+
+	return INDEX_NONE;
 }
 
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
@@ -52,30 +61,24 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 		for(int32 i = 0; i < Layers.Num(); i++)
 		{
 			const int32 LayerIndex = i;
+
+			const bool bIsActive = (i == GetActiveLayerIndex());
 			FDigumWorldAssetLayer Layer = Layers[i];
 			FText LayerName = Layer.GetLayerName();
+
+			TSharedPtr<SLayerItem> LayerItem = SNew(SLayerItem)
+			.bIsActive(bIsActive)
+			.Layer(Layer);
+
+			LayerItem->OnSelectWidget.AddLambda([this, i]()
+			{
+				OnSelectActiveLayerIndex(i);
+			});
+			
 			VerticalContainer->AddSlot()
 			.AutoHeight()
 			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				[
-					SNew(SEditableText)
-					.Text(LayerName)
-					.OnTextCommitted(this, &SLayerTab::OnLayerNameCommited, LayerIndex)
-				]
-				+SHorizontalBox::Slot()
-				.AutoWidth()
-				[
-					SNew(SButton)
-					.Text(FText::FromString("X"))
-					.OnClicked_Lambda([this, LayerIndex]()
-					{
-						GetAsset()->RemoveLayer(LayerIndex);
-						return FReply::Handled();
-					})
-				]
-
+				LayerItem.ToSharedRef()
 			];
 		}
 	}
@@ -92,6 +95,16 @@ void SLayerTab::AddNewLayer()
 	if(ToolkitPtr.Pin())
 	{
 		ToolkitPtr.Pin()->AddNewLayer();
+		RefreshTab();
+	}
+}
+
+void SLayerTab::OnSelectActiveLayerIndex(const int32 InIndex)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetActiveLayerIndex(InIndex);
+		UE_LOG(LogTemp, Warning, TEXT("Selected Index %i"), InIndex);
 		RefreshTab();
 	}
 }
@@ -117,5 +130,4 @@ void SLayerTab::DrawTab()
 		]
 	];
 }
-
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION
