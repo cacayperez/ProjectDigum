@@ -3,16 +3,19 @@
 #include "SSingleObjectDetailsPanel.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Objects/DigumWorldEditorSwatch.h"
+#include "Tools/DigumWorldEditor_AddTool.h"
+#include "Tools/DigumWorldEditor_DeleteTool.h"
 #include "Widgets/Canvas/SCanvasTab.h"
 #include "Widgets/Layers/SLayerTab.h"
 #include "Widgets/Swatch/SSwatchTab.h"
+#include "Widgets/Tools/SToolTab.h"
 
 struct FDigumWorldEditorTabs
 {
 	// Tab identifiers
 	static const FName DetailsID;
 	static const FName CanvasViewportID;
-	// static const FName ActionsPaletteID;
+	static const FName ToolsID;
 	// static const FName ActionsSubMenuID;
 	static const FName SwatchesID;
 	static const FName LayersID;
@@ -21,7 +24,7 @@ struct FDigumWorldEditorTabs
 
 const FName FDigumWorldEditorTabs::DetailsID(TEXT("DigumGridMapLayoutEditor_Details"));
 const FName FDigumWorldEditorTabs::CanvasViewportID(TEXT("DigumGridMapLayoutEditor_CanvasViewport"));
-// const FName FDigumWorldEditorTabs::ActionsPaletteID(TEXT("DigumGridMapLayoutEditor_ActionsPalette"));
+const FName FDigumWorldEditorTabs::ToolsID(TEXT("DigumGridMapLayoutEditor_Tools"));
 // const FName FDigumWorldEditorTabs::ActionsSubMenuID(TEXT("DigumGridMapLayoutEditor_ActionsSubMenu"));
 const FName FDigumWorldEditorTabs::SwatchesID(TEXT("DigumGridMapLayoutEditor_Swatches"));
 const FName FDigumWorldEditorTabs::LayersID(TEXT("DigumGridMapLayoutEditor_Layers"));
@@ -63,6 +66,7 @@ void FDigumWorldEditorToolkit::OnLayerUpdated()
 	
 }
 
+
 TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs)
 {
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
@@ -80,7 +84,7 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Layers(const FSpawnTabAr
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
 	
 	return SNew(SDockTab)
-		.Label(NSLOCTEXT("DetailsTab_Title", "LayersTab", "Layers"))
+		.Label(NSLOCTEXT("LayersTab_Title", "LayersTab", "Layers"))
 		[
 			//SNew(SBorder)
 			SNew(SLayerTab, WorldEditorToolkit)
@@ -92,7 +96,7 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Swatches(const FSpawnTab
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
 	
 	return SNew(SDockTab)
-	.Label(NSLOCTEXT("DetailsTab_Title", "SwatchesTab", "Swatches"))
+	.Label(NSLOCTEXT("SwatchesTab_Title", "SwatchesTab", "Swatches"))
 	[
 		//SNew(SBorder)
 		SNew(SSwatchTab, WorldEditorToolkit)
@@ -103,10 +107,22 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_CanvasViewport(const FSp
 {
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
 	return SNew(SDockTab)
-	.Label(NSLOCTEXT("DetailsTab_Title", "CanvasTab", "Canvas"))
+	.Label(NSLOCTEXT("CanvasTab_Title", "CanvasTab", "Canvas"))
 	[
 		//SNew(SBorder)
 		SNew(SCanvasTab, WorldEditorToolkit)
+	];
+}
+
+
+TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Tools(const FSpawnTabArgs& SpawnTabArgs)
+{
+	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
+	return SNew(SDockTab)
+	.Label(NSLOCTEXT("ToolsTab_Title", "ToolsTab", "Tools"))
+	[
+		//SNew(SBorder)
+		SNew(SToolTab, WorldEditorToolkit)
 	];
 }
 
@@ -130,6 +146,10 @@ void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>
 	InTabManager->RegisterTabSpawner(FDigumWorldEditorTabs::CanvasViewportID, FOnSpawnTab::CreateSP(this, &FDigumWorldEditorToolkit::SpawnTab_CanvasViewport))
 	.SetDisplayName(NSLOCTEXT("DigumWorldEditor", "CanvasTab", "Canvas"))
 	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
+
+	InTabManager->RegisterTabSpawner(FDigumWorldEditorTabs::ToolsID, FOnSpawnTab::CreateSP(this, &FDigumWorldEditorToolkit::SpawnTab_Tools))
+	.SetDisplayName(NSLOCTEXT("DigumWorldEditor", "ToolsTab", "Tools"))
+	.SetGroup(WorkspaceMenuCategory.ToSharedRef());
 }
 
 void FDigumWorldEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -137,9 +157,27 @@ void FDigumWorldEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabManage
 	FAssetEditorToolkit::UnregisterTabSpawners(InTabManager);
 }
 
-void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode,
-	const TSharedPtr<IToolkitHost>& InInitToolkitHost)
+void FDigumWorldEditorToolkit::InitializeTools()
 {
+	Tools.Add(NewObject<UDigumWorldEditor_AddTool>());
+	Tools.Add(NewObject<UDigumWorldEditor_DeleteTool>());
+}
+
+UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActiveTool() const
+{
+	if(Tools.IsValidIndex(ActiveToolIndex))
+	{
+		return Tools[ActiveToolIndex];
+	}
+
+	return nullptr;
+}
+
+void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode,
+                                          const TSharedPtr<IToolkitHost>& InInitToolkitHost)
+{
+	
+	InitializeTools();
 	AssetBeingEdited = InWorldAssetBeingEdited;
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("Standalone_DigumWorldEditor_Layout_v1")
 	->AddArea
@@ -164,6 +202,7 @@ void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdi
 		true,
 		AssetBeingEdited
 		);
+
 }
 
 void FDigumWorldEditorToolkit::AddSwatchItem(UDigumWorldEditorSwatch* InSwatch)
@@ -222,10 +261,6 @@ void FDigumWorldEditorToolkit::UpdateLayer(const int32& InLayerIndex, const FDig
 	{
 		GetAssetBeingEdited()->UpdateLayer(InLayerIndex, InLayer);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HEllo I AM NULL"));
-	}
 }
 
 void FDigumWorldEditorToolkit::DeleteActiveLayer()
@@ -281,6 +316,29 @@ void FDigumWorldEditorToolkit::AddCoordinateToActiveLayer(const int32& InX, cons
 	AddCoordinate(ActiveLayerIndex, InX, InY);
 }
 
+void FDigumWorldEditorToolkit::CallToolAction(const int32& InLayerIndex, const int32& InX, const int32& InY)
+{
+	if(GetActiveTool())
+	{
+		FDigumWorldEditorToolParams Params;
+		Params.Asset = GetAssetBeingEdited();
+		Params.LayerIndex = InLayerIndex;
+		Params.SwatchINdex = ActiveSwatchIndex;
+		Params.X = InX;
+		Params.Y = InY;
+		GetActiveTool()->ActivateTool(Params);	
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Active Tool"));
+	}
+}
+
+void FDigumWorldEditorToolkit::CallToolAction(const int32& InX, const int32& InY)
+{
+	CallToolAction(ActiveLayerIndex, InX, InY);
+}
+
 void FDigumWorldEditorToolkit::SetLayerName(const int32& InLayerIndex, const FText& InLayerName)
 {
 	if(GetAssetBeingEdited() == nullptr) return;
@@ -309,4 +367,15 @@ void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, con
 		GEditor->EndTransaction();
 		
 	}
+}
+
+void FDigumWorldEditorToolkit::SetActiveTool(const int32& InToolIndex)
+{
+	ActiveToolIndex = InToolIndex;
+}
+
+TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetTools()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Hello %i"), Tools.Num());
+	return Tools;
 }

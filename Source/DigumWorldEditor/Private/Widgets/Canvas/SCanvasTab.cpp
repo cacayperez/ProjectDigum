@@ -27,7 +27,8 @@ void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 {
 	if(ToolkitPtr.IsValid())
 	{
-		ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
+		// ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
+		ToolkitPtr.Pin()->CallToolAction(InX, InY);
 		UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
 		RefreshTab();
 	}

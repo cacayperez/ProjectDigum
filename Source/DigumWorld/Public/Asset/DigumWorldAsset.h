@@ -85,6 +85,17 @@ public:
 		
 		Coordinates.Add(InCoordinate);
 	}
+	void RemoveCoordinate(const int32& InX, const int32& InY)
+	{
+		for(int32 i = 0; i < Coordinates.Num(); i++)
+		{
+			if(Coordinates[i].X == InX && Coordinates[i].Y == InY)
+			{
+				Coordinates.RemoveAt(i);
+				break;
+			}
+		}
+	}
 
 	FText GetLayerName() const { return LayerName; }
 	
