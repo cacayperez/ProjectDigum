@@ -138,6 +138,12 @@ void UDigumWorldAsset::SetLayerVisibility(const int32& InLayerIndex, const bool&
 	}
 }
 
+void UDigumWorldAsset::RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch)
+{
+	Swatches.Remove(Swatch);
+	OnDigumWorldAssetUpdated.Broadcast();
+}
+
 
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

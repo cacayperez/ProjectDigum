@@ -5,6 +5,7 @@
 #include "Objects/DigumWorldEditorSwatch.h"
 #include "Tools/DigumWorldEditor_AddTool.h"
 #include "Tools/DigumWorldEditor_DeleteTool.h"
+#include "Tools/DigumWorldEditor_RefreshTool.h"
 #include "Widgets/Canvas/SCanvasTab.h"
 #include "Widgets/Layers/SLayerTab.h"
 #include "Widgets/Swatch/SSwatchTab.h"
@@ -161,6 +162,7 @@ void FDigumWorldEditorToolkit::InitializeTools()
 {
 	Tools.Add(NewObject<UDigumWorldEditor_AddTool>());
 	Tools.Add(NewObject<UDigumWorldEditor_DeleteTool>());
+	Tools.Add(NewObject<UDigumWorldEditor_RefreshTool>());
 }
 
 UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActiveTool() const

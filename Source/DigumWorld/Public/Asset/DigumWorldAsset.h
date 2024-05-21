@@ -153,6 +153,7 @@ public:
 	void DeleteLayer(int32 InIndex);
 	void SetLayerName(const int32& InLayerIndex, FText& InLayerName);
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
+	void RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch);
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

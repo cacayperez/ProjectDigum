@@ -48,7 +48,6 @@ FReply SSwatchTab::OpenNewSwatchModal()
 	ModalWindowPtr->SetOnWindowClosed(FOnWindowClosed::CreateSP(this, &SSwatchTab::OnNewSwatchWindowClosed));
 	
 	bHasWindowActive = true;
-
 	
 	return FReply::Handled();
 }
