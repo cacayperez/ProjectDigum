@@ -70,7 +70,6 @@ void ADigumMinerCharacter::ActivateAction_Internal(const int32& InItemIndex)
 			
 			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Activated: %s"), *Item->ItemName.ToString());
 			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Action: %s"), *Item->ActionClass->GetName());
-
 		}
 	}
 }
@@ -102,7 +101,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 
 void ADigumMinerCharacter::OnActivateItemAction(const int32& InItemIndex)
 {
-	// Call function for predition
+	// Call function for prediction
 	ActivateAction_Internal(InItemIndex);
 	
 	// Call Server function

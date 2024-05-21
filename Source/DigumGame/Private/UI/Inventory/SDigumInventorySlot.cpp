@@ -27,18 +27,17 @@ void SDigumInventorySlot::OnConstruct()
 	{
 		if(InventorySlot->HasValidItem())
 		{
-			const UTexture2D* Texture = InventorySlot->GetItemTexture();
 			UMaterialInterface* Material = InventorySlot->GetDisplayMaterial();
 			const FText ItemName = InventorySlot->GetItemObject()->ItemName;
 
 			if(Material)
 			{
-				// FSlateImageBrush* Brush = new FSlateImageBrush(Texture, FVector2D(100.0f, 100.0f));
+				FSlateImageBrush* TextureBrush = new FSlateImageBrush(Material, FVector2D(100.0f, 100.0f));
 				FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(100.0f, 100.0f));
 				_Container->AddSlot()
 				[
 					SNew(SImage)
-					.Image(MaterialBrush)
+					.Image(TextureBrush)
 				];
 			}
 			else

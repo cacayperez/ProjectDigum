@@ -53,7 +53,6 @@ void UPlayerMinerUIComponent::BeginPlay()
 	if(OwningMiner.IsValid())
 	{
 		OwningController = OwningMiner->GetLocalViewingPlayerController();
-		
 	}
  
 	InitializeUI();
@@ -135,5 +134,5 @@ void UPlayerMinerUIComponent::InitializeCharacterMenuWidget()
 	CharacterMenuSlateWidget =
 	SNew(SDigumWindow)
 	.HeightOverride(400)
-	.WidthOverride(400) ;
+	.WidthOverride(400);
 }

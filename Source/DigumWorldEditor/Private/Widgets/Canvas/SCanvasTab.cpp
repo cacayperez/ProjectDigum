@@ -31,7 +31,6 @@ void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 		UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
 		RefreshTab();
 	}
-	
 }
 
 void SCanvasTab::DrawTab()
