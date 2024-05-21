@@ -9,8 +9,6 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
-
-
 void SSwatchItem::Construct(const FArguments& InArgs)
 {
 	AssetAttribute = InArgs._SwatchAsset;
@@ -36,22 +34,11 @@ void SSwatchItem::OnConstruct()
 	FSlateBorderBrush* SelectionBorderBrush = new FSlateBorderBrush(TEXT("Background"), FMargin(2.0f));
 	FSlateColor BorderSlateColor = FSlateColor(SelectionColor);
 	// Border
-
-	_Container->AddSlot()
-	[
-		SNew(SBox)
-		[
-			SNew(SBorder)
-			.BorderBackgroundColor(BorderSlateColor)
-			.BorderImage(SelectionBorderBrush)
-		]
-
-	];
 	
 	if(AssetAttribute.Get())
 	{
 		UMaterialInterface* Material = AssetAttribute.Get()->EditorMaterial;
-		FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(50, 50));
+		FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(40, 40));
 
 
 		_Container->AddSlot()
@@ -64,6 +51,16 @@ void SSwatchItem::OnConstruct()
 		];
 	}
 
+	_Container->AddSlot()
+	[
+		SNew(SBox)
+		[
+			SNew(SBorder)
+			.BorderBackgroundColor(BorderSlateColor)
+			.BorderImage(SelectionBorderBrush)
+		]
+
+	];
 }
 
 SSwatchItem::~SSwatchItem()
