@@ -84,7 +84,7 @@ void SCanvasView::OnConstruct()
 
 						if(SwatchAsset)
 						{
-							UMaterialInstance* Material = SwatchAsset->EditorMaterial;
+							UMaterialInstance* Material = SwatchAsset->GetEditorMaterial();
 							if(Material)
 							{
 								FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(SquareSize, SquareSize));

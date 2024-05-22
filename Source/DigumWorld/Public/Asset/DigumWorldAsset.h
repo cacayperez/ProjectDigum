@@ -97,6 +97,14 @@ public:
 		}
 	}
 
+	void RemoveCoordinate(const int32& InCoordinateIndex)
+	{
+		if(Coordinates.IsValidIndex(InCoordinateIndex))
+		{
+			Coordinates.RemoveAt(InCoordinateIndex);
+		}
+	}
+	
 	FText GetLayerName() const { return LayerName; }
 	
 	bool HasCoordinate(const int32& InX, const int32 InY) const
@@ -141,6 +149,7 @@ public:
 	TArray<FDigumWorldAssetLayer>& GetLayers() { return Layers; }
 	TArray<FDigumWorldSwatchPaletteItem>& GetSwatches() { return Swatches; }
 	TArray<FDigumWorldAssetCoordinate>& GetCoordinates(const int32& InLayerIndex);
+	int32 GetLayerCount() const { return Layers.Num();}
 	bool GetCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY, FDigumWorldAssetCoordinate*& Out);
 	FDigumWorldSwatchPaletteItem* GetSwatch(const int32& InIndex);
 	FDigumWorldSwatchPaletteItem* GetSwatch(const FName& Name);
@@ -153,6 +162,7 @@ public:
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 	void RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch);
 	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex);
+	
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

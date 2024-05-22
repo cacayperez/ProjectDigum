@@ -15,5 +15,16 @@ class DIGUMWORLD_API UDigumWorldSwatchAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere)
-	UMaterialInstance* EditorMaterial;
+	TSoftObjectPtr<UMaterialInstance> EditorMaterial;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UMaterialInstance> WorldMaterial;
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UStaticMesh> SwatchMesh;
+
+	UMaterialInstance* GetEditorMaterial() const;
+	UMaterialInstance* GetWorldMaterial() const;
+	UStaticMesh* GetSwatchMesh() const;
+
 };

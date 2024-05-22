@@ -6,8 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "DigumWorldActor.generated.h"
 
+class ADigumWorldActorChild;
+class UDigumWorldAsset;
 class UDigumWorld;
-class UDigumWorldLayerComponent;
+class UDigumWorldISMComponent;
 
 UCLASS()
 class DIGUMWORLD_API ADigumWorldActor : public AActor
@@ -16,13 +18,16 @@ class DIGUMWORLD_API ADigumWorldActor : public AActor
 
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
+
+	UPROPERTY()
+	TArray<TWeakObjectPtr<AActor>> WorldChildActors;
 	
-	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<UDigumWorldLayerComponent>> WorldLayers;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<UDigumWorld> WorldDefinitionClass;
-
+	
+#if WITH_EDITORONLY_DATA
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UDigumWorldAsset> WorldAsset;
+#endif
+	
 protected:
 	UPROPERTY()
 	TObjectPtr<UDigumWorld> WorldDefinition;
@@ -32,5 +37,13 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+#if WITH_EDITOR
+	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Update World Asset"))
+	void Editor_UpdateWorldAsset();
+
+	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Clean World Asset"))
+	void Editor_CleanActors();
+#endif
 
 };

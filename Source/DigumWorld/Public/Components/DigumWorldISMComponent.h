@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
-#include "DigumWorldLayerComponent.generated.h"
+#include "DigumWorldISMComponent.generated.h"
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class DIGUMWORLD_API UDigumWorldLayerComponent : public UInstancedStaticMeshComponent
+class DIGUMWORLD_API UDigumWorldISMComponent : public UInstancedStaticMeshComponent
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UDigumWorldLayerComponent();
+	UDigumWorldISMComponent();
 
 protected:
 	// Called when the game starts

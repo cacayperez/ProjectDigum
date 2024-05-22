@@ -9,7 +9,6 @@ void UDigumWorldEditor_RefreshTool::OnActivateTool(const FDigumWorldEditorToolPa
 {
 	Super::OnActivateTool(InParams);
 	
-	
 	UDigumWorldAsset* Asset = InParams.Asset;
 	const int32 ActiveLayerIndex = InParams.LayerIndex;
 	const int32 ActiveSwatchIndex = InParams.SwatchINdex;
@@ -20,6 +19,10 @@ void UDigumWorldEditor_RefreshTool::OnActivateTool(const FDigumWorldEditorToolPa
 		CleanUpSwatches(Asset);
 		CleanUpLayers(Asset);
 		CleanUpCoordinates(Asset);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Asset is null cl up>>>>>"));
 	}
 }
 
@@ -50,9 +53,30 @@ void UDigumWorldEditor_RefreshTool::CleanUpSwatches(UDigumWorldAsset* Asset)
 void UDigumWorldEditor_RefreshTool::CleanUpLayers(UDigumWorldAsset* Asset)
 {
 	// TODO
+	
 }
 
 void UDigumWorldEditor_RefreshTool::CleanUpCoordinates(UDigumWorldAsset* Asset)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Clean up>>>>>"));
 	// TODO
+	for(int32 i = 0; i < Asset->GetLayerCount(); i++)
+	{
+		FDigumWorldAssetLayer* Layer = Asset->GetLayer(i);
+		TArray<FDigumWorldAssetCoordinate> Coordinates = Asset->GetCoordinates(i);
+		for(int32 c = 0;  c < Coordinates.Num(); c++)
+		{
+			FDigumWorldAssetCoordinate* Coordinate = &Coordinates[c];
+			if(Coordinate != nullptr)
+			{
+				const FName SwatchName = Coordinate->SwatchName;
+				FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(SwatchName);
+				if(Swatch == nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Swatch is null"));
+					Layer->RemoveCoordinate(c);
+				}
+			}
+		}
+	}
 }

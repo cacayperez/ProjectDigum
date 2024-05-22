@@ -21,16 +21,19 @@ void SToolTab::DrawTab()
 	_Container->ClearChildren();
 
 	TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);
+	TSharedPtr<SVerticalBox> PaintToolsBox = SNew(SVerticalBox);
+	TSharedPtr<SVerticalBox> UtilityToolsBox = SNew(SVerticalBox);
 
-	TArray<UDigumWorldEditorTool*> Tools = ToolkitPtr.Pin()->GetTools();
+	TArray<UDigumWorldEditorTool*> PaintTools = ToolkitPtr.Pin()->GetPaintTools();
+	TArray<UDigumWorldEditorTool*> UtilityTools = ToolkitPtr.Pin()->GetUtilityTools();
 
-	for(int32 i = 0; i < Tools.Num(); i++)
+	for(int32 i = 0; i < PaintTools.Num(); i++)
 	{
-		UDigumWorldEditorTool* Tool = Tools[i];
-		bool bIsActive = ToolkitPtr.Pin()->GetActiveToolIndex() == i;
+		UDigumWorldEditorTool* Tool = PaintTools[i];
+		bool bIsActive = ToolkitPtr.Pin()->GetActivePaintToolIndex() == i;
 		Tool->SetActive(bIsActive);
 		
-		VerticalBox->AddSlot()
+		PaintToolsBox->AddSlot()
 		.AutoHeight()
 		[
 			Tool->CreateToolWidget().ToSharedRef()
@@ -42,6 +45,34 @@ void SToolTab::DrawTab()
 			RefreshTab();
 		});
 	}
+
+	for(int32 i = 0; i < UtilityTools.Num(); i++)
+	{
+		UDigumWorldEditorTool* Tool = UtilityTools[i];
+		
+		UtilityToolsBox->AddSlot()
+		.AutoHeight()
+		[
+			Tool->CreateToolWidget().ToSharedRef()
+		];
+
+		Tool->OnSelectToolDelegate.AddLambda([this, i]()
+		{
+			ToolkitPtr.Pin()->CallToolAction(i);
+			RefreshTab();
+		});
+	}
+
+	VerticalBox->AddSlot()
+	[
+		PaintToolsBox.ToSharedRef()
+	];
+
+	VerticalBox->AddSlot()
+	.AutoHeight()
+	[
+		UtilityToolsBox.ToSharedRef()
+	];
 	
 	_Container->AddSlot()
 	[

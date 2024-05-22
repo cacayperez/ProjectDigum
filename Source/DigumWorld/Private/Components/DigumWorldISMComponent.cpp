@@ -1,11 +1,11 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Components/DigumWorldLayerComponent.h"
+#include "Components/DigumWorldISMComponent.h"
 
 
 // Sets default values for this component's properties
-UDigumWorldLayerComponent::UDigumWorldLayerComponent()
+UDigumWorldISMComponent::UDigumWorldISMComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -16,7 +16,7 @@ UDigumWorldLayerComponent::UDigumWorldLayerComponent()
 
 
 // Called when the game starts
-void UDigumWorldLayerComponent::BeginPlay()
+void UDigumWorldISMComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -31,7 +31,7 @@ void UDigumWorldLayerComponent::BeginPlay()
 
 
 // Called every frame
-void UDigumWorldLayerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                               FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);

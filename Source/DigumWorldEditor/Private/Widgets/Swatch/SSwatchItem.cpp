@@ -37,7 +37,7 @@ void SSwatchItem::OnConstruct()
 	
 	if(AssetAttribute.Get())
 	{
-		UMaterialInterface* Material = AssetAttribute.Get()->EditorMaterial;
+		UMaterialInterface* Material = AssetAttribute.Get()->GetEditorMaterial();
 		FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(40, 40));
 
 

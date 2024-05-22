@@ -20,6 +20,7 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
 	void OnLayerUpdated();
 
+
 protected:
 	TSharedRef<SDockTab> SpawnTab_Tools(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs);
@@ -28,14 +29,15 @@ protected:
 	TSharedRef<SDockTab> SpawnTab_CanvasViewport(const FSpawnTabArgs& SpawnTabArgs);
 	
 	TObjectPtr<UDigumWorldAsset> AssetBeingEdited;
-	TArray<TObjectPtr<UDigumWorldEditorTool>> Tools;
+	TArray<TObjectPtr<UDigumWorldEditorTool>> PaintTools;
+	TArray<TObjectPtr<UDigumWorldEditorTool>> UtilityTools;
  
 	int32 ActiveLayerIndex = 0;
 	int32 ActiveSwatchIndex = 0;
-	int32 ActiveToolIndex = 0;
+	int32 ActivePaintToolIndex = 0;
 	
 	void InitializeTools();
-	UDigumWorldEditorTool* GetActiveTool() const;
+	UDigumWorldEditorTool* GetActivePaintTool() const;
 public:
 	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
@@ -55,11 +57,13 @@ public:
 	void AddCoordinateToActiveLayer(const int32& InX, const int32& InY);
 	void CallToolAction(const int32& InLayerIndex, const int32& InX, const int32& InY);
 	void CallToolAction(const int32& InX, const int32& InY);
+	void CallToolAction(const int32& InUtilityToolIndex);
 	void SetLayerName(const int32& InLayerIndex, const FText& InLayerName);
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInLayerVisibility);
 	void SetActiveTool(const int32& InToolIndex);
 
-	TArray<UDigumWorldEditorTool*> GetTools();
-	int32 GetActiveToolIndex() const { return ActiveToolIndex;};
+	TArray<UDigumWorldEditorTool*> GetPaintTools();
+	TArray<UDigumWorldEditorTool*> GetUtilityTools();
+	int32 GetActivePaintToolIndex() const { return ActivePaintToolIndex;};
 	void SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB);
 };

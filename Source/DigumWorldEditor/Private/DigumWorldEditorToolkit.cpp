@@ -129,7 +129,8 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Tools(const FSpawnTabArg
 
 FDigumWorldEditorToolkit::~FDigumWorldEditorToolkit()
 {
-	Tools.Empty();
+	PaintTools.Empty();
+	UtilityTools.Empty();
 }
 
 void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -165,16 +166,16 @@ void FDigumWorldEditorToolkit::UnregisterTabSpawners(const TSharedRef<FTabManage
 
 void FDigumWorldEditorToolkit::InitializeTools()
 {
-	Tools.Add(NewObject<UDigumWorldEditor_AddTool>());
-	Tools.Add(NewObject<UDigumWorldEditor_DeleteTool>());
-	Tools.Add(NewObject<UDigumWorldEditor_RefreshTool>());
+	PaintTools.Add(NewObject<UDigumWorldEditor_AddTool>());
+	PaintTools.Add(NewObject<UDigumWorldEditor_DeleteTool>());
+	UtilityTools.Add(NewObject<UDigumWorldEditor_RefreshTool>());
 }
 
-UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActiveTool() const
+UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
 {
-	if(Tools.IsValidIndex(ActiveToolIndex))
+	if(PaintTools.IsValidIndex(ActivePaintToolIndex))
 	{
-		return Tools[ActiveToolIndex];
+		return PaintTools[ActivePaintToolIndex];
 	}
 
 	return nullptr;
@@ -327,7 +328,7 @@ void FDigumWorldEditorToolkit::AddCoordinateToActiveLayer(const int32& InX, cons
 
 void FDigumWorldEditorToolkit::CallToolAction(const int32& InLayerIndex, const int32& InX, const int32& InY)
 {
-	if(GetActiveTool())
+	if(GetActivePaintTool())
 	{
 		FDigumWorldEditorToolParams Params;
 		Params.Asset = GetAssetBeingEdited();
@@ -335,7 +336,7 @@ void FDigumWorldEditorToolkit::CallToolAction(const int32& InLayerIndex, const i
 		Params.SwatchINdex = ActiveSwatchIndex;
 		Params.X = InX;
 		Params.Y = InY;
-		GetActiveTool()->ActivateTool(Params);	
+		GetActivePaintTool()->ActivateTool(Params);	
 	}
 	else
 	{
@@ -347,6 +348,18 @@ void FDigumWorldEditorToolkit::CallToolAction(const int32& InX, const int32& InY
 {
 	CallToolAction(ActiveLayerIndex, InX, InY);
 }
+
+void FDigumWorldEditorToolkit::CallToolAction(const int32& InUtilityToolIndex)
+{
+	if(UtilityTools.IsValidIndex(InUtilityToolIndex))
+	{
+		FDigumWorldEditorToolParams Params;
+		Params.Asset = GetAssetBeingEdited();
+
+		UtilityTools[InUtilityToolIndex]->ActivateTool(Params);
+	}
+}
+
 
 void FDigumWorldEditorToolkit::SetLayerName(const int32& InLayerIndex, const FText& InLayerName)
 {
@@ -374,13 +387,17 @@ void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, con
 
 void FDigumWorldEditorToolkit::SetActiveTool(const int32& InToolIndex)
 {
-	ActiveToolIndex = InToolIndex;
+	ActivePaintToolIndex = InToolIndex;
 }
 
-TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetTools()
+TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetPaintTools()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Hello %i"), Tools.Num());
-	return Tools;
+	return PaintTools;
+}
+
+TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetUtilityTools()
+{
+	return UtilityTools;
 }
 
 void FDigumWorldEditorToolkit::SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB)
