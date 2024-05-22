@@ -19,7 +19,8 @@ public:
 		{
 		}
 	SLATE_END_ARGS()
-	
+
+	virtual ~SSwatchTab() override;
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
 	virtual void OnConstruct() override;
 	void OnAddNewSwatch();	

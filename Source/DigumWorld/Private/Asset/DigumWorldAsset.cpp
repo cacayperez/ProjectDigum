@@ -144,6 +144,19 @@ void UDigumWorldAsset::RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch)
 	OnDigumWorldAssetUpdated.Broadcast();
 }
 
+void UDigumWorldAsset::SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex)
+{
+	if(InLayerIndexA == InLayerIndexB) return;
+	if(InLayerIndexA == INDEX_NONE || InLayerIndexB == INDEX_NONE) return;
+
+	const int32 LayerCount = Layers.Num();
+	const int32 StartIndex = InLayerIndexA;
+	const int32 EndIndex = FMath::Clamp<int32>(InLayerIndexB, 0, LayerCount - 1);
+
+	GetLayers().Swap(StartIndex, EndIndex);
+	OutEndIndex = EndIndex;
+}
+
 
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {

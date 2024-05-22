@@ -21,10 +21,11 @@ public:
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
 	
 protected:
-	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect, FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
-
+	float ZoomFactor = 1.0f;
+	    
 public:
 	void OnSelectCanvasCoordinate(const int32& InX, const int32& InY);
+	void OnSetZoomFactor(const float& InZoomValue);
 	virtual void DrawTab() override;
 	// void RenderGrid();
 };

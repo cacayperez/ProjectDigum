@@ -7,6 +7,13 @@
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
+SLayerItem::~SLayerItem()
+{
+	OnLayerUpdated.Clear();
+	OnSetLayerName.Clear();
+	OnSetLayerVisibility.Clear();
+}
+
 void SLayerItem::Construct(const FArguments& InArgs)
 {
 	LayerAttribute = InArgs._Layer;

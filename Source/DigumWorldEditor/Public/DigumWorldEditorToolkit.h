@@ -10,7 +10,8 @@ class UDigumWorldEditorSwatch;
 class FDigumWorldEditorToolkit : public FAssetEditorToolkit
 {
 public:
-
+	~FDigumWorldEditorToolkit();
+	
 	virtual void RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager) override;
 	virtual void UnregisterTabSpawners(const TSharedRef<FTabManager>& InTabManager) override;
 	virtual FName GetToolkitFName() const override { return FName("DigumWorldEditor"); }
@@ -60,4 +61,5 @@ public:
 
 	TArray<UDigumWorldEditorTool*> GetTools();
 	int32 GetActiveToolIndex() const { return ActiveToolIndex;};
+	void SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB);
 };

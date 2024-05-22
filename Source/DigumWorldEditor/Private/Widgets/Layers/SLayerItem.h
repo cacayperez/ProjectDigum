@@ -21,6 +21,8 @@ public:
 	SLATE_ATTRIBUTE(FDigumWorldAssetLayer*, Layer)
 	SLATE_END_ARGS()
 
+	virtual ~SLayerItem() override;
+
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct() override;

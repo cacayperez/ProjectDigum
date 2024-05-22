@@ -19,11 +19,12 @@ public:
 		{
 		}
 	SLATE_END_ARGS()
-	
+
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
 	void OnLayerUpdated();
 	void OnSetLayerName(const int32& InLayerIndex, const FText& Text);
 	void OnSetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
+	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB);
 
 protected:
 	TSharedPtr<SWidget> OnCreateLayerMenu();

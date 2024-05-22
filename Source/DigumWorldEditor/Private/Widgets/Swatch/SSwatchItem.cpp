@@ -63,10 +63,6 @@ void SSwatchItem::OnConstruct()
 	];
 }
 
-SSwatchItem::~SSwatchItem()
-{;
-}
-
 void SSwatchItem::OnSelectSwatch()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Swatch Selected"));

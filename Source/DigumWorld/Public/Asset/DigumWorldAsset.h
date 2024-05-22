@@ -114,8 +114,6 @@ public:
 	void SetLayerName(const FText& InText) { LayerName = InText; }
 };
 
-
-
 /**
  * 
  */
@@ -154,6 +152,7 @@ public:
 	void SetLayerName(const int32& InLayerIndex, FText& InLayerName);
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 	void RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch);
+	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex);
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

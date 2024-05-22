@@ -14,15 +14,6 @@ void SCanvasTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEdito
 {
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
-
-int32 SCanvasTab::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
-                          FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle,
-                          bool bParentEnabled) const
-{
-	return SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle,
-	                                bParentEnabled);
-}
-
 void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 {
 	if(ToolkitPtr.IsValid())
@@ -32,6 +23,12 @@ void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 		UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
 		RefreshTab();
 	}
+}
+
+void SCanvasTab::OnSetZoomFactor(const float& InZoomValue)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Zoom Factor: %f"), InZoomValue);
+	ZoomFactor = InZoomValue;
 }
 
 void SCanvasTab::DrawTab()
@@ -45,9 +42,11 @@ void SCanvasTab::DrawTab()
 		TSharedPtr<SCanvasView> CanvasView = SNew(SCanvasView)
 					.CanvasHeight(Asset->GetHeight())
 					.CanvasWidth(Asset->GetWidth())
-					.Asset(ToolkitPtr.Pin()->GetAssetBeingEdited());
+					.Asset(ToolkitPtr.Pin()->GetAssetBeingEdited())
+					.ZoomFactor(ZoomFactor);
 
 		CanvasView->OnSelectCanvasCoordinate.AddSP(this, &SCanvasTab::OnSelectCanvasCoordinate);
+		CanvasView->OnSetZoomFactor.AddSP(this, &SCanvasTab::OnSetZoomFactor);
 		
 		if(Asset)
 		{

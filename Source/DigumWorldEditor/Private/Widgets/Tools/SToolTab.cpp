@@ -38,7 +38,6 @@ void SToolTab::DrawTab()
 
 		Tool->OnSelectToolDelegate.AddLambda([this, i]()
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Tool %d selected"), i);
 			ToolkitPtr.Pin()->SetActiveTool(i);
 			RefreshTab();
 		});

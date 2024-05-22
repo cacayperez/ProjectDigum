@@ -39,34 +39,83 @@ void SLayerTab::OnSetLayerVisibility(const int32& InLayerIndex, const bool& bInV
 	}
 }
 
+void SLayerTab::SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SwapLayers(InLayerIndexA, InLayerIndexB);
+	}
+}
+
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 {
-	TSharedPtr<SHorizontalBox> Widget = SNew(SHorizontalBox);
-
-	Widget->AddSlot()
+	TSharedPtr<SHorizontalBox> a = SNew(SHorizontalBox);
+	TSharedPtr<SVerticalBox> VerticalContainer = SNew(SVerticalBox);
+	
+	VerticalContainer->AddSlot()
 	[
-		SNew(SButton)
-		.Text(FText::FromString("Add New Layer"))
-		.OnClicked_Lambda([&]()
-		{
-			AddNewLayer();
-			return FReply::Handled();
-		})
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Move Up"))
+			.OnClicked_Lambda([&]()
+			{
+				if(GetActiveLayerIndex() != INDEX_NONE)
+				{
+					const int32 IndexA = GetActiveLayerIndex();
+					const int32 IndexB = IndexA - 1;
+					SwapLayers(IndexA, IndexB);
+				}
+
+				return FReply::Handled();
+			})
+		]
+		+ SHorizontalBox::Slot()
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Move Down"))
+			.OnClicked_Lambda([&]()
+			{
+				if(GetActiveLayerIndex() != INDEX_NONE)
+				{
+					const int32 IndexA = GetActiveLayerIndex();
+					const int32 IndexB = IndexA + 1;
+					SwapLayers(IndexA, IndexB);
+				}
+
+				return FReply::Handled();
+			})
+		]
 	];
 
-	Widget->AddSlot()
+	VerticalContainer->AddSlot()
 	[
-		SNew(SButton)
-		.Text(FText::FromString("Delete Layer"))
-		.OnClicked_Lambda([&]()
-		{
-			DeleteSelectedLayer();
-			return FReply::Handled();
-		})
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Add New Layer"))
+			.OnClicked_Lambda([&]()
+			{
+				AddNewLayer();
+				return FReply::Handled();
+			})
+		]
+		+ SHorizontalBox::Slot()
+		[
+			SNew(SButton)
+			.Text(FText::FromString("Delete Layer"))
+			.OnClicked_Lambda([&]()
+			{
+				DeleteSelectedLayer();
+				return FReply::Handled();
+			})
+		]
+
 	];
 	
-	
-	return Widget;
+	return VerticalContainer;
 }
 
 void SLayerTab::OnLayerNameCommitted(const FText& Text, ETextCommit::Type Arg, int InIndex)
@@ -91,12 +140,15 @@ int32 SLayerTab::GetActiveLayerIndex() const
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 {
 	TSharedPtr<SVerticalBox> VerticalContainer = SNew(SVerticalBox);
+	TArray<TSharedPtr<SLayerItem>> LayerItems;
+	
 	if(GetAsset() != nullptr)
 	{
 		TArray<FDigumWorldAssetLayer> Layers = GetAsset()->GetLayers();
+		// for(int32 i = FirstIndex; i >= LastIndex; i--)
 		for(int32 i = 0; i < Layers.Num(); i++)
 		{
-			const int32 LayerIndex = i;
+			// const int32 LayerIndex = i;
 
 			const bool bIsActive = (i == GetActiveLayerIndex());
 			FDigumWorldAssetLayer* Layer = ToolkitPtr.Pin()->GetAssetBeingEdited()->GetLayer(i);
@@ -120,15 +172,25 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 			{
 				OnSetLayerVisibility(i, bInVisibility);
 			});
-			
+
+			LayerItems.Add(LayerItem);
+		}
+		
+		int32 FirstIndex = Layers.Num() - 1;
+		int32 LastIndex = 0;
+		
+		// Display in reverse Order
+		for(int32 i = FirstIndex; i >= LastIndex; i--)
+		{
 			VerticalContainer->AddSlot()
 			.AutoHeight()
 			[
-				LayerItem.ToSharedRef()
+				LayerItems[i].ToSharedRef()
 			];
 		}
 	}
 
+	
 	return SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
 	[

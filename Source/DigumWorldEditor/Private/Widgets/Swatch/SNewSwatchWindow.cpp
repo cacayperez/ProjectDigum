@@ -8,6 +8,7 @@
 #include "SSingleObjectDetailsPanel.h"
 #include "DigumWorldEditorToolkit.h"
 #include "Objects/DigumWorldEditorSwatch.h"
+#include "Widgets/Base/SWidgetBase.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -44,6 +45,11 @@ public:
 		];
 	}
 };
+
+SNewSwatchWindow::~SNewSwatchWindow()
+{
+	ToolkitPtr.Reset();
+}
 
 FReply SNewSwatchWindow::OnAddClicked()
 {

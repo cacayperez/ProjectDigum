@@ -12,6 +12,12 @@
 #include "Objects/DigumWorldEditorSwatch.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
+
+SSwatchTab::~SSwatchTab()
+{
+	ModalWindowPtr.Reset();
+}
+
 void SSwatchTab::Construct(const FArguments& InArgs,  TSharedPtr<FDigumWorldEditorToolkit>& InToolkit)
 {
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);

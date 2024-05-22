@@ -20,7 +20,6 @@ public:
 	SLATE_ATTRIBUTE(UDigumWorldSwatchAsset*, SwatchAsset);
 	SLATE_END_ARGS()
 
-	~SSwatchItem();
 	void OnSelectSwatch();
 	void OnDeselectSwatch();
 	/** Constructs this widget with InArgs */

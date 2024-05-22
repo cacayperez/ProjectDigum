@@ -127,6 +127,11 @@ TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Tools(const FSpawnTabArg
 	];
 }
 
+FDigumWorldEditorToolkit::~FDigumWorldEditorToolkit()
+{
+	Tools.Empty();
+}
+
 void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
 {
 	WorkspaceMenuCategory = InTabManager->AddLocalWorkspaceMenuCategory(NSLOCTEXT("DigumWorldEditor", "WorkspaceMenu_DigumWorldEditor", "2D Grid Map Layout Editor"));
@@ -178,7 +183,6 @@ UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActiveTool() const
 void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode,
                                           const TSharedPtr<IToolkitHost>& InInitToolkitHost)
 {
-	
 	InitializeTools();
 	AssetBeingEdited = InWorldAssetBeingEdited;
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("Standalone_DigumWorldEditor_Layout_v1")
@@ -251,13 +255,11 @@ void FDigumWorldEditorToolkit::DeleteLayer(const int32& InIndex)
 		GEditor->EndTransaction();
 
 		ActiveLayerIndex = TempIndex;
-		
 	}
 }
 
 void FDigumWorldEditorToolkit::UpdateLayer(const int32& InLayerIndex, const FDigumWorldAssetLayer& InLayer)
 {
-	
 	FDigumWorldAssetLayer* Layer = GetAssetBeingEdited()->GetLayer(InLayerIndex);
 	if(GEditor && GetAssetBeingEdited())
 	{
@@ -272,7 +274,12 @@ void FDigumWorldEditorToolkit::DeleteActiveLayer()
 
 void FDigumWorldEditorToolkit::SetActiveLayerIndex(const int32 InLayerIndex)
 {
-	ActiveLayerIndex = InLayerIndex;
+	if(InLayerIndex >= 0 && InLayerIndex < GetAssetBeingEdited()->GetLayers().Num())
+	{
+		ActiveLayerIndex = InLayerIndex;
+		return;
+	}
+	ActiveLayerIndex = 0;
 }
 
 void FDigumWorldEditorToolkit::SetActiveSwatchIndex(const int32 InSwatchIndex)
@@ -343,9 +350,7 @@ void FDigumWorldEditorToolkit::CallToolAction(const int32& InX, const int32& InY
 
 void FDigumWorldEditorToolkit::SetLayerName(const int32& InLayerIndex, const FText& InLayerName)
 {
-	if(GetAssetBeingEdited() == nullptr) return;
-
-	if(GEditor)
+	if(GEditor && GetAssetBeingEdited())
 	{
 		FText Name = InLayerName;
 		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: SetLayerName"));
@@ -353,15 +358,11 @@ void FDigumWorldEditorToolkit::SetLayerName(const int32& InLayerIndex, const FTe
 		GetAssetBeingEdited()->SetLayerName(InLayerIndex, Name);
 		GEditor->EndTransaction();
 	}
-
-	
 }
 
 void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, const bool& bInLayerVisibility)
 {
-	if(GetAssetBeingEdited() == nullptr) return;
-
-	if(GEditor)
+	if(GEditor && GetAssetBeingEdited())
 	{
 		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: SetLayerVisibility"));
 		GetAssetBeingEdited()->Modify();
@@ -380,4 +381,19 @@ TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetTools()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Hello %i"), Tools.Num());
 	return Tools;
+}
+
+void FDigumWorldEditorToolkit::SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB)
+{
+	if(GEditor && GetAssetBeingEdited())
+	{
+		int32 OutEndIndex;
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: MoveLayer"));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->SwapLayers(InLayerIndexA, InLayerIndexB, OutEndIndex);
+
+		// TODO - Figure out how to revert active layer index on undo.
+		SetActiveLayerIndex(OutEndIndex);
+		GEditor->EndTransaction();
+	}
 }

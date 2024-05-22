@@ -20,6 +20,8 @@ public:
 	SLATE_ATTRIBUTE(UDigumWorldEditorSwatch*, Swatch)
 	SLATE_END_ARGS()
 
+	virtual ~SNewSwatchWindow() override;
+
 	FReply OnAddClicked();
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkitPtr);

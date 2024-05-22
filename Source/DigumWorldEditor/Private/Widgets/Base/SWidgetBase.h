@@ -17,7 +17,7 @@ public:
 
 	SLATE_END_ARGS()
 
-	~SWidgetBase();
+	virtual ~SWidgetBase() override;
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct();
