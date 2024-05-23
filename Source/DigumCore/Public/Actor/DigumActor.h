@@ -6,6 +6,14 @@
 #include "GameFramework/Actor.h"
 #include "DigumActor.generated.h"
 
+UENUM(BlueprintType)
+enum EDigumActorType : uint8
+{
+	DA_None,
+	DA_WorldStatic,
+	DA_WorldDynamic,
+};
+
 UCLASS()
 class DIGUMCORE_API ADigumActor : public AActor
 {
@@ -13,13 +21,11 @@ class DIGUMCORE_API ADigumActor : public AActor
 
 public:
 	// Sets default values for this actor's properties
-	ADigumActor();
+	ADigumActor(const FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY()
+	TEnumAsByte<EDigumActorType> ActorType;
+	
+	virtual void SetActorType(EDigumActorType InActorType);
 };

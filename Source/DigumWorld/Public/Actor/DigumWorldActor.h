@@ -3,16 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/DigumActor.h"
 #include "GameFramework/Actor.h"
 #include "DigumWorldActor.generated.h"
 
 class ADigumWorldActorChild;
 class UDigumWorldAsset;
-class UDigumWorld;
 class UDigumWorldISMComponent;
 
 UCLASS()
-class DIGUMWORLD_API ADigumWorldActor : public AActor
+class DIGUMWORLD_API ADigumWorldActor : public ADigumActor
 {
 	GENERATED_BODY()
 
@@ -20,20 +20,16 @@ class DIGUMWORLD_API ADigumWorldActor : public AActor
 	TObjectPtr<USceneComponent> Root;
 
 	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> WorldChildActors;
-	
-	
+	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;
+
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDigumWorldAsset> WorldAsset;
 #endif
 	
-protected:
-	UPROPERTY()
-	TObjectPtr<UDigumWorld> WorldDefinition;
 public:
 	// Sets default values for this actor's properties
-	ADigumWorldActor();
+	ADigumWorldActor(const FObjectInitializer& ObjectInitializer);
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;

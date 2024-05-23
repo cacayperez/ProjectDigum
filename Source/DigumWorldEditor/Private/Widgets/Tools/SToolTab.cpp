@@ -14,10 +14,8 @@ void SToolTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorT
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
 
-
 void SToolTab::DrawTab()
 {
-
 	_Container->ClearChildren();
 
 	TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);

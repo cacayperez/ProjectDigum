@@ -6,12 +6,10 @@ public class DigumWorld : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicDependencyModuleNames.AddRange(
-            new string[]
-            {
-                "Core", "DigumCore",
-            }
-        );
+        PublicDependencyModuleNames.AddRange(new string[] { "Core", "DigumCore" });
+        
+        // Utilities and Tools
+        PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" });
 
         PrivateDependencyModuleNames.AddRange(
             new string[]

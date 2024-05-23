@@ -3,9 +3,19 @@
 
 #include "Asset/DigumWorldAsset.h"
 
-TArray<FDigumWorldAssetCoordinate>& FDigumWorldAssetLayer::GetAllCoordinates()
+TArray<FDigumWorldAssetCoordinate>& FDigumWorldAssetCoordinateArray::GetAllCoordinates()
 {
 	return Coordinates;
+}
+
+FDigumWorldAssetCoordinate* FDigumWorldAssetCoordinateArray::GetAt(int32 InArrayIndex)
+{
+	return Coordinates.IsValidIndex(InArrayIndex) ? &Coordinates[InArrayIndex] : nullptr;
+}
+
+TArray<FDigumWorldAssetCoordinate>& FDigumWorldAssetLayer::GetAllCoordinates()
+{
+	return CoordinateArray.GetAllCoordinates();
 }
 
 void UDigumWorldAsset::AddSwatchPaletteItem(FDigumWorldSwatchPaletteItem InSwatch)

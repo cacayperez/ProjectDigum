@@ -23,6 +23,7 @@ class DIGUMINVENTORY_API IDigumPickupInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual void OnPickup(AActor* InPickupInstigator) = 0;
+	// virtual void Pickup(AActor* InPickupInstigator) = 0;
 	/*virtual int32 GetAmount() const = 0;
 	virtual FName GetItemID() const = 0;
 	virtual FName GetItemSuffix() const = 0;

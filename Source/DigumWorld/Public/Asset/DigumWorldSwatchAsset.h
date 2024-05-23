@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "DigumWorldSwatchAsset.generated.h"
 
+class ADigumWorldActorChild;
 /**
  * 
  */
@@ -23,7 +24,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UStaticMesh> SwatchMesh;
 
+	UPROPERTY(EditAnywhere)
+	TSoftClassPtr<ADigumWorldActorChild> ChildActorClass;
+
 	UMaterialInstance* GetEditorMaterial() const;
+	TSubclassOf<ADigumWorldActorChild> GetChildActorClass() const;
 	UMaterialInstance* GetWorldMaterial() const;
 	UStaticMesh* GetSwatchMesh() const;
 

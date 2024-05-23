@@ -2,12 +2,17 @@
 
 
 #include "Asset/DigumWorldSwatchAsset.h"
-
+#include "Actor/DigumWorldActorChild.h"
 #include "Asset/DigumAssetManager.h"
 
 UMaterialInstance* UDigumWorldSwatchAsset::GetEditorMaterial() const
 {
 	return UDigumAssetManager::GetAsset<UMaterialInstance>(EditorMaterial);
+}
+
+TSubclassOf<ADigumWorldActorChild> UDigumWorldSwatchAsset::GetChildActorClass() const
+{
+	return UDigumAssetManager::GetSubclass<ADigumWorldActorChild>(ChildActorClass);
 }
 
 UMaterialInstance* UDigumWorldSwatchAsset::GetWorldMaterial() const

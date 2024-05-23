@@ -2,19 +2,20 @@
 
 
 #include "Actor/DigumWorldActor.h"
-
 #include "Actor/DigumWorldActorChild.h"
+#include "Asset/DigumAssetManager.h"
+#include "Asset/DigumWorldSwatchAsset.h"
 #include "Asset/DigumWorldAsset.h"
 
-// Sets default values
-ADigumWorldActor::ADigumWorldActor()
+
+ADigumWorldActor::ADigumWorldActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-	
 }
 
 void ADigumWorldActor::BeginPlay()
@@ -42,7 +43,7 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 	for(int32 i = 0; i < WorldAsset->GetLayers().Num(); i++)
 	{
 		TArray<FDigumWorldAssetCoordinate> Coordinates = WorldAsset->GetCoordinates(i);
-		TMap<FName, TArray<FDigumWorldAssetCoordinate>> Group;
+		TMap<FName, FDigumWorldAssetCoordinateArray> Group;
 		for(int32 c = 0; c < Coordinates.Num(); c++)
 		{
 			FName SwatchName = Coordinates[c].SwatchName;
@@ -50,31 +51,40 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 			UE_LOG(LogTemp, Warning, TEXT("SwatchName: %s"), *SwatchName.ToString());
 			if(Group.Contains(SwatchName))
 			{
-				TArray<FDigumWorldAssetCoordinate>& GroupCoordinates = Group[SwatchName];
-				GroupCoordinates.Add(Coordinate);
+				FDigumWorldAssetCoordinateArray& GroupCoordinates = Group[SwatchName];
+				GroupCoordinates.AddCoordinate(Coordinate);
 			}
 			else
 			{
-				TArray<FDigumWorldAssetCoordinate> GroupCoordinates;
-				GroupCoordinates.Add(Coordinate);
+				FDigumWorldAssetCoordinateArray GroupCoordinates;
+				GroupCoordinates.AddCoordinate(Coordinate);
 				Group.Add(SwatchName, GroupCoordinates);
 			}
 		}
 		for (auto It = Group.CreateConstIterator(); It; ++It)
 		{
 			FName Key = It.Key();
-			TArray<FDigumWorldAssetCoordinate> Value = It.Value();
+			FDigumWorldAssetCoordinateArray Value = It.Value();
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
-
 			
-			AActor* NewActor = GetWorld()->SpawnActor<AActor>(ADigumWorldActorChild::StaticClass(), FTransform::Identity, SpawnParams);
-			if(NewActor)
+			UDigumWorldSwatchAsset* Swatch = UDigumAssetManager::GetAsset<UDigumWorldSwatchAsset>(WorldAsset->GetSwatch(Key)->SoftSwatchAsset);
+
+			if(Swatch)
 			{
-				NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-				NewActor->SetFolderPath(GetFolderPath());
-				WorldChildActors.Add(NewActor);
+				if(TSubclassOf<ADigumWorldActorChild> ChildClass = Swatch->GetChildActorClass())
+				{
+					if(ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity))
+					{
+						NewActor->InitializeSwatchAsset(Swatch, Value);
+						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+						NewActor->SetFolderPath(GetFolderPath());
+						NewActor->FinishSpawning(FTransform::Identity);
+						WorldChildActors.Add(NewActor);
+					}
+				}
 			}
+			
 		}
 	
 	}

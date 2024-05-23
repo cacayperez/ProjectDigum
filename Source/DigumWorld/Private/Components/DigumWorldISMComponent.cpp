@@ -20,13 +20,6 @@ void UDigumWorldISMComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ... test
-	for(int32 i = 0; i < 10; i++)
-	{
-		FTransform Transform;
-		Transform.SetLocation(FVector(i * 100, 0, 0));
-		AddInstance(Transform);
-	}
 }
 
 

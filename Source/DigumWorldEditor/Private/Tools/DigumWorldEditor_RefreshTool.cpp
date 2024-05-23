@@ -58,8 +58,9 @@ void UDigumWorldEditor_RefreshTool::CleanUpLayers(UDigumWorldAsset* Asset)
 
 void UDigumWorldEditor_RefreshTool::CleanUpCoordinates(UDigumWorldAsset* Asset)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Clean up>>>>>"));
-	// TODO
+	const int32 Width = Asset->GetWidth();
+	const int32 Height = Asset->GetHeight();
+	
 	for(int32 i = 0; i < Asset->GetLayerCount(); i++)
 	{
 		FDigumWorldAssetLayer* Layer = Asset->GetLayer(i);
@@ -69,13 +70,23 @@ void UDigumWorldEditor_RefreshTool::CleanUpCoordinates(UDigumWorldAsset* Asset)
 			FDigumWorldAssetCoordinate* Coordinate = &Coordinates[c];
 			if(Coordinate != nullptr)
 			{
+				if(Coordinate->X < 0 || Coordinate->X >= Width || Coordinate->Y < 0 || Coordinate->Y >= Height)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Coordinate is out of bounds"));
+					Layer->RemoveCoordinate(c);
+					continue;
+				}
+				
 				const FName SwatchName = Coordinate->SwatchName;
 				FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(SwatchName);
 				if(Swatch == nullptr)
 				{
 					UE_LOG(LogTemp, Warning, TEXT("Swatch is null"));
 					Layer->RemoveCoordinate(c);
+					continue;
 				}
+
+
 			}
 		}
 	}

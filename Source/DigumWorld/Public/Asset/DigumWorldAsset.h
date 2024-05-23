@@ -38,46 +38,21 @@ public:
 		return InCoordinate.X == X && InCoordinate.Y == Y;
 	}
 };
-
+/**
+ * Wrapper for TArray<FDigumWorldAssetCoordinate> to allow for custom logic
+ */
 USTRUCT()
-struct FDigumWorldSwatchPaletteItem
+struct FDigumWorldAssetCoordinateArray
 {
 	GENERATED_BODY()
+	
 public:
-	UPROPERTY(EditAnywhere)
-	FName SwatchName;
-	
-	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UDigumWorldSwatchAsset> SoftSwatchAsset;
-
-	bool operator==(const FDigumWorldSwatchPaletteItem& InSwatchPallette) const
-	{
-		return InSwatchPallette.SwatchName == SwatchName;
-	}
-};
-
-USTRUCT()
-struct FDigumWorldAssetLayer
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere)
-	FText LayerName;
-	
 	UPROPERTY(EditAnywhere)
 	TArray<FDigumWorldAssetCoordinate> Coordinates;
 
-	UPROPERTY()
-	bool bIsVisible = true;
-	
-public:
 	TArray<FDigumWorldAssetCoordinate>& GetAllCoordinates();
 	void AddCoordinate(FDigumWorldAssetCoordinate InCoordinate)
 	{
-		if(bIsVisible == false)
-		{
-			return;
-		}
 		if(HasCoordinate(InCoordinate.X, InCoordinate.Y))
 		{
 			return;
@@ -104,9 +79,7 @@ public:
 			Coordinates.RemoveAt(InCoordinateIndex);
 		}
 	}
-	
-	FText GetLayerName() const { return LayerName; }
-	
+
 	bool HasCoordinate(const int32& InX, const int32 InY) const
 	{
 		const FDigumWorldAssetCoordinate* Coordinate =  Coordinates.FindByPredicate([&InX, &InY](const FDigumWorldAssetCoordinate& Coordinate)
@@ -115,6 +88,94 @@ public:
 		});
 
 		return Coordinate != nullptr;
+	}
+	
+	bool HasTopNeighbor(const int32& InX, const int32& InY) const
+	{
+		return HasCoordinate(InX, InY + 1);
+	}
+
+	bool HasBottomNeighbor(const int32& InX, const int32& InY) const
+	{
+		return HasCoordinate(InX, InY - 1);
+	}
+
+	bool HasLeftNeighbor(const int32& InX, const int32& InY) const
+	{
+		return HasCoordinate(InX - 1, InY);
+	}
+
+	bool HasRightNeighbor(const int32& InX, const int32& InY) const
+	{
+		return HasCoordinate(InX + 1, InY);
+	}
+
+	int32 CoordinateCount() const { return Coordinates.Num(); }
+	FDigumWorldAssetCoordinate* GetAt(int32 InArrayIndex);
+};
+
+
+USTRUCT()
+struct FDigumWorldSwatchPaletteItem
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+	FName SwatchName;
+	
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UDigumWorldSwatchAsset> SoftSwatchAsset;
+
+	bool operator==(const FDigumWorldSwatchPaletteItem& InSwatchPallette) const
+	{
+		return InSwatchPallette.SwatchName == SwatchName;
+	}
+};
+
+USTRUCT()
+struct FDigumWorldAssetLayer
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	FText LayerName;
+	
+	/*UPROPERTY(EditAnywhere)
+	TArray<FDigumWorldAssetCoordinate> Coordinates;*/
+
+	UPROPERTY(EditAnywhere)
+	FDigumWorldAssetCoordinateArray CoordinateArray;
+
+	UPROPERTY()
+	bool bIsVisible = true;
+	
+public:
+	TArray<FDigumWorldAssetCoordinate>& GetAllCoordinates();
+	void AddCoordinate(FDigumWorldAssetCoordinate InCoordinate)
+	{
+		if(bIsVisible == false)
+		{
+			return;
+		}
+
+		
+		CoordinateArray.AddCoordinate(InCoordinate);
+	}
+	void RemoveCoordinate(const int32& InX, const int32& InY)
+	{
+		CoordinateArray.RemoveCoordinate(InX, InY);
+	}
+
+	void RemoveCoordinate(const int32& InCoordinateIndex)
+	{
+		CoordinateArray.RemoveCoordinate(InCoordinateIndex);
+	}
+	
+	FText GetLayerName() const { return LayerName; }
+	
+	bool HasCoordinate(const int32& InX, const int32 InY) const
+	{
+		return CoordinateArray.HasCoordinate(InX, InY);
 	}
 
 	bool IsVisible() const { return bIsVisible; }

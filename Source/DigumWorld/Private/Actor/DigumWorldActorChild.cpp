@@ -3,24 +3,57 @@
 
 #include "Actor/DigumWorldActorChild.h"
 
+#include "Asset/DigumAssetManager.h"
+#include "Asset/DigumWorldAsset.h"
+#include "Asset/DigumWorldSwatchAsset.h"
+#include "Components/DigumWorldISMComponent.h"
+#include "Settings/DigumWorldSettings.h"
 
-// Sets default values
-ADigumWorldActorChild::ADigumWorldActorChild()
+ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
+	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 }
 
-// Called when the game starts or when spawned
-void ADigumWorldActorChild::BeginPlay()
+void ADigumWorldActorChild::OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
+	FDigumWorldAssetCoordinateArray Coordinates)
 {
-	Super::BeginPlay();
-	
 }
 
-// Called every frame
-void ADigumWorldActorChild::Tick(float DeltaTime)
+void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
+                                               FDigumWorldAssetCoordinateArray Coordinates)
 {
-	Super::Tick(DeltaTime);
+	SwatchAsset = InSwatchAsset;
+	if(SwatchAsset)
+	{
+		InstancedMeshComponent->ClearInstances();
+		int32 GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+		UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh);
+		if(Mesh)
+		{
+			InstancedMeshComponent->SetStaticMesh(Mesh);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Mesh is nullll"));
+		}
+		const float HalfGrid = GridSize * 0.5f;
+		
+		for(int32 i = 0; i < Coordinates.CoordinateCount(); i++)
+		{
+			FDigumWorldAssetCoordinate* Coordinate = Coordinates.GetAt(i);
+			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
+			const float X = Coordinate->X * HalfGrid;
+			const float Y = 0.0f;
+			const float Z = -Coordinate->Y * HalfGrid;
+			FVector Location = FVector(X, Y, Z);
+			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
+			InstancedMeshComponent->AddInstance(Transform);
+		}
+
+		OnFinishedInitializeSwatchAsset(SwatchAsset, Coordinates);
+	}
 }
+
 
