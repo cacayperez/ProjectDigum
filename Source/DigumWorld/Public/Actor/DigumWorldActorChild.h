@@ -29,7 +29,8 @@ public:
 protected:
 	virtual void OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
 
+	bool GetInstancedHitIndex(const FVector HitLocation, int32& OutIndex);
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
-	
+	void OnCollide(AActor* InInstigator, const FVector& InLocation);
 };

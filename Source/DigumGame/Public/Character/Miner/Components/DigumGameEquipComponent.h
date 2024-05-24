@@ -9,16 +9,21 @@
 
 class ADigumItemActor;
 
+UENUM()
+enum EDigumGame_EquipSlot : uint8
+{
+	DigumEquipSlot_Default,
+	DigumEquipSlot_MainHand,
+	DigumEquipSlot_OffHand,
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMGAME_API UDigumGameEquipComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
-	TSubclassOf<ADigumItemActor> EquippedItemActorClass;
-
-	UPROPERTY()
-	TObjectPtr<ADigumItemActor> EquippedItemActor = nullptr;
+	TMap<TEnumAsByte<EDigumGame_EquipSlot>, TObjectPtr<ADigumItemActor>> EquippedItems;
 	
 public:
 	// Sets default values for this component's properties
@@ -33,5 +38,13 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 
-	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass);
+private:
+	void SetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot, ADigumItemActor* ItemActor);
+	
+public:
+	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+	// ADigumItemActor*& GetEquippedItemActor() const { return EquippedItemActor; }
+	
+	ADigumItemActor* GetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot);
+	void ClearEquippedItem(const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
 };

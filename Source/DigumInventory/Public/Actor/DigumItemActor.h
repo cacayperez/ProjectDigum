@@ -16,15 +16,12 @@ class DIGUMINVENTORY_API ADigumItemActor : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Item", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Item", meta = (AllowPrivateAccess = "true", MakeEditWidget = "true"))
-	FVector AttachPoint;
+;
 	
 public:
 	// Sets default values for this actor's properties
 	ADigumItemActor(const FObjectInitializer& ObjectInitializer);
-
+	~ADigumItemActor();
+	
 	FORCEINLINE UStaticMeshComponent* GetMesh() const { return Mesh; }
-
-	void SetAttachPoint(const FVector& InAttachPoint) { AttachPoint = InAttachPoint; }
 };

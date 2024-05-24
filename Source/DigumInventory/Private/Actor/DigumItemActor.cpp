@@ -14,3 +14,8 @@ ADigumItemActor::ADigumItemActor(const FObjectInitializer& ObjectInitializer)
 	
 	PrimaryActorTick.bCanEverTick = false;
 }
+
+ADigumItemActor::~ADigumItemActor()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ADigumItemActor::~ADigumItemActor"));
+}

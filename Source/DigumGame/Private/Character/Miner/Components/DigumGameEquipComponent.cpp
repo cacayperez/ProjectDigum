@@ -38,23 +38,54 @@ void UDigumGameEquipComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	// ...
 }
 
-void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass)
+ADigumItemActor* UDigumGameEquipComponent::GetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot)
 {
-	if(EquippedItemActor)
+	if(EquippedItems.Contains(EquipSlot))
 	{
-		EquippedItemActor->Destroy();
-		EquippedItemActor = nullptr;
+		return EquippedItems[EquipSlot];
+	}
+	return nullptr;
+}
+
+void UDigumGameEquipComponent::SetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot, ADigumItemActor* ItemActor)
+{
+	UE_LOG(LogTemp, Warning, TEXT("SetEquippedItemActor"));
+	EquippedItems.Add(EquipSlot, ItemActor);
+}
+
+void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass,
+                                         const EDigumGame_EquipSlot EquipSlot)
+{
+	const ACharacter* Character = Cast<ACharacter>(GetOwner());
+
+	if(Character == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Character is nullptr"));
+		return;
 	}
 	
-	ACharacter* Character = Cast<ACharacter>(GetOwner());
+	ClearEquippedItem(EquipSlot);
+	
 	if(Character && ItemActorClass)
 	{
 		USkeletalMeshComponent* Mesh = Character->GetMesh();
-		EquippedItemActor = GetWorld()->SpawnActor<ADigumItemActor>(ItemActorClass, Character->GetActorLocation(), Character->GetActorRotation());
-		if(EquippedItemActor)
+		
+		ADigumItemActor* ItemActor = GetWorld()->SpawnActor<ADigumItemActor>(ItemActorClass, Character->GetActorLocation(), Character->GetActorRotation());
+		if(ItemActor && Mesh)
 		{
-			EquippedItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));
+			ItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));
+			SetEquippedItemActor(EquipSlot, ItemActor);
 		}
+	}
+}
+
+void UDigumGameEquipComponent::ClearEquippedItem(const EDigumGame_EquipSlot EquipSlot)
+{
+	if(ADigumItemActor* EquippedItem = GetEquippedItemActor(EquipSlot))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ClearEquippedItem"));
+		EquippedItem->Destroy();
+		EquippedItems.FindAndRemoveChecked(EquipSlot);
 	}
 }
 

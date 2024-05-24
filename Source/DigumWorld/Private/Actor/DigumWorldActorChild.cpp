@@ -21,8 +21,39 @@ void ADigumWorldActorChild::OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAss
 {
 }
 
+bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, int32& OutIndex)
+{
+	int32 ClosestInstanceIndex = -1;
+	float MinDistanceSquared = 1000;
+
+	for(int32 i = 0; i < InstancedMeshComponent->GetInstanceCount(); ++i)
+	{
+		FTransform InstanceTransform;
+		InstancedMeshComponent->GetInstanceTransform(i, InstanceTransform, true);
+		
+		FVector InstanceLocation = InstanceTransform.GetLocation();
+		float Distance = FVector::Distance(HitLocation, InstanceLocation);
+		UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
+		if (Distance < MinDistanceSquared)
+		{
+		
+			MinDistanceSquared = Distance;
+			ClosestInstanceIndex = i;
+		}
+	}
+	
+	OutIndex =  ClosestInstanceIndex;
+
+	if(ClosestInstanceIndex != -1)
+	{
+		return true;
+	}
+	
+	return false;
+}
+
 void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
-                                               FDigumWorldAssetCoordinateArray Coordinates)
+                                                  FDigumWorldAssetCoordinateArray Coordinates)
 {
 	SwatchAsset = InSwatchAsset;
 	if(SwatchAsset)
@@ -54,6 +85,16 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 
 		OnFinishedInitializeSwatchAsset(SwatchAsset, Coordinates);
 	}
+}
+
+void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation)
+{
+	int32 InstanceIndex;
+	if(GetInstancedHitIndex(InLocation, InstanceIndex))
+	{
+		InstancedMeshComponent->RemoveInstance(InstanceIndex);
+	}
+	
 }
 
 

@@ -17,7 +17,7 @@ public class DigumGame : ModuleRules
 		
 		// Digum Modules
 		PublicDependencyModuleNames.AddRange(new string[] { "DigumCore", "DigumUI", "DigumInventory", "DigumAction"});
-		PrivateDependencyModuleNames.AddRange(new string[] { "DigumCore", "DigumUI","DigumInventory", "DigumAction"});
+		PrivateDependencyModuleNames.AddRange(new string[] { "DigumCore", "DigumUI","DigumInventory", "DigumAction", "DigumWorld"});
 		
 		// Uncomment if you are using Slate UI
 		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

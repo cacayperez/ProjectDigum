@@ -15,6 +15,7 @@ class SDigumInventoryWindow;
 class SWidget;
 class ADigumMinerCharacter;
 
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 {

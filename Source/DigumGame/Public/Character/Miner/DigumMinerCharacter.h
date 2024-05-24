@@ -5,9 +5,11 @@
 #include "CoreMinimal.h"
 #include "InputActionValue.h"
 #include "Character/DigumCharacter.h"
+#include "Interface/IDigumActionComponentInterface.h"
 #include "DigumMinerCharacter.generated.h"
 
 
+struct FDigumGameActionParams;
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumMinerCharacter, Log, All);
 
 DECLARE_MULTICAST_DELEGATE(FOnToggleInventory);
@@ -31,7 +33,7 @@ enum EDigumMinerState : uint8
 };
 
 UCLASS()
-class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
+class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigumActionComponentInterface
 {
 	GENERATED_BODY()
 	
@@ -68,10 +70,10 @@ protected:
 	FOnCancelAction OnCancelAction;
 
 	UFUNCTION(Server, Reliable)
-	void Server_TryActivateAction(const int32& InItemIndex);
+	void Server_TryActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_TryActivateAction(const int32& InItemIndex);
+	void Multicast_TryActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetFaceDirection(float InDirection = -1.0f);
@@ -85,14 +87,18 @@ protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EquipItem(const int32& InItemIndex);
 	
-	virtual void ActivateAction_Internal(const int32& InItemIndex);
+	virtual void ActivateEquippedItemAction_Internal(const FDigumGameActionParams& ActionParams);
 	virtual void EquipItem_Internal(const int32& InItemIndex);
+	
 public:
 	// Sets default values for this character's properties
 	ADigumMinerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION()
-	void OnActivateItemAction(const int32& InItemIndex);
+	void OnActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
+
+	UFUNCTION()
+	void OnActivateInventoryItemAction(const FDigumGameActionParams& InActionParams);
 
 	UFUNCTION()
 	void EquipItem(const int32& InItemIndex);
@@ -103,8 +109,6 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	
 public:
-
-
 	virtual void SetFaceDirection(float InDirection = 1.0f);
 	virtual void PrimaryAction();
 	virtual void SecondaryAction();
@@ -118,16 +122,21 @@ public:
 	virtual void SelectActionBar_4();
 
 	void UpdateMeshScale();
+
+	UFUNCTION()
+	void ActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 	FORCEINLINE UDigumGameInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE UDigumPickupHandlerComponent* GetPickupHandlerComponent() const { return PickupHandlerComponent; }
 	FORCEINLINE UDigumGameActionBarComponent* GetActionBarComponent() const { return ActionBarComponent; }
-	FORCEINLINE UDigumActionComponent* GetActionComponent() const { return ActionComponent; }
 	FORCEINLINE UDigumGameEquipComponent* GetEquipComponent() const { return EquipComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 	FORCEINLINE FOnCancelAction& OnCancelActionDelegate() { return OnCancelAction; }
+
+	virtual UDigumActionComponent* GetActionComponent() const override;
+	virtual UDigumActionComponent* GetActionComponentBP_Implementation() const override;
 	
 };

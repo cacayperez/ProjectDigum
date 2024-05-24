@@ -5,7 +5,19 @@
 
 DEFINE_LOG_CATEGORY(LogDigumAction);
 
-void UDigumAction::OnExecuteAction(AActor* InExecutor)
+UDigumAction::~UDigumAction()
+{
+	OnBeginExecuteAction.Unbind();
+	OnFinishedAction.Unbind();
+}
+
+void UDigumAction::FinishDestroy()
+{
+	UObject::FinishDestroy();
+	UE_LOG(LogTemp, Warning, TEXT("Finished destroy"));
+}
+
+void UDigumAction::OnExecuteAction(AActor* InExecutor, UObject* InPayload)
 {
 	// Override this function in child classes
 	// Make sure to end action
@@ -23,14 +35,18 @@ void UDigumAction::InitializeDefaults()
 	bIsBlockingAction = false;
 }
 
-void UDigumAction::ExecuteAction(AActor* InExecutor)
+void UDigumAction::ExecuteAction(AActor* InExecutor, UObject* InPayload )
 {
-	OnExecuteAction(InExecutor);
+	OnBeginExecuteAction.ExecuteIfBound();
+	OnExecuteAction(InExecutor, InPayload);
 }
 
 void UDigumAction::EndAction(EDigumActionResult Result)
 {
 	OnEndAction(Result);
+	
+	OnFinishedAction.ExecuteIfBound();
+	
 	bFinishedExecuting = true;
 }
 

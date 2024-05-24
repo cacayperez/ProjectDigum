@@ -17,11 +17,17 @@ class DIGUMACTION_API UDigumAction : public UObject
 
 	UPROPERTY()
 	bool bFinishedExecuting = false;
+public:
+	~UDigumAction();
 
+	virtual void FinishDestroy() override;
 protected:
 
-	DECLARE_DELEGATE(FOnFinishedAction);
-	FOnFinishedAction OnFinishedAction;
+	DECLARE_DELEGATE(FOnBeginExecuteActionDelegate);
+	DECLARE_DELEGATE(FOnFinishExecuteActionDelegate);
+	
+	FOnFinishExecuteActionDelegate OnFinishedAction;
+	FOnBeginExecuteActionDelegate OnBeginExecuteAction;
 	
 	UPROPERTY()
 	bool bIsBlockingAction = false;
@@ -32,16 +38,16 @@ protected:
 		DigumAction_Success,
 	};
 	
-	virtual void OnExecuteAction(AActor* InExecutor);
+	virtual void OnExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr);
 	virtual void OnEndAction(EDigumActionResult Result);
-	
 public:
 	virtual void InitializeDefaults();
-	void ExecuteAction(AActor* InExecutor);
+	void ExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr);
 	void EndAction(EDigumActionResult Result);
 
 	bool IsFinishedExecuting() const;
-	bool IsBlockingAction() const;
+	virtual bool IsBlockingAction() const;
 	
-	FOnFinishedAction& GetOnFinishedAction() { return OnFinishedAction;}
+	FOnFinishExecuteActionDelegate& GetOnFinishedAction() { return OnFinishedAction;}
+	FOnBeginExecuteActionDelegate& GetOnBeginExecuteAction() { return OnBeginExecuteAction;}
 };

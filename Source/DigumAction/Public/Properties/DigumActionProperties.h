@@ -14,8 +14,11 @@ struct FDigumActionProperties
 	GENERATED_BODY()
 public:
 	UPROPERTY()
-	AActor* ActionInstigator;
+	AActor* ActionInstigator = nullptr;
 
+	UPROPERTY()
+	UObject* Payload = nullptr;
+	
 	UPROPERTY()
 	TSubclassOf<UDigumAction> ActionClass;
 };

@@ -14,9 +14,10 @@ UDigumGameActionBarComponent::UDigumGameActionBarComponent()
 	// ...
 }
 
-void UDigumGameActionBarComponent::ActivateAction_Internal(const int32& ItemIndex)
+
+void UDigumGameActionBarComponent::ActivateAction_Internal(const FDigumGameActionParams& InActionParams)
 {
-	OnActivateItemAction.Broadcast(ItemIndex);
+	OnActivateItemAction.Broadcast(InActionParams);
 }
 
 void UDigumGameActionBarComponent::InitializeActionKeys(const TArray<int32> ItemIndices)
@@ -41,20 +42,22 @@ void UDigumGameActionBarComponent::SetActionIndex(const int32& ActionIndex, cons
 	}
 }
 
-void UDigumGameActionBarComponent::TryActivateAction(const int32& ActionIndex)
-{
-	if(ActionKeys.IsValidIndex(ActionIndex))
-	{
-		ActivateAction_Internal(ActionKeys[ActionIndex]);
-	}
-}
 
-void UDigumGameActionBarComponent::ActivateDefaultAction()
+void UDigumGameActionBarComponent::ActivatePrimaryAction()
 {
-	TryActivateAction(ActiveActionIndex);
+	FDigumGameActionParams ActionParams = FDigumGameActionParams();
+	ActionParams.EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand;
+	ActionParams.ActionKey = EDigumGameItem_ActionKey::DigumGameActionKey_Primary;
+	
+	TryActivateAction(ActionParams);
 }
 
 void UDigumGameActionBarComponent::SetActiveAction(const int32& Index)
 {
 	ActiveActionIndex = Index;
+}
+
+void UDigumGameActionBarComponent::TryActivateAction(const FDigumGameActionParams& InActionParams)
+{
+	ActivateAction_Internal(InActionParams);
 }

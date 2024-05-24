@@ -6,14 +6,20 @@
 #include "Character/DigumCharacter.h"
 
 DEFINE_LOG_CATEGORY(LogDigumAction);
+
+UDigumGameAnimatedAction::~UDigumGameAnimatedAction()
+{
+	AnimationMontage = nullptr;
+	AnimInstance = nullptr;
+}
+
 void UDigumGameAnimatedAction::OnMontageEnded(UAnimMontage* AnimMontage, bool bArg)
 {
-	// AnimInstance->Montage_GetEndedDelegate(AnimationMontage)->Unbind()
-	OnFinishedAction.ExecuteIfBound();
+	MontageEndDelegate.Unbind();
 	EndAction(EDigumActionResult::DigumAction_Success);
 }
 
-void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor)
+void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor, UObject* InPayload)
 {
 	ADigumCharacter* DigumCharacter = Cast<ADigumCharacter>(InExecutor);
 	if(AnimationMontage && DigumCharacter)
@@ -24,19 +30,16 @@ void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor)
 			float Result = AnimInstance->Montage_Play(AnimationMontage);
 			if(Result >= 0)
 			{
-				FOnMontageEnded EndDelegate;
-				EndDelegate.BindUObject(this, &UDigumGameAnimatedAction::OnMontageEnded);
-				AnimInstance->Montage_SetEndDelegate(EndDelegate, AnimationMontage);
+				MontageEndDelegate.BindUObject(this, &UDigumGameAnimatedAction::OnMontageEnded);
+				AnimInstance->Montage_SetEndDelegate(MontageEndDelegate, AnimationMontage);
 			}
 			else
 			{
 				UE_LOG(LogDigumAction, Error, TEXT("Failed to play animation montage"));
 				EndAction(EDigumActionResult::DigumAction_Failed);
 			}
-
 		}
 	}
-	
 }
 
 void UDigumGameAnimatedAction::InitializeDefaults()

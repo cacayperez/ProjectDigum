@@ -32,16 +32,16 @@ constexpr int32 GDigum_ActionBarIndex_2 = 2;
 constexpr int32 GDigum_ActionBarIndex_3 = 3;
 constexpr int32 GDigum_ActionBarIndex_4 = 4;
 
-void ADigumMinerCharacter::Server_TryActivateAction_Implementation(const int32& InItemIndex)
+void ADigumMinerCharacter::Server_TryActivateEquippedItemAction_Implementation(const FDigumGameActionParams& InActionParams)
 {
 	if(HasAuthority())
-		Multicast_TryActivateAction(InItemIndex);
+		Multicast_TryActivateEquippedItemAction(InActionParams);
 }
 
-void ADigumMinerCharacter::Multicast_TryActivateAction_Implementation(const int32& InItemIndex)
+void ADigumMinerCharacter::Multicast_TryActivateEquippedItemAction_Implementation(const FDigumGameActionParams& InActionParams)
 {
 	if(!IsLocallyControlled())
-		ActivateAction_Internal(InItemIndex);
+		ActivateEquippedItemAction_Internal(InActionParams);
 }
 
 void ADigumMinerCharacter::Server_SetFaceDirection_Implementation(float InDirection)
@@ -68,10 +68,25 @@ void ADigumMinerCharacter::Server_EquipItem_Implementation(const int32& InItemIn
 		Multicast_EquipItem(InItemIndex);
 }
 
-void ADigumMinerCharacter::ActivateAction_Internal(const int32& InItemIndex)
+void ADigumMinerCharacter::ActivateEquippedItemAction_Internal(const FDigumGameActionParams& InActionParams)
 {
+	if(GetEquipComponent())
+	{
+		ADigumItemActor* ItemActor = GetEquipComponent()->GetEquippedItemActor(InActionParams.EquipSlot);
+		ADigumGameItemActor_ActiveItem* ActiveItemActor = Cast<ADigumGameItemActor_ActiveItem>(ItemActor);
+		
+		if(ActiveItemActor)
+		{
+			UE_LOG(LogDigumMinerCharacter, Log, TEXT("THis works...: %s"), *ActiveItemActor->GetName());
+			ActiveItemActor->TryActivateItem(this, InActionParams.ActionKey);
+		}
+		// GetEquipComponent()->ActivateAction(ActionParams);
+	}
+	
+	/*
 	if(GetInventoryComponent())
 	{
+		// Todo - move action class to item actor instance instead.
 		const UDigumGameItem* Item = GetInventoryComponent()->GetItem<UDigumGameItem>(InItemIndex);
 		if(Item && Item->ActionClass && GetActionComponent())
 		{
@@ -84,7 +99,7 @@ void ADigumMinerCharacter::ActivateAction_Internal(const int32& InItemIndex)
 			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Activated: %s"), *Item->ItemName.ToString());
 			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Action: %s"), *Item->ActionClass->GetName());
 		}
-	}
+	}*/
 }
 
 // Sets default values
@@ -113,13 +128,18 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
 }
 
-void ADigumMinerCharacter::OnActivateItemAction(const int32& InItemIndex)
+void ADigumMinerCharacter::OnActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)
 {
 	// Call function for prediction
-	ActivateAction_Internal(InItemIndex);
+	
 	
 	// Call Server function
-	Server_TryActivateAction(InItemIndex);
+	Server_TryActivateEquippedItemAction(InActionParams);
+}
+
+void ADigumMinerCharacter::OnActivateInventoryItemAction(const FDigumGameActionParams& InActionParams)
+{
+	
 }
 
 void ADigumMinerCharacter::EquipItem(const int32& InItemIndex)
@@ -178,7 +198,7 @@ void ADigumMinerCharacter::BeginPlay()
 			SlotIndices.Add(SlotIndex);
 		}
 		GetActionBarComponent()->InitializeActionKeys(SlotIndices);
-		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::OnActivateItemAction);
+		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::ActivateEquippedItemAction);
 		EquipItem(GDigum_ActionBarIndex_0);
 	}
 	
@@ -236,7 +256,6 @@ void ADigumMinerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 
 			if(GetActionBarComponent())
 			{
-
 				BindActionLambda("ActionBar 0", InputSettings->ActionBar_Action_0, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_0);
 				BindActionLambda("ActionBar 1", InputSettings->ActionBar_Action_1, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_1);
 				BindActionLambda("ActionBar 2", InputSettings->ActionBar_Action_2, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_2);
@@ -260,14 +279,14 @@ void ADigumMinerCharacter::Jump()
 void ADigumMinerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	
 }
 
 void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 {
 	if(GetInventoryComponent() && GetEquipComponent())
 	{
-		TSubclassOf<ADigumItemActor> ItemActorClass = GetInventoryComponent()->GetItemActorClass(InItemIndex);
+		const TSubclassOf<ADigumItemActor> ItemActorClass = GetInventoryComponent()->GetItemActorClass(InItemIndex);
+		if(ItemActorClass) UE_LOG(LogDigumMinerCharacter, Warning, TEXT("ItemActorClass: %s"), *ItemActorClass->GetName());
 		EquipComponent->EquipItem(ItemActorClass);
 
 		if(GetActionComponent())
@@ -275,7 +294,23 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 			GetActionBarComponent()->SetActiveAction(InItemIndex);
 		}
 	}
-	
+}
+
+void ADigumMinerCharacter::ActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)
+{
+	ActivateEquippedItemAction_Internal(InActionParams);
+
+	Server_TryActivateEquippedItemAction(InActionParams);
+}
+
+UDigumActionComponent* ADigumMinerCharacter::GetActionComponent() const
+{
+	return ActionComponent;
+}
+
+UDigumActionComponent* ADigumMinerCharacter::GetActionComponentBP_Implementation() const
+{
+	return GetActionComponent();
 }
 
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)
@@ -287,7 +322,7 @@ void ADigumMinerCharacter::SetFaceDirection(float InDirection)
 void ADigumMinerCharacter::PrimaryAction()
 {
 	if(GetActionBarComponent())
-		GetActionBarComponent()->ActivateDefaultAction();
+		GetActionBarComponent()->ActivatePrimaryAction();
 }
 
 void ADigumMinerCharacter::SecondaryAction()

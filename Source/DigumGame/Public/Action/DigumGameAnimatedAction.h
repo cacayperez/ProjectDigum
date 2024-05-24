@@ -20,10 +20,14 @@ class DIGUMGAME_API UDigumGameAnimatedAction : public UDigumAction
 
 	UPROPERTY()
 	UAnimInstance* AnimInstance;
+public:
+	~UDigumGameAnimatedAction();
 protected:
+	FOnMontageEnded MontageEndDelegate;
 	void OnMontageEnded(UAnimMontage* AnimMontage, bool bArg);
-	virtual void OnExecuteAction(AActor* InExecutor) override;
+	virtual void OnExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr) override;
 
 public:
 	virtual void InitializeDefaults() override;
+	virtual bool IsBlockingAction() const override { return true; }
 };
