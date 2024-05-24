@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/DigumItemActor.h"
 #include "UObject/Object.h"
 #include "DigumItem.generated.h"
 
@@ -22,6 +23,9 @@ public:
 	TObjectPtr<UTexture2D> DisplayTexture = nullptr;
 
 	UPROPERTY()
+	TSubclassOf<ADigumItemActor> ItemActorClass = nullptr;
+
+	UPROPERTY()
 	FText ItemName;
 
 	UPROPERTY()
@@ -37,4 +41,5 @@ public:
 	UTexture2D* GetItemTexture() const { return DisplayTexture; }
 	UMaterialInterface* GetItemMaterial() const { return DisplayMaterial; }
 	UMaterialInterface* GetDisplayMaterial() const { return DisplayMaterial; }
+	TSubclassOf<ADigumItemActor> GetItemActorClass() const { return ItemActorClass; }
 };

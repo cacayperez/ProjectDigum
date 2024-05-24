@@ -217,6 +217,17 @@ bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const
 	
 	return false;
 }
+
+TSubclassOf<ADigumItemActor> UDigumInventoryComponent::GetItemActorClass(const int32 InSlotIndex) const
+{
+	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	if(Slot)
+	{
+		return Slot->GetItemActorClass();
+	}
+	return nullptr;
+}
+
 /*
 template<typename T>
 T* UDigumInventoryComponent::GetItem(const int32 InSlotIndex) const

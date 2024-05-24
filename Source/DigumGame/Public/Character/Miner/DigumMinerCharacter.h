@@ -7,8 +7,7 @@
 #include "Character/DigumCharacter.h"
 #include "DigumMinerCharacter.generated.h"
 
-class UDigumPickupHandlerComponent;
-class UDigumGameInventoryComponent;
+
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumMinerCharacter, Log, All);
 
 DECLARE_MULTICAST_DELEGATE(FOnToggleInventory);
@@ -20,6 +19,9 @@ class UCameraComponent;
 class UDigumInventoryComponent;
 class UDigumGameActionBarComponent;
 class UDigumActionComponent;
+class UDigumGameEquipComponent;
+class UDigumPickupHandlerComponent;
+class UDigumGameInventoryComponent;
 
 UENUM()
 enum EDigumMinerState : uint8
@@ -51,6 +53,9 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UDigumActionComponent> ActionComponent;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UDigumGameEquipComponent> EquipComponent;
+
 	UPROPERTY(Replicated)
 	float FacedDirection = 1.0f;
 
@@ -73,15 +78,24 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetFaceDirection(float InDirection = -1.0f);
-	
+
+	UFUNCTION(Server, Reliable)
+	void Server_EquipItem(const int32& InItemIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EquipItem(const int32& InItemIndex);
 	
 	virtual void ActivateAction_Internal(const int32& InItemIndex);
+	virtual void EquipItem_Internal(const int32& InItemIndex);
 public:
 	// Sets default values for this character's properties
 	ADigumMinerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	UFUNCTION()
 	void OnActivateItemAction(const int32& InItemIndex);
+
+	UFUNCTION()
+	void EquipItem(const int32& InItemIndex);
 	
 	virtual void BeginPlay() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
@@ -89,6 +103,8 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	
 public:
+
+
 	virtual void SetFaceDirection(float InDirection = 1.0f);
 	virtual void PrimaryAction();
 	virtual void SecondaryAction();
@@ -109,7 +125,9 @@ public:
 	FORCEINLINE UDigumPickupHandlerComponent* GetPickupHandlerComponent() const { return PickupHandlerComponent; }
 	FORCEINLINE UDigumGameActionBarComponent* GetActionBarComponent() const { return ActionBarComponent; }
 	FORCEINLINE UDigumActionComponent* GetActionComponent() const { return ActionComponent; }
+	FORCEINLINE UDigumGameEquipComponent* GetEquipComponent() const { return EquipComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 	FORCEINLINE FOnCancelAction& OnCancelActionDelegate() { return OnCancelAction; }
+	
 };

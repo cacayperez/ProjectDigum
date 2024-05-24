@@ -34,11 +34,11 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 				Item->StackSize = GameItemAsset->StackSize;
 				Item->ItemName = GameItemAsset->ItemName;
 				Item->ItemDescription = GameItemAsset->ItemDescription;
-				Item->DisplayTexture = GameItemAsset->DisplayTexture;
-				Item->DisplayMaterial = GameItemAsset->DisplayMaterial;
+				Item->DisplayTexture = GameItemAsset->GetItemTexture();
+				Item->DisplayMaterial = GameItemAsset->GetItemMaterial();
 				Item->ActionClass = GameItemAsset->Action.LoadSynchronous();
-
-
+				Item->ItemActorClass = GameItemAsset->GetItemActorClass();
+				
 				OutBuiltItem = Item;
 				return true;
 			}

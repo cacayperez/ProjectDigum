@@ -10,7 +10,7 @@ public class DigumInventory : ModuleRules
             new string[]
             {
                 "Core",
-                "DeveloperSettings"
+                "DeveloperSettings", "DigumCore"
             }
         );
 

@@ -8,6 +8,7 @@
 #include "UObject/Object.h"
 #include "DigumInventorySlot.generated.h"
 
+class ADigumItemActor;
 class UDigumInventoryComponent;
 
 UCLASS()
@@ -46,4 +47,5 @@ public:
 	
 	UTexture2D* GetItemTexture() const;
 	UMaterialInterface* GetDisplayMaterial();
+	TSubclassOf<ADigumItemActor> GetItemActorClass() const;
 };

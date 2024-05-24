@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Miner/Components/DigumGameActionBarComponent.h"
+#include "Character/Miner/Components/DigumGameEquipComponent.h"
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/DigumActionComponent.h"
@@ -55,6 +56,18 @@ void ADigumMinerCharacter::Multicast_SetFaceDirection_Implementation(float InDir
 		SetFaceDirection(InDirection);
 }
 
+void ADigumMinerCharacter::Multicast_EquipItem_Implementation(const int32& InItemIndex)
+{
+	if(!IsLocallyControlled())
+		EquipItem_Internal(InItemIndex);
+}
+
+void ADigumMinerCharacter::Server_EquipItem_Implementation(const int32& InItemIndex)
+{
+	if(HasAuthority())
+		Multicast_EquipItem(InItemIndex);
+}
+
 void ADigumMinerCharacter::ActivateAction_Internal(const int32& InItemIndex)
 {
 	if(GetInventoryComponent())
@@ -97,6 +110,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	PickupHandlerComponent = CreateDefaultSubobject<UDigumPickupHandlerComponent>(TEXT("PickupHandlerComponent"));
 	ActionBarComponent = CreateDefaultSubobject<UDigumGameActionBarComponent>(TEXT("ActionBarComponent"));
 	ActionComponent = CreateDefaultSubobject<UDigumActionComponent>(TEXT("ActionComponent"));
+	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
 }
 
 void ADigumMinerCharacter::OnActivateItemAction(const int32& InItemIndex)
@@ -106,6 +120,13 @@ void ADigumMinerCharacter::OnActivateItemAction(const int32& InItemIndex)
 	
 	// Call Server function
 	Server_TryActivateAction(InItemIndex);
+}
+
+void ADigumMinerCharacter::EquipItem(const int32& InItemIndex)
+{
+	EquipItem_Internal(InItemIndex);
+	
+	Server_EquipItem(InItemIndex);
 }
 
 void ADigumMinerCharacter::BeginPlay()
@@ -147,7 +168,7 @@ void ADigumMinerCharacter::BeginPlay()
 	}
 
 	// Bind Action Bar Event
-	if(GetActionBarComponent() && GetInventoryComponent())
+	if(GetActionBarComponent() && GetInventoryComponent() && GetEquipComponent())
 	{
 		TArray<UDigumInventorySlot*> Slots = GetInventoryComponent()->GetInventoryItems();
 		TArray<int32> SlotIndices;
@@ -158,6 +179,7 @@ void ADigumMinerCharacter::BeginPlay()
 		}
 		GetActionBarComponent()->InitializeActionKeys(SlotIndices);
 		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::OnActivateItemAction);
+		EquipItem(GDigum_ActionBarIndex_0);
 	}
 	
 }
@@ -241,6 +263,21 @@ void ADigumMinerCharacter::Tick(float DeltaSeconds)
 	
 }
 
+void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
+{
+	if(GetInventoryComponent() && GetEquipComponent())
+	{
+		TSubclassOf<ADigumItemActor> ItemActorClass = GetInventoryComponent()->GetItemActorClass(InItemIndex);
+		EquipComponent->EquipItem(ItemActorClass);
+
+		if(GetActionComponent())
+		{
+			GetActionBarComponent()->SetActiveAction(InItemIndex);
+		}
+	}
+	
+}
+
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)
 {
 	FacedDirection = InDirection;
@@ -274,32 +311,27 @@ void ADigumMinerCharacter::CancelAction()
 
 void ADigumMinerCharacter::SelectActionBar_0()
 {
-	if(GetActionBarComponent())
-		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_0);
+	EquipItem(GDigum_ActionBarIndex_0);
 }
 
 void ADigumMinerCharacter::SelectActionBar_1()
 {
-	if(GetActionBarComponent())
-		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_1);
+	EquipItem(GDigum_ActionBarIndex_1);
 }
 
 void ADigumMinerCharacter::SelectActionBar_2()
 {
-	if(GetActionBarComponent())
-		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_2);
+	EquipItem(GDigum_ActionBarIndex_2);
 }
 
 void ADigumMinerCharacter::SelectActionBar_3()
 {
-	if(GetActionBarComponent())
-		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_3);
+	EquipItem(GDigum_ActionBarIndex_3);
 }
 
 void ADigumMinerCharacter::SelectActionBar_4()
 {
-	if(GetActionBarComponent())
-		GetActionBarComponent()->SetActiveAction(GDigum_ActionBarIndex_4);
+	EquipItem(GDigum_ActionBarIndex_4);
 }
 
 void ADigumMinerCharacter::UpdateMeshScale()

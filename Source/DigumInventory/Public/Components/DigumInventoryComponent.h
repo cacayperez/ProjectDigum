@@ -8,6 +8,7 @@
 #include "DigumInventoryComponent.generated.h"
 
 
+class ADigumItemActor;
 class UDigumItem;
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumInventory, Log, All);
 
@@ -64,7 +65,8 @@ public:
 	TArray<UDigumInventorySlot*> GetInventoryItems() const;
 
 	bool RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount = 1);
-
+	TSubclassOf<ADigumItemActor> GetItemActorClass(const int32 InSlotIndex) const;
+	
 	template<typename T>
 	T* GetItem(const int32 InSlotIndex) const;
 };

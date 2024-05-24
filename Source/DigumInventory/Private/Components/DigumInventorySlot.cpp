@@ -73,3 +73,13 @@ UMaterialInterface* UDigumInventorySlot::GetDisplayMaterial()
 	UE_LOG(LogTemp, Warning, TEXT("UDigumInventorySlot::GetDisplayMaterial - ItemObject is null"));
 	return nullptr;
 }
+
+TSubclassOf<ADigumItemActor> UDigumInventorySlot::GetItemActorClass() const
+{
+	if(ItemObject)
+	{
+		return ItemObject->GetItemActorClass();
+	}
+	UE_LOG(LogTemp, Warning, TEXT("UDigumInventorySlot::GetDisplayMaterial - ItemObject is null"));
+	return nullptr;
+}

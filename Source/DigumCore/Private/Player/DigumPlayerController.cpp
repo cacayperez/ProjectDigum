@@ -15,7 +15,7 @@ ADigumPlayerController::ADigumPlayerController()
 void ADigumPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	bShowMouseCursor = true;
 }
 
 // Called every frame

@@ -32,12 +32,12 @@ void SDigumInventorySlot::OnConstruct()
 
 			if(Material)
 			{
-				FSlateImageBrush* TextureBrush = new FSlateImageBrush(Material, FVector2D(100.0f, 100.0f));
+				// FSlateImageBrush* TextureBrush = new FSlateImageBrush(Material, FVector2D(100.0f, 100.0f));
 				FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(100.0f, 100.0f));
 				_Container->AddSlot()
 				[
 					SNew(SImage)
-					.Image(TextureBrush)
+					.Image(MaterialBrush)
 				];
 			}
 			else
@@ -63,12 +63,7 @@ void SDigumInventorySlot::OnConstruct()
 				if(InventoryWindow) InventoryWindow->StopDragItem();
 			});
 		}
-	
 	}
-
-	
-	
-
 }
 
 void SDigumInventorySlot::OnReceiveDropPayload(UObject* InPayload)
