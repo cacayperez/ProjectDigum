@@ -41,6 +41,7 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 			AActor* Actor = HitResult.GetActor();
 			FVector ImpactLocation = HitResult.ImpactPoint;
 			int32 HitItem = HitResult.Item;
+			UE_LOG(LogTemp, Warning, TEXT("Hit Item: %d"), HitItem);
 			if(Actor)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Actor Name, %s"), *Actor->GetName());

@@ -157,7 +157,6 @@ public:
 		{
 			return;
 		}
-
 		
 		CoordinateArray.AddCoordinate(InCoordinate);
 	}

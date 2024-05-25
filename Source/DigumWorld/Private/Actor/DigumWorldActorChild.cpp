@@ -92,10 +92,11 @@ void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLoc
 	if(InIndex == INDEX_NONE) return; 
 
 	FTransform Transform;
-	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
+	int32 OutIndex = -1;
+	if(GetInstancedHitIndex(InLocation, OutIndex))
 	{
 		float Distance = FVector::Distance(InLocation, Transform.GetLocation());
-		if(Distance < 1400)
+		if(OutIndex >= 0)
 		{
 			InstancedMeshComponent->RemoveInstance(InIndex);
 		}
