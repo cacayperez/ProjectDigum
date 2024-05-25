@@ -17,6 +17,7 @@ SWidgetBase::~SWidgetBase()
 void SWidgetBase::Construct(const FArguments& InArgs)
 {
 	_Container = SNew(SOverlay);
+	bCanSupportFocus = true;
 	
 	ChildSlot
 	[
@@ -32,15 +33,15 @@ void SWidgetBase::OnConstruct()
 
 FReply SWidgetBase::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	Select();
-	return FReply::Handled();
+	if(MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		Select();
+		
+		return FReply::Handled();
+	}
+	
+	return FReply::Unhandled();
 }
-
-FReply SWidgetBase::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	return SCompoundWidget::OnMouseButtonUp(MyGeometry, MouseEvent);
-}
-
 FReply SWidgetBase::OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent)
 {
 	DoubleClick();
@@ -68,7 +69,6 @@ bool SWidgetBase::IsSelected() const
 {
 	return bIsSelected;
 }
-
 
 void SWidgetBase::RefreshWidget()
 {

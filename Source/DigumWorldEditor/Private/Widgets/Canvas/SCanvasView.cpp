@@ -3,6 +3,7 @@
 
 #include "SCanvasView.h"
 
+#include "DigumWorldEditorToolkit.h"
 #include "SlateMaterialBrush.h"
 #include "SlateOptMacros.h"
 #include "Rendering/DrawElements.h"
@@ -11,6 +12,7 @@
 #include "Asset/DigumWorldSwatchAsset.h"
 #include "Widgets/Base/SWidgetBase.h"
 
+class UDigumWorldEditorSelector;
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 SCanvasView::~SCanvasView()
@@ -33,7 +35,7 @@ void SCanvasView::Construct(const FArguments& InArgs)
 	_LayersPanel = SNew(SGridPanel);
 
 	TestBrush = MakeShareable(new FSlateColorBrush(FLinearColor::Red));
-	
+	ToolkitPtr = InArgs._Toolkit.Get();
 	SWidgetBase::Construct(SWidgetBase::FArguments());
 }
 
@@ -136,30 +138,42 @@ void SCanvasView::OnConstruct()
 			_LayersPanel.ToSharedRef()
 		]
 	];
-
 }
 
 FReply SCanvasView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	StartDrag();
-	SelectCoordinate(MyGeometry, MouseEvent);
-	return SWidgetBase::OnMouseButtonDown(MyGeometry, MouseEvent).CaptureMouse(SharedThis(this));
+	if(MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		SelectCoordinate(MyGeometry, MouseEvent);
+		if(ToolkitPtr.IsValid())
+		{
+			ToolkitPtr.Pin()->SetLeftButtonHeldDown(true);
+		}
+	}
+	return FReply::Handled();
 }
 
 FReply SCanvasView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
 {
-	if(bIsDragging == true)
+	if(MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DRAGG"));
-		SelectCoordinate(MyGeometry, MouseEvent);
+		if(ToolkitPtr.IsValid())
+		{
+			if(IsHeldDown() == true)
+			{
+				SelectCoordinate(MyGeometry, MouseEvent);
+				return FReply::Handled();
+			}
+		}
 	}
-	return SWidgetBase::OnMouseMove(MyGeometry, MouseEvent);
-}
-
-FReply SCanvasView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	StopDrag();
-	return SWidgetBase::OnMouseButtonUp(MyGeometry, MouseEvent).ReleaseMouseCapture();
+	else
+	{
+		if(ToolkitPtr.IsValid())
+		{
+			ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
+		}
+	}
+	return FReply::Unhandled();
 }
 
 FReply SCanvasView::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -168,6 +182,39 @@ FReply SCanvasView::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEven
 	ProcessScroll(ScrollDelta);
 	RefreshWidget();
 	return SWidgetBase::OnMouseWheel(MyGeometry, MouseEvent);
+}
+
+FReply SCanvasView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Mouse up, %f"), ElapsedTime);
+		ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
+	}
+	return FReply::Handled();
+}
+
+void SCanvasView::OnFocusLost(const FFocusEvent& InFocusEvent)
+{
+	SWidgetBase::OnFocusLost(InFocusEvent);
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
+	}
+}
+
+void SCanvasView::OnMouseLeave(const FPointerEvent& MouseEvent)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
+	}
+}
+
+FReply SCanvasView::OnTouchEnded(const FGeometry& MyGeometry, const FPointerEvent& InTouchEvent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Touch ended"));
+	return SWidgetBase::OnTouchEnded(MyGeometry, InTouchEvent);
 }
 
 FVector2D SCanvasView::ComputeDesiredSize(float LayoutScaleMultiplier) const
@@ -188,15 +235,15 @@ int32 SCanvasView::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeom
 {
 	int32 CurrentLayer = SWidgetBase::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle,
 								bParentEnabled);
-
 	
 	return CurrentLayer;
 }
 
 void SCanvasView::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	ScaledSquareSize = SquareSize * Zoom;
 	SWidgetBase::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+	ScaledSquareSize = SquareSize * Zoom;
+
 }
 
 void SCanvasView::SelectCoordinate(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const
@@ -208,14 +255,14 @@ void SCanvasView::SelectCoordinate(const FGeometry& MyGeometry, const FPointerEv
 	OnSelectCanvasCoordinate.Broadcast(X, Y);
 }
 
-void SCanvasView::StartDrag()
+bool SCanvasView::IsHeldDown() const
 {
-	bIsDragging = true;
+	if(ToolkitPtr.IsValid())
+	{
+		return ToolkitPtr.Pin()->IsLeftButtonHeldDown();
+	}
+	return false;
 }
 
-void SCanvasView::StopDrag()
-{
-	bIsDragging = false;
-}
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

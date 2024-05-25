@@ -6,10 +6,16 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Base/SWidgetBase.h"
 
+class FDigumWorldEditorToolkit;
 class UDigumWorldAsset;
 class SCanvasViewBackground;
 struct FDigumWorldAssetLayer;
 
+struct FDigumCanvasCursorState
+{
+public:
+	bool bHeldDown = false;
+};
 
 /**
  * 
@@ -25,6 +31,7 @@ public:
 	SLATE_ARGUMENT(TArray<FDigumWorldAssetLayer>, Layers)
 	SLATE_ATTRIBUTE(float, ZoomFactor)
 	SLATE_ATTRIBUTE(UDigumWorldAsset*, Asset)
+	SLATE_ATTRIBUTE(TSharedPtr<FDigumWorldEditorToolkit>, Toolkit)
 	SLATE_END_ARGS()
 
 	virtual ~SCanvasView() override;
@@ -33,15 +40,22 @@ public:
 	virtual void OnConstruct() override;
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	virtual void OnFocusLost(const FFocusEvent& InFocusEvent) override;
+	virtual void OnMouseLeave(const FPointerEvent& MouseEvent) override;
+	virtual FReply OnTouchEnded(const FGeometry& MyGeometry, const FPointerEvent& InTouchEvent) override;
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override;
-	
+
+private:
+	mutable bool bHeldDown = false;
+	mutable float ElapsedTime = 0.0f;
 protected:
 	float Zoom = 1.0f;
 	float SquareSize = 24.0f;
 	float ScaledSquareSize = SquareSize * Zoom;
-	bool bIsDragging = false;
+	TWeakPtr<FDigumWorldEditorToolkit> ToolkitPtr;
+	
 	TAttribute<UDigumWorldAsset*> Asset;
 	TAttribute<int32> CanvasWidthAttribute;
 	TAttribute<int32> CanvasHeightAttribute;
@@ -54,11 +68,16 @@ protected:
 	
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectCanvasCoordinate, const int32&, const int32&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetZoomFactor, const float&);
+	DECLARE_MULTICAST_DELEGATE(FOnLeftMouseDown)
+	DECLARE_MULTICAST_DELEGATE(FOnLeftMouseUp)
+	
 public:
 	TSharedPtr<FSlateColorBrush> TestBrush;
 	FOnSelectCanvasCoordinate OnSelectCanvasCoordinate;
 	FOnSetZoomFactor OnSetZoomFactor;
+	FOnLeftMouseDown OnLeftMouseDown;
+	FOnLeftMouseUp OnLeftMouseUp;
 	void SelectCoordinate(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) const;
-	void StartDrag();
-	void StopDrag();
+	bool IsHeldDown() const;
+
 };

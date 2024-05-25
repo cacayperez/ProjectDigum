@@ -6,6 +6,7 @@
 class UDigumWorldEditorTool;
 class UDigumWorldAsset;
 class UDigumWorldEditorSwatch;
+class UDigumWorldEditorSelector;
 
 class FDigumWorldEditorToolkit : public FAssetEditorToolkit
 {
@@ -20,7 +21,6 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
 	void OnLayerUpdated();
 
-
 protected:
 	TSharedRef<SDockTab> SpawnTab_Tools(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs);
@@ -31,13 +31,17 @@ protected:
 	TObjectPtr<UDigumWorldAsset> AssetBeingEdited;
 	TArray<TObjectPtr<UDigumWorldEditorTool>> PaintTools;
 	TArray<TObjectPtr<UDigumWorldEditorTool>> UtilityTools;
+	TArray<TObjectPtr<UDigumWorldEditorSelector>> Selectors;
  
 	int32 ActiveLayerIndex = 0;
 	int32 ActiveSwatchIndex = 0;
 	int32 ActivePaintToolIndex = 0;
-	
+	int32 ActiveSelectorIndex = 0;
+	mutable bool bHeldDown = false;
 	void InitializeTools();
+	void InitializeSelectors();
 	UDigumWorldEditorTool* GetActivePaintTool() const;
+
 public:
 	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
@@ -64,6 +68,13 @@ public:
 
 	TArray<UDigumWorldEditorTool*> GetPaintTools();
 	TArray<UDigumWorldEditorTool*> GetUtilityTools();
+	TArray<UDigumWorldEditorSelector*> GetSelectors();
 	int32 GetActivePaintToolIndex() const { return ActivePaintToolIndex;};
 	void SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB);
+
+	UDigumWorldEditorSelector* GetActiveSelector() const;
+	void SetLeftButtonHeldDown(const bool& bValue);
+	bool IsLeftButtonHeldDown() const;
+	void BeginSelection(const int32& InX, const int32& InY);
+	void EndSelection(const int32& InX, const int32& InY);
 };

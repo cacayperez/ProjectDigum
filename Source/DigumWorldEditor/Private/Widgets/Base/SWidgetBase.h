@@ -22,11 +22,14 @@ public:
 	void Construct(const FArguments& InArgs);
 	virtual void OnConstruct();
 	virtual FReply OnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
-	virtual FReply OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
 	virtual FReply OnMouseButtonDoubleClick(const FGeometry& InMyGeometry, const FPointerEvent& InMouseEvent) override;
+
+private:
+	mutable bool bLeftMouseButtonHeld = false;
 	
 protected:
 	bool bIsSelected = false;
+
 	TSharedPtr<SOverlay> _Container;
 
 	DECLARE_MULTICAST_DELEGATE(FOnSelectWidget);

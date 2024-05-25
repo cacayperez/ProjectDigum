@@ -3,6 +3,7 @@
 #include "SSingleObjectDetailsPanel.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Objects/DigumWorldEditorSwatch.h"
+#include "Selector/DigumWorldEditorSelector.h"
 #include "Tools/DigumWorldEditor_AddTool.h"
 #include "Tools/DigumWorldEditor_DeleteTool.h"
 #include "Tools/DigumWorldEditor_FillTool.h"
@@ -132,6 +133,7 @@ FDigumWorldEditorToolkit::~FDigumWorldEditorToolkit()
 {
 	PaintTools.Empty();
 	UtilityTools.Empty();
+	Selectors.Empty();
 }
 
 void FDigumWorldEditorToolkit::RegisterTabSpawners(const TSharedRef<FTabManager>& InTabManager)
@@ -173,6 +175,11 @@ void FDigumWorldEditorToolkit::InitializeTools()
 	UtilityTools.Add(NewObject<UDigumWorldEditor_RefreshTool>());
 }
 
+void FDigumWorldEditorToolkit::InitializeSelectors()
+{
+	Selectors.Add(NewObject<UDigumWorldEditorSelector>());
+}
+
 UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
 {
 	if(PaintTools.IsValidIndex(ActivePaintToolIndex))
@@ -187,6 +194,7 @@ void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdi
                                           const TSharedPtr<IToolkitHost>& InInitToolkitHost)
 {
 	InitializeTools();
+	InitializeSelectors();
 	AssetBeingEdited = InWorldAssetBeingEdited;
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("Standalone_DigumWorldEditor_Layout_v1")
 	->AddArea
@@ -402,6 +410,11 @@ TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetUtilityTools()
 	return UtilityTools;
 }
 
+TArray<UDigumWorldEditorSelector*> FDigumWorldEditorToolkit::GetSelectors()
+{
+	return Selectors;
+}
+
 void FDigumWorldEditorToolkit::SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB)
 {
 	if(GEditor && GetAssetBeingEdited())
@@ -415,4 +428,32 @@ void FDigumWorldEditorToolkit::SwapLayers(const int32 InLayerIndexA, const int32
 		SetActiveLayerIndex(OutEndIndex);
 		GEditor->EndTransaction();
 	}
+}
+
+UDigumWorldEditorSelector* FDigumWorldEditorToolkit::GetActiveSelector() const
+{
+	if(Selectors.IsValidIndex(ActiveSelectorIndex))
+	{
+		return Selectors[ActiveSelectorIndex];
+	}
+
+	return nullptr;
+}
+
+void FDigumWorldEditorToolkit::SetLeftButtonHeldDown(const bool& bValue)
+{
+	bHeldDown = bValue;
+}
+
+bool FDigumWorldEditorToolkit::IsLeftButtonHeldDown() const
+{
+	return bHeldDown;
+}
+
+void FDigumWorldEditorToolkit::BeginSelection(const int32& InX, const int32& InY)
+{
+}
+
+void FDigumWorldEditorToolkit::EndSelection(const int32& InX, const int32& InY)
+{
 }

@@ -33,10 +33,8 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, int3
 		
 		FVector InstanceLocation = InstanceTransform.GetLocation();
 		float Distance = FVector::Distance(HitLocation, InstanceLocation);
-		UE_LOG(LogTemp, Warning, TEXT("Distance: %f"), Distance);
 		if (Distance < MinDistanceSquared)
 		{
-		
 			MinDistanceSquared = Distance;
 			ClosestInstanceIndex = i;
 		}
@@ -77,7 +75,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
 			const float X = Coordinate->X * HalfGrid;
 			const float Y = 0.0f;
-			const float Z = -Coordinate->Y * HalfGrid;
+			const float Z = -((Coordinate->Y * HalfGrid) + HalfGrid);
 			FVector Location = FVector(X, Y, Z);
 			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			InstancedMeshComponent->AddInstance(Transform);

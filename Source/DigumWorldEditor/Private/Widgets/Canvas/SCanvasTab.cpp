@@ -7,20 +7,22 @@
 #include "SCanvasView.h"
 #include "SlateOptMacros.h"
 #include "Asset/DigumWorldAsset.h"
+#include "Selector/DigumWorldEditorSelector.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 void SCanvasTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit)
 {
+	bCanSupportFocus = true;
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
+
 void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 {
 	if(ToolkitPtr.IsValid())
 	{
 		// ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
 		ToolkitPtr.Pin()->CallToolAction(InX, InY);
-		UE_LOG(LogTemp, Warning, TEXT("Selected Coordinate: %d, %d"), InX, InY);
 		RefreshTab();
 	}
 }
@@ -43,6 +45,7 @@ void SCanvasTab::DrawTab()
 					.CanvasHeight(Asset->GetHeight())
 					.CanvasWidth(Asset->GetWidth())
 					.Asset(ToolkitPtr.Pin()->GetAssetBeingEdited())
+					.Toolkit(ToolkitPtr.Pin())
 					.ZoomFactor(ZoomFactor);
 
 		CanvasView->OnSelectCanvasCoordinate.AddSP(this, &SCanvasTab::OnSelectCanvasCoordinate);
@@ -62,5 +65,7 @@ void SCanvasTab::DrawTab()
 		}
 	}
 }
+
+
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

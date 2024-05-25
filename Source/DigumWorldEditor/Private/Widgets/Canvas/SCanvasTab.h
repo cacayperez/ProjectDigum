@@ -6,6 +6,7 @@
 #include "Widgets/SCompoundWidget.h"
 #include "Widgets/Base/SBaseTab.h"
 
+class SCanvasView;
 /**
  * 
  */
@@ -19,13 +20,14 @@ public:
 
 	/** Constructs this widget with InArgs */
 	void Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditorToolkit>& InToolkit);
-	
 protected:
+	
 	float ZoomFactor = 1.0f;
-	    
+
 public:
 	void OnSelectCanvasCoordinate(const int32& InX, const int32& InY);
 	void OnSetZoomFactor(const float& InZoomValue);
 	virtual void DrawTab() override;
+
 	// void RenderGrid();
 };

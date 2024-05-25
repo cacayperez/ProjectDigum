@@ -14,7 +14,8 @@ UDigumAction::~UDigumAction()
 void UDigumAction::FinishDestroy()
 {
 	UObject::FinishDestroy();
-	UE_LOG(LogTemp, Warning, TEXT("Finished destroy"));
+	OnBeginExecuteAction.Unbind();
+	OnFinishedAction.Unbind();
 }
 
 void UDigumAction::OnExecuteAction(AActor* InExecutor, UObject* InPayload)

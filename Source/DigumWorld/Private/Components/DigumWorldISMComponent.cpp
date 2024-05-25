@@ -10,8 +10,6 @@ static TAutoConsoleVariable<int32> CVarISMForceRemoveAtSwap(
 	0,
 	TEXT("Force the RemoveAtSwap optimization when removing instances from an ISM."));
 
-
-
 // Sets default values for this component's properties
 UDigumWorldISMComponent::UDigumWorldISMComponent()
 {
@@ -19,7 +17,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
+	// important to set this to true to avoid the performance hit of the old RemoveAt() behavior
 	bSupportRemoveAtSwap = true;
 }
 
@@ -151,14 +149,11 @@ bool UDigumWorldISMComponent::RemoveInstanceInternal_Custom(int32 InstanceIndex,
 	return true;
 }
 
-
 // Called when the game starts
 void UDigumWorldISMComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
-
 
 // Called every frame
 void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType,
