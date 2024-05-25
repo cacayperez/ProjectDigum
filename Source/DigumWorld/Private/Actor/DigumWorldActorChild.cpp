@@ -87,12 +87,19 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 	}
 }
 
-void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation)
+void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)
 {
-	int32 InstanceIndex;
-	if(GetInstancedHitIndex(InLocation, InstanceIndex))
+	if(InIndex == INDEX_NONE) return; 
+
+	FTransform Transform;
+	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
 	{
-		InstancedMeshComponent->RemoveInstance(InstanceIndex);
+		float Distance = FVector::Distance(InLocation, Transform.GetLocation());
+		if(Distance < 1400)
+		{
+			InstancedMeshComponent->RemoveInstance(InIndex);
+		}
+		
 	}
 	
 }

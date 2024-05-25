@@ -25,9 +25,14 @@ public:
 protected:
 	FOnMontageEnded MontageEndDelegate;
 	void OnMontageEnded(UAnimMontage* AnimMontage, bool bArg);
+
+	void OnBeginAnimationActionNotify();
+	void OnEndAnimationActionNotify();	
 	virtual void OnExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr) override;
 
 public:
+	virtual void ExecuteAction(AActor* InExecutor, UObject* InPayload) override;
+	virtual void EndAction(EDigumActionResult Result) override;
 	virtual void InitializeDefaults() override;
 	virtual bool IsBlockingAction() const override { return true; }
 };

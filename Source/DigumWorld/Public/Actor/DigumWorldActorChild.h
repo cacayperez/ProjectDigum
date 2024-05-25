@@ -32,5 +32,5 @@ protected:
 	bool GetInstancedHitIndex(const FVector HitLocation, int32& OutIndex);
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
-	void OnCollide(AActor* InInstigator, const FVector& InLocation);
+	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 };

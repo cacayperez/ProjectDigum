@@ -15,14 +15,14 @@ class DIGUMACTION_API UDigumAction : public UObject
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	bool bFinishedExecuting = false;
 public:
 	~UDigumAction();
 
 	virtual void FinishDestroy() override;
 protected:
-
+	UPROPERTY()
+	bool bFinishedExecuting = false;
+	
 	DECLARE_DELEGATE(FOnBeginExecuteActionDelegate);
 	DECLARE_DELEGATE(FOnFinishExecuteActionDelegate);
 	
@@ -42,8 +42,8 @@ protected:
 	virtual void OnEndAction(EDigumActionResult Result);
 public:
 	virtual void InitializeDefaults();
-	void ExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr);
-	void EndAction(EDigumActionResult Result);
+	virtual void ExecuteAction(AActor* InExecutor, UObject* InPayload = nullptr);
+	virtual void EndAction(EDigumActionResult Result);
 
 	bool IsFinishedExecuting() const;
 	virtual bool IsBlockingAction() const;

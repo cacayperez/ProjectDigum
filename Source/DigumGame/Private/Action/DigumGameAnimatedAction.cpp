@@ -4,6 +4,8 @@
 #include "Action/DigumGameAnimatedAction.h"
 
 #include "Character/DigumCharacter.h"
+#include "Notifies/DigumActionBeginNotify.h"
+#include "Notifies/DigumActionEndNotify.h"
 
 DEFINE_LOG_CATEGORY(LogDigumAction);
 
@@ -19,12 +21,35 @@ void UDigumGameAnimatedAction::OnMontageEnded(UAnimMontage* AnimMontage, bool bA
 	EndAction(EDigumActionResult::DigumAction_Success);
 }
 
+void UDigumGameAnimatedAction::OnBeginAnimationActionNotify()
+{
+	OnBeginExecuteAction.ExecuteIfBound();
+}
+
+void UDigumGameAnimatedAction::OnEndAnimationActionNotify()
+{
+	OnFinishedAction.ExecuteIfBound();
+}
+
 void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor, UObject* InPayload)
 {
 	ADigumCharacter* DigumCharacter = Cast<ADigumCharacter>(InExecutor);
 	if(AnimationMontage && DigumCharacter)
 	{
+		for(const auto Notify : AnimationMontage->Notifies)
+		{
+			if(const auto ActionBegin = Cast<UDigumActionBeginNotify>(Notify.Notify))
+			{
+				ActionBegin->OnDigumActionBeginNotify.AddUObject(this, &UDigumGameAnimatedAction::OnBeginAnimationActionNotify);
+			}
+			if(const auto ActionEnd = Cast<UDigumActionEndNotify>(Notify.Notify))
+			{
+				ActionEnd->OnDigumActionEndNotify.AddUObject(this, &UDigumGameAnimatedAction::OnEndAnimationActionNotify);
+			}
+		}
+		
 		AnimInstance = DigumCharacter->GetMesh()->GetAnimInstance();
+		// DigumCharacter->GetAni
 		if(AnimInstance)
 		{
 			float Result = AnimInstance->Montage_Play(AnimationMontage);
@@ -40,6 +65,20 @@ void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor, UObject* InPa
 			}
 		}
 	}
+}
+
+void UDigumGameAnimatedAction::ExecuteAction(AActor* InExecutor, UObject* InPayload)
+{
+	OnExecuteAction(InExecutor, InPayload);
+}
+
+void UDigumGameAnimatedAction::EndAction(EDigumActionResult Result)
+{
+	
+	OnEndAction(Result);
+	
+	
+	bFinishedExecuting = true;
 }
 
 void UDigumGameAnimatedAction::InitializeDefaults()
