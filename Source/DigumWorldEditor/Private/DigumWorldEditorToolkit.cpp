@@ -4,7 +4,8 @@
 #include "Asset/DigumWorldAsset.h"
 #include "Objects/DigumWorldEditorSwatch.h"
 #include "Selector/DigumWorldEditorSelector.h"
-#include "Selector/DigumWorldEditorSelector_Single.h"
+#include "Selector/DigumWorldEditorSelector_BoxSelect.h"
+#include "Selector/DigumWorldEditorSelector_PointSelect.h"
 #include "Tools/DigumWorldEditor_AddTool.h"
 #include "Tools/DigumWorldEditor_DeleteTool.h"
 #include "Tools/DigumWorldEditor_FillTool.h"
@@ -178,13 +179,19 @@ void FDigumWorldEditorToolkit::InitializeTools()
 
 void FDigumWorldEditorToolkit::InitializeSelectors()
 {
-	UDigumWorldEditorSelector_Single* Selector_Single = NewObject<UDigumWorldEditorSelector_Single>();
-	Selector_Single->GetOnBeginSelection().AddSP(this, &FDigumWorldEditorToolkit::OnBeginSelection);
-	Selector_Single->GetOnEndSelection().AddSP(this, &FDigumWorldEditorToolkit::OnEndSelection);
-	Selector_Single->GetOnSetSelection().AddSP(this, &FDigumWorldEditorToolkit::OnSetSelection);
+	UDigumWorldEditorSelector_PointSelect* PointSelect = NewObject<UDigumWorldEditorSelector_PointSelect>();
+	PointSelect->GetOnBeginSelection().AddSP(this, &FDigumWorldEditorToolkit::OnBeginSelection);
+	PointSelect->GetOnEndSelection().AddSP(this, &FDigumWorldEditorToolkit::OnEndSelection);
+	PointSelect->GetOnSetSelection().AddSP(this, &FDigumWorldEditorToolkit::OnSetSelection);
 	// Selector_Single-
+
+	UDigumWorldEditorSelector_BoxSelect* BoxSelect = NewObject<UDigumWorldEditorSelector_BoxSelect>();
+	BoxSelect->GetOnBeginSelection().AddSP(this, &FDigumWorldEditorToolkit::OnBeginSelection);
+	BoxSelect->GetOnEndSelection().AddSP(this, &FDigumWorldEditorToolkit::OnEndSelection);
+	BoxSelect->GetOnSetSelection().AddSP(this, &FDigumWorldEditorToolkit::OnSetSelection);
 	
-	Selectors.Add(Selector_Single);
+	Selectors.Add(PointSelect);
+	Selectors.Add(BoxSelect);
 }
 
 UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
@@ -199,12 +206,19 @@ UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
 
 void FDigumWorldEditorToolkit::OnBeginSelection()
 {
-	
+	if(GetActiveSelector())
+	{
+		FDigumWorldSwatchPaletteItem* Swatch = GetAssetBeingEdited()->GetSwatch(ActiveSwatchIndex);
+		
+		if(Swatch)
+		{
+			GetActiveSelector()->SetSwatchName(Swatch->SwatchName);
+		}
+	}
 }
 
 void FDigumWorldEditorToolkit::OnEndSelection()
 {
-	UE_LOG(LogTemp, Warning, TEXT("End Selection"));
 	CallToolAction(-1,-1);
 
 	if(GetActiveSelector())
@@ -429,6 +443,11 @@ void FDigumWorldEditorToolkit::SetActiveTool(const int32& InToolIndex)
 void FDigumWorldEditorToolkit::SetActiveSelector(const int32& InSelectorIndex)
 {
 	ActiveSelectorIndex = InSelectorIndex;
+
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->SetZoomFactor(ZoomFactor);
+	}
 }
 
 TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetPaintTools()
@@ -504,6 +523,24 @@ void FDigumWorldEditorToolkit::EndSelection()
 	if(GetActiveSelector())
 	{
 		GetActiveSelector()->EndSelection();
+	}
+}
+
+void FDigumWorldEditorToolkit::SelectionGeometry(const FGeometry& Geometry,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId)
+{
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->SelectionGeometry(Geometry, OutDrawElements, LayerId);
+	}
+}
+
+void FDigumWorldEditorToolkit::SetZoomFactor(const float& InZoomValue)
+{
+	ZoomFactor = InZoomValue;
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->SetZoomFactor(ZoomFactor);
 	}
 }
 

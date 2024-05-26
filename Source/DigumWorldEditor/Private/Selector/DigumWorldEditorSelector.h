@@ -18,10 +18,20 @@ class DIGUMWORLDEDITOR_API UDigumWorldEditorSelector : public UObject
 	
 protected:
 	UPROPERTY()
+	float SquareSize = 24.0f;
+
+	UPROPERTY()
+	FName SwatchName = NAME_None;
+	
+	UPROPERTY()
 	FDigumWorldAssetCoordinateArray Selection;
 
 	UPROPERTY()
 	bool bIsActive = false;
+
+	UPROPERTY()
+	float ZoomFactor = 1.0f;
+	
 	DECLARE_MULTICAST_DELEGATE(FOnSelectSelector);
 	DECLARE_MULTICAST_DELEGATE(FOnBeginSelection);
 	DECLARE_MULTICAST_DELEGATE(FOnEndSelection);
@@ -38,6 +48,8 @@ public:
 	virtual void ClearSelection();
 	virtual void EndSelection();
 	virtual void BeginSelection();
+	
+	virtual void SelectionGeometry(const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 NewLayerId);;
 
 	FDigumWorldAssetCoordinateArray GetSelection() const { return Selection; }
 	FOnBeginSelection& GetOnBeginSelection() { return OnBeginSelectionDelegate; }
@@ -47,4 +59,7 @@ public:
 
 	void SetActive(bool bInIsActive) { bIsActive = bInIsActive; }
 	bool IsActive() const { return bIsActive; }
+	void SetSquareSize(const float& InSquareSize) { SquareSize = InSquareSize; }
+	void SetSwatchName(const FName& InSwatchName) { SwatchName = InSwatchName; }
+	void SetZoomFactor(const float& InZoomFactor) { ZoomFactor = InZoomFactor; }
 };

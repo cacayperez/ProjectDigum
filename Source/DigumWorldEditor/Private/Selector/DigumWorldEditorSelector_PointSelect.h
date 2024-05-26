@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "DigumWorldEditorSelector.h"
 #include "UObject/Object.h"
-#include "DigumWorldEditorSelector_Single.generated.h"
+#include "DigumWorldEditorSelector_PointSelect.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DIGUMWORLDEDITOR_API UDigumWorldEditorSelector_Single : public UDigumWorldEditorSelector
+class DIGUMWORLDEDITOR_API UDigumWorldEditorSelector_PointSelect : public UDigumWorldEditorSelector
 {
 	GENERATED_BODY()
 public:
@@ -19,4 +19,5 @@ public:
 	virtual void BeginSelection() override;
 	virtual void EndSelection() override;
 	virtual void AddSelection(FDigumWorldAssetCoordinate Coordinate) override;
+	virtual void SelectionGeometry(const FGeometry& AllottedGeometry, FSlateWindowElementList& OutDrawElements, int32 NewLayerId) override;
 };

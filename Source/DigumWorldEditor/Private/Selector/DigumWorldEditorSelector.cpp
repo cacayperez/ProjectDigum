@@ -36,3 +36,9 @@ void UDigumWorldEditorSelector::EndSelection()
 void UDigumWorldEditorSelector::BeginSelection()
 {
 }
+
+void UDigumWorldEditorSelector::SelectionGeometry(const FGeometry& AllottedGeometry,
+	FSlateWindowElementList& OutDrawElements, int32 NewLayerId)
+{
+}
+

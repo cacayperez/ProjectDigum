@@ -20,7 +20,7 @@ void UDigumWorldEditor_FillTool::OnActivateTool(const FDigumWorldEditorToolParam
 		const int32 Height = Asset->GetHeight();
 		FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(ActiveSwatchIndex);
 		FDigumWorldAssetLayer* Layer = Asset->GetLayer(ActiveLayerIndex);
-		if(Swatch && Layer && Layer->IsVisible())
+		if(Swatch)
 		{
 			FName SwatchName = Swatch->SwatchName;
 		
@@ -31,9 +31,10 @@ void UDigumWorldEditor_FillTool::OnActivateTool(const FDigumWorldEditorToolParam
 				for(int32 y = 0; y < Height; y++)
 				{
 					FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(x, y, SwatchName);
-					Layer->AddCoordinate(Coordinate);
+					Asset->AddCoordinate(ActiveLayerIndex, Coordinate);
 				}
 			}
+			Asset->EditorRefresh();
 			GEditor->EndTransaction();
 		}
 	}

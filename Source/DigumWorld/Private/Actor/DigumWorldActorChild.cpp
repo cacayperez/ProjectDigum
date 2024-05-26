@@ -98,9 +98,7 @@ void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLoc
 		{
 			InstancedMeshComponent->RemoveInstance(InIndex);
 		}
-		
 	}
-	
 }
 
 

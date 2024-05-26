@@ -17,15 +17,16 @@ void UDigumWorldEditor_AddTool::OnActivateTool(const FDigumWorldEditorToolParams
 	{
 		FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(ActiveSwatchIndex);
 		FDigumWorldAssetLayer* Layer = Asset->GetLayer(ActiveLayerIndex);
-		if(Swatch && Layer && Layer->IsVisible())
+		if(Swatch)
 		{
 			GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: AddCoordinate"));
 			Asset->Modify();
 			for(const FDigumWorldAssetCoordinate& SelectionCoordinate : Selection.Coordinates)
 			{
-				Layer->AddCoordinate(SelectionCoordinate);
+				Asset->AddCoordinate(ActiveLayerIndex, SelectionCoordinate);
 			
 			}
+			Asset->EditorRefresh();
 			GEditor->EndTransaction();
 		}
 	}

@@ -67,7 +67,6 @@ protected:
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectCanvasCoordinate, const int32&, const int32&);
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSelectCanvasCoordinate, const int32&, const int32&);
 	DECLARE_MULTICAST_DELEGATE(FOnBeginSelection);
 	DECLARE_MULTICAST_DELEGATE(FOnEndSelection);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetZoomFactor, const float&);

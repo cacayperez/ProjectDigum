@@ -68,6 +68,22 @@ TArray<FDigumWorldAssetCoordinate>& UDigumWorldAsset::GetCoordinates(const int32
 	return Layer->GetAllCoordinates();
 }
 
+void UDigumWorldAsset::AddCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY,
+	const FName& InSwatchName)
+{
+	const FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(InX, InY, InSwatchName);
+	AddCoordinate(InLayerIndex, Coordinate);
+}
+
+void UDigumWorldAsset::AddCoordinate(const int32& InLayerIndex, const FDigumWorldAssetCoordinate& InCoordinate)
+{
+	FDigumWorldAssetLayer* Layer = GetLayer(InLayerIndex);
+	if(Layer)
+	{
+		Layer->AddCoordinate(InCoordinate);
+	}
+}
+
 bool UDigumWorldAsset::GetCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY, FDigumWorldAssetCoordinate*& OutCoordinate)
 {
 	// FDigumWorldAssetCoordinate* Coordinate = nullptr;
@@ -179,3 +195,9 @@ void UDigumWorldAsset::PostEditUndo()
 	Super::PostEditUndo();
 	OnDigumWorldAssetUpdated.Broadcast();
 }
+
+void UDigumWorldAsset::EditorRefresh()
+{
+	OnDigumWorldAssetUpdated.Broadcast();
+}
+

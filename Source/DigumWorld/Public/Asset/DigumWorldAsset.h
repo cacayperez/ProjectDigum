@@ -116,6 +116,8 @@ public:
 	}
 	int32 CoordinateCount() const { return Coordinates.Num(); }
 	FDigumWorldAssetCoordinate* GetAt(int32 InArrayIndex);
+
+	
 };
 
 
@@ -214,6 +216,8 @@ public:
 	TArray<FDigumWorldSwatchPaletteItem>& GetSwatches() { return Swatches; }
 	TArray<FDigumWorldAssetCoordinate>& GetCoordinates(const int32& InLayerIndex);
 	int32 GetLayerCount() const { return Layers.Num();}
+	void AddCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY, const FName& InSwatchName);
+	void AddCoordinate(const int32& InLayerIndex, const FDigumWorldAssetCoordinate& InCoordinate);
 	bool GetCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY, FDigumWorldAssetCoordinate*& Out);
 	FDigumWorldSwatchPaletteItem* GetSwatch(const int32& InIndex);
 	FDigumWorldSwatchPaletteItem* GetSwatch(const FName& Name);
@@ -235,5 +239,6 @@ public:
 	
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 	virtual void PostEditUndo() override;
+	void EditorRefresh();
 #endif
 };

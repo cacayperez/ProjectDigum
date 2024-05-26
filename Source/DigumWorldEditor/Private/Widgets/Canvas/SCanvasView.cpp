@@ -143,7 +143,6 @@ FReply SCanvasView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointe
 {
 	if(MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		
 		OnBeginSelection.Broadcast();
 	}
 	return FReply::Handled();
@@ -155,6 +154,8 @@ FReply SCanvasView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent
 	{
 		SelectCoordinate(MyGeometry, MouseEvent);
 	}
+
+	
 	
 	return FReply::Unhandled();
 }

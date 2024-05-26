@@ -46,6 +46,7 @@ void UDigumWorldEditor_DeleteTool::OnActivateTool(const FDigumWorldEditorToolPar
 			{
 				Layer->RemoveCoordinate(SelectionCoordinate.X, SelectionCoordinate.Y);
 			}
+			Asset->EditorRefresh();
 			GEditor->EndTransaction();
 		}
 	}

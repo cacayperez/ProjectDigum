@@ -33,4 +33,5 @@ protected:
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
+	// void DestroyInstance(const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 };

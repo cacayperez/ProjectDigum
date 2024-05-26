@@ -25,14 +25,18 @@ void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 		ToolkitPtr.Pin()->AddSelection(InX, InY);
 		// ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
 		// ToolkitPtr.Pin()->CallToolAction(InX, InY);
-		RefreshTab();
 	}
 }
 
 void SCanvasTab::OnSetZoomFactor(const float& InZoomValue)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Zoom Factor: %f"), InZoomValue);
-	ZoomFactor = InZoomValue;
+	if(ToolkitPtr.IsValid())
+	{
+		ZoomFactor = InZoomValue;
+		ToolkitPtr.Pin()->SetZoomFactor(InZoomValue);
+	}
+	
 }
 
 void SCanvasTab::OnBeginSelection()
@@ -48,6 +52,7 @@ void SCanvasTab::OnEndSelection()
 	if(ToolkitPtr.IsValid())
 	{
 		ToolkitPtr.Pin()->EndSelection();
+		
 	}
 }
 
@@ -71,7 +76,8 @@ void SCanvasTab::DrawTab()
 		CanvasView->OnEndSelection.AddSP(this, &SCanvasTab::OnEndSelection);
 		CanvasView->OnSetZoomFactor.AddSP(this, &SCanvasTab::OnSetZoomFactor);
 
-		TSharedPtr<SCanvasSelectionLayer> SelectionLayer = SNew(SCanvasSelectionLayer);
+		TSharedPtr<SCanvasSelectionLayer> SelectionLayer = SNew(SCanvasSelectionLayer)
+					.Toolkit(ToolkitPtr.Pin());
 		
 		if(Asset)
 		{
@@ -88,8 +94,8 @@ void SCanvasTab::DrawTab()
 			_Container->AddSlot()
 			[
 				SNew(SBox)
-				.VAlign(VAlign_Fill)
-				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Center)
+				.HAlign(HAlign_Center)
 				[
 					SelectionLayer.ToSharedRef()
 				]

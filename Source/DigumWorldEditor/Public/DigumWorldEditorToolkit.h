@@ -21,6 +21,7 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
 	void OnLayerUpdated();
 
+
 protected:
 	TSharedRef<SDockTab> SpawnTab_Tools(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs);
@@ -32,7 +33,8 @@ protected:
 	TArray<TObjectPtr<UDigumWorldEditorTool>> PaintTools;
 	TArray<TObjectPtr<UDigumWorldEditorTool>> UtilityTools;
 	TArray<TObjectPtr<UDigumWorldEditorSelector>> Selectors;
- 
+
+	float ZoomFactor = 1.0f;
 	int32 ActiveLayerIndex = 0;
 	int32 ActiveSwatchIndex = 0;
 	int32 ActivePaintToolIndex = 0;
@@ -84,4 +86,8 @@ public:
 	void BeginSelection();
 	void AddSelection(const int32& InX, const int32& InY);
 	void EndSelection();
+
+	void SelectionGeometry(const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
+	void SetZoomFactor(const float& InZoomValue);
+	
 };
