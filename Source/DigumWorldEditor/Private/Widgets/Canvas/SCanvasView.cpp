@@ -118,7 +118,6 @@ void SCanvasView::OnConstruct()
 			}
 		}
 	}
-
 	
 	_Container->AddSlot()
 	[
@@ -144,11 +143,8 @@ FReply SCanvasView::OnMouseButtonDown(const FGeometry& MyGeometry, const FPointe
 {
 	if(MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
 	{
-		SelectCoordinate(MyGeometry, MouseEvent);
-		if(ToolkitPtr.IsValid())
-		{
-			ToolkitPtr.Pin()->SetLeftButtonHeldDown(true);
-		}
+		
+		OnBeginSelection.Broadcast();
 	}
 	return FReply::Handled();
 }
@@ -157,23 +153,18 @@ FReply SCanvasView::OnMouseMove(const FGeometry& MyGeometry, const FPointerEvent
 {
 	if(MouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
 	{
-		if(ToolkitPtr.IsValid())
-		{
-			if(IsHeldDown() == true)
-			{
-				SelectCoordinate(MyGeometry, MouseEvent);
-				return FReply::Handled();
-			}
-		}
+		SelectCoordinate(MyGeometry, MouseEvent);
 	}
-	else
-	{
-		if(ToolkitPtr.IsValid())
-		{
-			ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
-		}
-	}
+	
 	return FReply::Unhandled();
+}
+            
+
+FReply SCanvasView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	OnEndSelection.Broadcast();
+
+	return FReply::Handled();
 }
 
 FReply SCanvasView::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
@@ -182,16 +173,6 @@ FReply SCanvasView::OnMouseWheel(const FGeometry& MyGeometry, const FPointerEven
 	ProcessScroll(ScrollDelta);
 	RefreshWidget();
 	return SWidgetBase::OnMouseWheel(MyGeometry, MouseEvent);
-}
-
-FReply SCanvasView::OnMouseButtonUp(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
-{
-	if(ToolkitPtr.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Mouse up, %f"), ElapsedTime);
-		ToolkitPtr.Pin()->SetLeftButtonHeldDown(false);
-	}
-	return FReply::Handled();
 }
 
 void SCanvasView::OnFocusLost(const FFocusEvent& InFocusEvent)

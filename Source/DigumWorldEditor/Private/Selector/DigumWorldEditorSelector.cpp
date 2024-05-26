@@ -5,17 +5,34 @@
 
 #include "Asset/DigumWorldAsset.h"
 
-TSharedPtr<SWidget> UDigumWorldEditorSelector::CreateSelectorWidget()
+
+TSharedPtr<SWidget> UDigumWorldEditorSelector::CreateSelectorButtonWidget()
+{
+	return nullptr;
+}
+
+TSharedPtr<SWidget> UDigumWorldEditorSelector::CreateSelectorSelectionWidget()
 {
 	return nullptr;
 }
 
 void UDigumWorldEditorSelector::AddSelection(FDigumWorldAssetCoordinate Coordinate)
 {
-	Selection.Add(Coordinate);
+	Selection.AddCoordinate(Coordinate);
+	OnSetSelectionDelegate.Broadcast(Coordinate);
+	EndSelection();
 }
 
 void UDigumWorldEditorSelector::ClearSelection()
 {
-	Selection.Empty();
+	Selection.Clear();
+}
+
+void UDigumWorldEditorSelector::EndSelection()
+{
+	OnEndSelectionDelegate.Broadcast();
+}
+
+void UDigumWorldEditorSelector::BeginSelection()
+{
 }

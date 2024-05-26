@@ -9,7 +9,6 @@ void UDigumWorldEditorTool::OnActivateTool(const FDigumWorldEditorToolParams& In
 void UDigumWorldEditorTool::ActivateTool(const FDigumWorldEditorToolParams& InParams)
 {
 	OnActivateTool(InParams);
-	
 }
 
 TSharedPtr<SWidget> UDigumWorldEditorTool::CreateToolWidget()

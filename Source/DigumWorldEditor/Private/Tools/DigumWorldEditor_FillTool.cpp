@@ -14,8 +14,6 @@ void UDigumWorldEditor_FillTool::OnActivateTool(const FDigumWorldEditorToolParam
 	UDigumWorldAsset* Asset = InParams.Asset;
 	const int32 ActiveLayerIndex = InParams.LayerIndex;
 	const int32 ActiveSwatchIndex = InParams.SwatchINdex;
-	const int32 X = InParams.X;
-	const int32 Y = InParams.Y;
 	if(GEditor && Asset)
 	{
 		const int32 Width = Asset->GetWidth();

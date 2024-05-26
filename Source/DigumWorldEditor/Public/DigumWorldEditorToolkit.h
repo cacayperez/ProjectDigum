@@ -42,6 +42,10 @@ protected:
 	void InitializeSelectors();
 	UDigumWorldEditorTool* GetActivePaintTool() const;
 
+	
+	void OnBeginSelection();
+	void OnEndSelection();
+	void OnSetSelection(FDigumWorldAssetCoordinate DigumWorldAssetCoordinate);
 public:
 	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
@@ -65,16 +69,19 @@ public:
 	void SetLayerName(const int32& InLayerIndex, const FText& InLayerName);
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInLayerVisibility);
 	void SetActiveTool(const int32& InToolIndex);
+	void SetActiveSelector(const int32& InSelectorIndex);
 
 	TArray<UDigumWorldEditorTool*> GetPaintTools();
 	TArray<UDigumWorldEditorTool*> GetUtilityTools();
 	TArray<UDigumWorldEditorSelector*> GetSelectors();
 	int32 GetActivePaintToolIndex() const { return ActivePaintToolIndex;};
+	int32 GetActiveSelectorIndex() const { return ActiveSelectorIndex; };
 	void SwapLayers(const int32 InLayerIndexA, const int32 InLayerIndexB);
 
 	UDigumWorldEditorSelector* GetActiveSelector() const;
 	void SetLeftButtonHeldDown(const bool& bValue);
 	bool IsLeftButtonHeldDown() const;
-	void BeginSelection(const int32& InX, const int32& InY);
-	void EndSelection(const int32& InX, const int32& InY);
+	void BeginSelection();
+	void AddSelection(const int32& InX, const int32& InY);
+	void EndSelection();
 };

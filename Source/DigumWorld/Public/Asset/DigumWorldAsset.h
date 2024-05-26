@@ -110,6 +110,10 @@ public:
 		return HasCoordinate(InX + 1, InY);
 	}
 
+	void Clear()
+	{
+		Coordinates.Empty();
+	}
 	int32 CoordinateCount() const { return Coordinates.Num(); }
 	FDigumWorldAssetCoordinate* GetAt(int32 InArrayIndex);
 };

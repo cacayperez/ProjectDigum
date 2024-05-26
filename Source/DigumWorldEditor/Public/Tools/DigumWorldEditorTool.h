@@ -3,9 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Asset/DigumWorldAsset.h"
 #include "UObject/Object.h"
 #include "DigumWorldEditorTool.generated.h"
 
+struct FDigumWorldAssetCoordinateArray;
+struct FDigumWorldAssetCoordinate;
 class UDigumWorldAsset;
 
 USTRUCT()
@@ -23,10 +26,14 @@ public:
 	int32 SwatchINdex = INDEX_NONE;
 
 	UPROPERTY()
+	FDigumWorldAssetCoordinateArray Selection;
+	
+	/*
+	UPROPERTY()
 	int32 X = INDEX_NONE;
 
 	UPROPERTY()
-	int32 Y = INDEX_NONE;
+	int32 Y = INDEX_NONE;*/
 };
 /**
  * 

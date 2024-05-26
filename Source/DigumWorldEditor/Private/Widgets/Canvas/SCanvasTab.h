@@ -27,6 +27,8 @@ protected:
 public:
 	void OnSelectCanvasCoordinate(const int32& InX, const int32& InY);
 	void OnSetZoomFactor(const float& InZoomValue);
+	void OnBeginSelection();
+	void OnEndSelection();
 	virtual void DrawTab() override;
 
 	// void RenderGrid();

@@ -12,8 +12,6 @@ void UDigumWorldEditor_RefreshTool::OnActivateTool(const FDigumWorldEditorToolPa
 	UDigumWorldAsset* Asset = InParams.Asset;
 	const int32 ActiveLayerIndex = InParams.LayerIndex;
 	const int32 ActiveSwatchIndex = InParams.SwatchINdex;
-	const int32 X = InParams.X;
-	const int32 Y = InParams.Y;
 	if(GEditor && Asset)
 	{
 		CleanUpSwatches(Asset);

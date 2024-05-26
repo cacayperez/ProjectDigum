@@ -6,6 +6,7 @@
 #include "DigumWorldEditorToolkit.h"
 #include "SlateOptMacros.h"
 #include "Tools/DigumWorldEditorTool.h"
+#include "Selector/DigumWorldEditorSelector.h"
 
 BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
@@ -21,9 +22,11 @@ void SToolTab::DrawTab()
 	TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);
 	TSharedPtr<SVerticalBox> PaintToolsBox = SNew(SVerticalBox);
 	TSharedPtr<SVerticalBox> UtilityToolsBox = SNew(SVerticalBox);
+	TSharedPtr<SVerticalBox> SelectorsBox = SNew(SVerticalBox);
 
 	TArray<UDigumWorldEditorTool*> PaintTools = ToolkitPtr.Pin()->GetPaintTools();
 	TArray<UDigumWorldEditorTool*> UtilityTools = ToolkitPtr.Pin()->GetUtilityTools();
+	TArray<UDigumWorldEditorSelector*> Selectors = ToolkitPtr.Pin()->GetSelectors();
 
 	for(int32 i = 0; i < PaintTools.Num(); i++)
 	{
@@ -61,10 +64,40 @@ void SToolTab::DrawTab()
 		});
 	}
 
+	for(int32 i = 0; i < Selectors.Num(); i++)
+	{
+		UDigumWorldEditorSelector* Selector = Selectors[i];
+		bool bIsActive = ToolkitPtr.Pin()->GetActiveSelectorIndex() == i;
+		Selector->SetActive(bIsActive);
+		TSharedPtr<SWidget> ButtonWidget = Selector->CreateSelectorButtonWidget();
+
+		if(ButtonWidget != nullptr)
+		{
+			SelectorsBox->AddSlot()
+			.AutoHeight()
+			[
+				ButtonWidget.ToSharedRef()
+			];
+
+			Selector->GetOnSelectSelector().AddLambda([this, i]()
+			{
+				ToolkitPtr.Pin()->SetActiveSelector(i);
+				RefreshTab();
+			});
+		}
+
+	}
+
 	VerticalBox->AddSlot()
 	[
 		PaintToolsBox.ToSharedRef()
 	];
+
+	VerticalBox->AddSlot()
+	[
+		SelectorsBox.ToSharedRef()
+	];
+
 
 	VerticalBox->AddSlot()
 	.AutoHeight()

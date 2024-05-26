@@ -12,20 +12,20 @@ void UDigumWorldEditor_AddTool::OnActivateTool(const FDigumWorldEditorToolParams
 	UDigumWorldAsset* Asset = InParams.Asset;
 	const int32 ActiveLayerIndex = InParams.LayerIndex;
 	const int32 ActiveSwatchIndex = InParams.SwatchINdex;
-	const int32 X = InParams.X;
-	const int32 Y = InParams.Y;
+	FDigumWorldAssetCoordinateArray Selection = InParams.Selection;
 	if(GEditor && Asset)
 	{
 		FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(ActiveSwatchIndex);
 		FDigumWorldAssetLayer* Layer = Asset->GetLayer(ActiveLayerIndex);
 		if(Swatch && Layer && Layer->IsVisible())
 		{
-			FName SwatchName = Swatch->SwatchName;
-			
-			FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(X, Y, SwatchName);
 			GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: AddCoordinate"));
 			Asset->Modify();
-			Layer->AddCoordinate(Coordinate);
+			for(const FDigumWorldAssetCoordinate& SelectionCoordinate : Selection.Coordinates)
+			{
+				Layer->AddCoordinate(SelectionCoordinate);
+			
+			}
 			GEditor->EndTransaction();
 		}
 	}

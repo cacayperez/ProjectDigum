@@ -34,20 +34,18 @@ void UDigumWorldEditor_DeleteTool::OnActivateTool(const FDigumWorldEditorToolPar
 	UDigumWorldAsset* Asset = InParams.Asset;
 	const int32 ActiveLayerIndex = InParams.LayerIndex;
 	const int32 ActiveSwatchIndex = InParams.SwatchINdex;
-	const int32 X = InParams.X;
-	const int32 Y = InParams.Y;
+	const FDigumWorldAssetCoordinateArray Selection = InParams.Selection;
 	if(GEditor && Asset)
 	{
-		FDigumWorldSwatchPaletteItem* Swatch = Asset->GetSwatch(ActiveSwatchIndex);
 		FDigumWorldAssetLayer* Layer = Asset->GetLayer(ActiveLayerIndex);
-		if(Swatch && Layer && Layer->IsVisible())
+		if(Layer->IsVisible())
 		{
-			FName SwatchName = Swatch->SwatchName;
-			
-			FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(X, Y, SwatchName);
 			GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: RemoveCoordinate"));
 			Asset->Modify();
-			Layer->RemoveCoordinate(X, Y);
+			for(const auto SelectionCoordinate : Selection.Coordinates)
+			{
+				Layer->RemoveCoordinate(SelectionCoordinate.X, SelectionCoordinate.Y);
+			}
 			GEditor->EndTransaction();
 		}
 	}

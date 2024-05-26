@@ -4,6 +4,7 @@
 #include "SCanvasTab.h"
 
 #include "DigumWorldEditorToolkit.h"
+#include "SCanvasSelectionLayer.h"
 #include "SCanvasView.h"
 #include "SlateOptMacros.h"
 #include "Asset/DigumWorldAsset.h"
@@ -21,8 +22,9 @@ void SCanvasTab::OnSelectCanvasCoordinate(const int32& InX, const int32& InY)
 {
 	if(ToolkitPtr.IsValid())
 	{
+		ToolkitPtr.Pin()->AddSelection(InX, InY);
 		// ToolkitPtr.Pin()->AddCoordinateToActiveLayer(InX, InY);
-		ToolkitPtr.Pin()->CallToolAction(InX, InY);
+		// ToolkitPtr.Pin()->CallToolAction(InX, InY);
 		RefreshTab();
 	}
 }
@@ -31,6 +33,22 @@ void SCanvasTab::OnSetZoomFactor(const float& InZoomValue)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Zoom Factor: %f"), InZoomValue);
 	ZoomFactor = InZoomValue;
+}
+
+void SCanvasTab::OnBeginSelection()
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->BeginSelection();
+	}
+}
+
+void SCanvasTab::OnEndSelection()
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->EndSelection();
+	}
 }
 
 void SCanvasTab::DrawTab()
@@ -49,7 +67,11 @@ void SCanvasTab::DrawTab()
 					.ZoomFactor(ZoomFactor);
 
 		CanvasView->OnSelectCanvasCoordinate.AddSP(this, &SCanvasTab::OnSelectCanvasCoordinate);
+		CanvasView->OnBeginSelection.AddSP(this, &SCanvasTab::OnBeginSelection);
+		CanvasView->OnEndSelection.AddSP(this, &SCanvasTab::OnEndSelection);
 		CanvasView->OnSetZoomFactor.AddSP(this, &SCanvasTab::OnSetZoomFactor);
+
+		TSharedPtr<SCanvasSelectionLayer> SelectionLayer = SNew(SCanvasSelectionLayer);
 		
 		if(Asset)
 		{
@@ -60,6 +82,16 @@ void SCanvasTab::DrawTab()
 				.HAlign(HAlign_Center)
 				[
 					CanvasView.ToSharedRef()
+				]
+			];
+
+			_Container->AddSlot()
+			[
+				SNew(SBox)
+				.VAlign(VAlign_Fill)
+				.HAlign(HAlign_Fill)
+				[
+					SelectionLayer.ToSharedRef()
 				]
 			];
 		}

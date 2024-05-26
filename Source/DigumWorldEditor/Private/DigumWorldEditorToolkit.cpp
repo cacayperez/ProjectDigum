@@ -4,6 +4,7 @@
 #include "Asset/DigumWorldAsset.h"
 #include "Objects/DigumWorldEditorSwatch.h"
 #include "Selector/DigumWorldEditorSelector.h"
+#include "Selector/DigumWorldEditorSelector_Single.h"
 #include "Tools/DigumWorldEditor_AddTool.h"
 #include "Tools/DigumWorldEditor_DeleteTool.h"
 #include "Tools/DigumWorldEditor_FillTool.h"
@@ -177,7 +178,13 @@ void FDigumWorldEditorToolkit::InitializeTools()
 
 void FDigumWorldEditorToolkit::InitializeSelectors()
 {
-	Selectors.Add(NewObject<UDigumWorldEditorSelector>());
+	UDigumWorldEditorSelector_Single* Selector_Single = NewObject<UDigumWorldEditorSelector_Single>();
+	Selector_Single->GetOnBeginSelection().AddSP(this, &FDigumWorldEditorToolkit::OnBeginSelection);
+	Selector_Single->GetOnEndSelection().AddSP(this, &FDigumWorldEditorToolkit::OnEndSelection);
+	Selector_Single->GetOnSetSelection().AddSP(this, &FDigumWorldEditorToolkit::OnSetSelection);
+	// Selector_Single-
+	
+	Selectors.Add(Selector_Single);
 }
 
 UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
@@ -188,6 +195,26 @@ UDigumWorldEditorTool* FDigumWorldEditorToolkit::GetActivePaintTool() const
 	}
 
 	return nullptr;
+}
+
+void FDigumWorldEditorToolkit::OnBeginSelection()
+{
+	
+}
+
+void FDigumWorldEditorToolkit::OnEndSelection()
+{
+	UE_LOG(LogTemp, Warning, TEXT("End Selection"));
+	CallToolAction(-1,-1);
+
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->ClearSelection();
+	}
+}
+
+void FDigumWorldEditorToolkit::OnSetSelection(FDigumWorldAssetCoordinate DigumWorldAssetCoordinate)
+{
 }
 
 void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode,
@@ -338,19 +365,18 @@ void FDigumWorldEditorToolkit::AddCoordinateToActiveLayer(const int32& InX, cons
 
 void FDigumWorldEditorToolkit::CallToolAction(const int32& InLayerIndex, const int32& InX, const int32& InY)
 {
-	if(GetActivePaintTool())
+	if(GetActivePaintTool() && GetActiveSelector())
 	{
 		FDigumWorldEditorToolParams Params;
 		Params.Asset = GetAssetBeingEdited();
 		Params.LayerIndex = InLayerIndex;
 		Params.SwatchINdex = ActiveSwatchIndex;
-		Params.X = InX;
-		Params.Y = InY;
-		GetActivePaintTool()->ActivateTool(Params);	
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("No Active Tool"));
+		/*Params.X = InX;
+		Params.Y = InY;*/
+		Params.Selection = GetActiveSelector()->GetSelection();
+		GetActivePaintTool()->ActivateTool(Params);
+
+		GetActiveSelector()->ClearSelection();
 	}
 }
 
@@ -398,6 +424,11 @@ void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, con
 void FDigumWorldEditorToolkit::SetActiveTool(const int32& InToolIndex)
 {
 	ActivePaintToolIndex = InToolIndex;
+}
+
+void FDigumWorldEditorToolkit::SetActiveSelector(const int32& InSelectorIndex)
+{
+	ActiveSelectorIndex = InSelectorIndex;
 }
 
 TArray<UDigumWorldEditorTool*> FDigumWorldEditorToolkit::GetPaintTools()
@@ -450,10 +481,29 @@ bool FDigumWorldEditorToolkit::IsLeftButtonHeldDown() const
 	return bHeldDown;
 }
 
-void FDigumWorldEditorToolkit::BeginSelection(const int32& InX, const int32& InY)
+void FDigumWorldEditorToolkit::BeginSelection()
 {
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->BeginSelection();
+	}
 }
 
-void FDigumWorldEditorToolkit::EndSelection(const int32& InX, const int32& InY)
+void FDigumWorldEditorToolkit::AddSelection(const int32& InX, const int32& InY)
 {
+	if(GetActiveSelector())
+	{
+		const FDigumWorldSwatchPaletteItem* Swatch = GetAssetBeingEdited()->GetSwatch(ActiveSwatchIndex);
+		const FDigumWorldAssetCoordinate Coordinate = FDigumWorldAssetCoordinate(InX, InY, Swatch->SwatchName);
+		GetActiveSelector()->AddSelection(Coordinate);
+	}
 }
+
+void FDigumWorldEditorToolkit::EndSelection()
+{
+	if(GetActiveSelector())
+	{
+		GetActiveSelector()->EndSelection();
+	}
+}
+
