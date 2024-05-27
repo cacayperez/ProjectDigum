@@ -66,12 +66,6 @@ public:
 	}
 };
 
-void FDigumWorldEditorToolkit::OnLayerUpdated()
-{
-	
-}
-
-
 TSharedRef<SDockTab> FDigumWorldEditorToolkit::SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs)
 {
 	TSharedPtr<FDigumWorldEditorToolkit> WorldEditorToolkit = SharedThis(this);
@@ -236,6 +230,7 @@ void FDigumWorldEditorToolkit::Initialize(UDigumWorldAsset* InWorldAssetBeingEdi
 {
 	InitializeTools();
 	InitializeSelectors();
+	
 	AssetBeingEdited = InWorldAssetBeingEdited;
 	const TSharedRef<FTabManager::FLayout> StandaloneDefaultLayout = FTabManager::NewLayout("Standalone_DigumWorldEditor_Layout_v1")
 	->AddArea
@@ -339,10 +334,6 @@ void FDigumWorldEditorToolkit::SetActiveSwatchIndex(const int32 InSwatchIndex)
 	ActiveSwatchIndex = InSwatchIndex;
 }
 
-void FDigumWorldEditorToolkit::PlaceCoordinate(const int32& InX, const int32& InY)
-{
-}
-
 int32 FDigumWorldEditorToolkit::GetActiveLayerIndex() const
 {
 	return ActiveLayerIndex;
@@ -385,8 +376,6 @@ void FDigumWorldEditorToolkit::CallToolAction(const int32& InLayerIndex, const i
 		Params.Asset = GetAssetBeingEdited();
 		Params.LayerIndex = InLayerIndex;
 		Params.SwatchINdex = ActiveSwatchIndex;
-		/*Params.X = InX;
-		Params.Y = InY;*/
 		Params.Selection = GetActiveSelector()->GetSelection();
 		GetActivePaintTool()->ActivateTool(Params);
 
@@ -529,7 +518,8 @@ void FDigumWorldEditorToolkit::EndSelection()
 void FDigumWorldEditorToolkit::SelectionGeometry(const FGeometry& Geometry,
 	FSlateWindowElementList& OutDrawElements, int32 LayerId)
 {
-	if(GetActiveSelector())
+	
+	if(GetActiveSelector() && IsToolkitWindowFocused())
 	{
 		GetActiveSelector()->SelectionGeometry(Geometry, OutDrawElements, LayerId);
 	}
@@ -541,6 +531,19 @@ void FDigumWorldEditorToolkit::SetZoomFactor(const float& InZoomValue)
 	if(GetActiveSelector())
 	{
 		GetActiveSelector()->SetZoomFactor(ZoomFactor);
+	}
+}
+
+bool FDigumWorldEditorToolkit::IsToolkitWindowFocused() const
+{
+	{
+		const TSharedPtr<SWindow> ToolkitWindow = TabManager->GetOwnerTab()->GetParentWindow();
+		if (ToolkitWindow.IsValid())
+		{
+			TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+			return ToolkitWindow == ActiveWindow;
+		}
+		return false;
 	}
 }
 

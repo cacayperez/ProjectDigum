@@ -19,7 +19,7 @@ public:
 	virtual FText GetBaseToolkitName() const override { return NSLOCTEXT("DigumWorldEditor", "DigumWorldEditor", "Digum World Editor"); }
 	virtual FString GetWorldCentricTabPrefix() const override { return NSLOCTEXT("DigumWorldEditor", "DigumWorldEditorTabPrefix", "DigumWorldEditor").ToString(); }
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
-	void OnLayerUpdated();
+
 
 
 protected:
@@ -49,7 +49,7 @@ protected:
 	void OnEndSelection();
 	void OnSetSelection(FDigumWorldAssetCoordinate DigumWorldAssetCoordinate);
 public:
-	void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
+void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type InMode, const TSharedPtr<class IToolkitHost>& InInitToolkitHost);
 	
 	UDigumWorldAsset* GetAssetBeingEdited() const { return AssetBeingEdited; };
 	void AddSwatchItem(UDigumWorldEditorSwatch* InSwatch);
@@ -60,7 +60,6 @@ public:
 	void DeleteActiveLayer();
 	void SetActiveLayerIndex(const int32 InLayerIndex);
 	void SetActiveSwatchIndex(const int32 InSwatchIndex);
-	void PlaceCoordinate(const int32& InX, const int32& InY);
 	int32 GetActiveLayerIndex() const;
 	int32 GetActiveSwatchIndex() const;
 	void AddCoordinate(const int32& InLayerIndex, const int32& InX, const int32& InY);
@@ -89,5 +88,6 @@ public:
 
 	void SelectionGeometry(const FGeometry& Geometry, FSlateWindowElementList& OutDrawElements, int32 LayerId);
 	void SetZoomFactor(const float& InZoomValue);
-	
+
+	bool IsToolkitWindowFocused() const;
 };
