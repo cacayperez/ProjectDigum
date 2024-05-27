@@ -19,6 +19,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 
 	// important to set this to true to avoid the performance hit of the old RemoveAt() behavior
 	bSupportRemoveAtSwap = true;
+	SetCastShadow(false);
 }
 
 bool UDigumWorldISMComponent::RemoveInstanceInternal_Custom(int32 InstanceIndex, bool InstanceAlreadyRemoved)
