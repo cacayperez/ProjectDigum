@@ -41,8 +41,14 @@ public:
 	bool HasValidItem() const { return ItemProperties.IsValid(); }
 	FName GetItemID() const { return ItemProperties.ItemID; }
 	int32 GetAmount() const { return ItemProperties.ItemAmount; }
-	int32 GetInventoryIndex() const { return InventoryIndex; } 
-	void SetAmount(const int32 InAmount) { ItemProperties.ItemAmount = InAmount; }
+	int32 GetInventoryIndex() const { return InventoryIndex; }
+	int32 GetStackSize() const;
+	int32 GetItemAmount() const;
+	void SetAmount(const int32& InAmount) { ItemProperties.ItemAmount = InAmount; }
+	// returns stack excess
+	int32 IncrementAmount(const int32& InAmount);
+	// returns remaining amount
+	void DecrementAmount(const int32& InAmount);
 	UDigumItem* GetItemObject() const { return ItemObject.Get(); }
 
 	
@@ -56,4 +62,5 @@ public:
 	TSubclassOf<ADigumItemActor> GetItemActorClass() const;
 
 	FOnInventorySlotContentChanged& GetOnInventorySlotContentChanged() { return OnInventorySlotContentChanged; }
+	FDigumItemProperties GetItemProperties() const;
 };

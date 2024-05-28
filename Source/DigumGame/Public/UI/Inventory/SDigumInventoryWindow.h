@@ -17,8 +17,8 @@ class DIGUMGAME_API SDigumInventoryWindow : public SDigumWindow
 {
 public:
 	 SLATE_BEGIN_ARGS(SDigumInventoryWindow)
-		 :	_GridHeight(5),
-			_GridWidth(5) {}
+		 :	_GridWidth(5),
+			_GridHeight(5) {}
 		SLATE_ATTRIBUTE(UDigumGameInventoryComponent*, InventoryComponent)
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
 		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)

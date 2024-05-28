@@ -10,6 +10,7 @@
 #include "Character/Miner/Components/DigumGameActionBarComponent.h"
 #include "Character/Miner/Components/DigumGameEquipComponent.h"
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/DigumActionComponent.h"
 #include "Components/DigumInventorySlot.h"
@@ -126,6 +127,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	ActionBarComponent = CreateDefaultSubobject<UDigumGameActionBarComponent>(TEXT("ActionBarComponent"));
 	ActionComponent = CreateDefaultSubobject<UDigumActionComponent>(TEXT("ActionComponent"));
 	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
+
 }
 
 void ADigumMinerCharacter::OnActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)
@@ -154,7 +156,7 @@ void ADigumMinerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Enable pickup detection
-	if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(true);
+	if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(false);
 	
 	// constraint movement to the xz plane
 	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, 1.0f, 0.0f));
@@ -377,11 +379,13 @@ void ADigumMinerCharacter::UpdateMeshScale()
 	{
 		Scale.X = FMath::Abs(Scale.X) * -1;
 		GetMesh()->SetRelativeScale3D(Scale);
+		// GetArrowComponent()->SetRelativeScale3D(Scale);
 	}
 	else
 	{
 		Scale.X = FMath::Abs(Scale.X);
 		GetMesh()->SetRelativeScale3D(Scale);
+		// GetArrowComponent()->SetRelativeScale3D(Scale);
 	}
 }
 

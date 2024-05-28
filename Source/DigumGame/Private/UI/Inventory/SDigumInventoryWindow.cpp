@@ -93,8 +93,8 @@ void SDigumInventoryWindow::StopDragItem()
 			if(InventoryComponent && ItemSlot)
 			{
 				const int32 Index = ItemSlot->InventoryIndex;
-				InventoryComponent->RemoveItemFromSlot(Index);
 				// TO-DO Call DropItemInWorld
+				InventoryComponent->TryDropItem(Index);
 			}
 		}
 	}

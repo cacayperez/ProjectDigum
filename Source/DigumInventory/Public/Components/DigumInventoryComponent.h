@@ -47,10 +47,13 @@ public:
 protected:
 
 	DECLARE_MULTICAST_DELEGATE(FOnInventoryContentChanged);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnItemDropped, const FDigumItemProperties);
 
 	FOnInventoryContentChanged OnInventoryContentChanged;
+	FOnItemDropped OnItemDropped;
 	
 	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
+	virtual void OnItemDrop(const FDigumItemProperties& InItemProperties);
 	// virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
 
 	
@@ -78,6 +81,9 @@ public:
 	T* GetItem(const int32 InSlotIndex) const;
 
 	FOnInventoryContentChanged& GetOnInventoryContentChangedDelegate() { return OnInventoryContentChanged; }
+	FOnItemDropped& GetOnItemDroppedDelegate() { return OnItemDropped; }
+	
+	void TryDropItem(const int32& InSlotIndex);
 };
 
 template <typename T>

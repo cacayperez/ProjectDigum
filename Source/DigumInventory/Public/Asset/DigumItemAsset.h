@@ -8,6 +8,7 @@
 #include "Engine/DataAsset.h"
 #include "DigumItemAsset.generated.h"
 
+class ADigumPickupActor;
 /**
  * 
  */
@@ -33,6 +34,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftClassPtr<ADigumItemActor> ItemActorClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftClassPtr<ADigumPickupActor> PickupActorClass;
 	
 	UTexture2D* GetItemTexture() const { return UDigumAssetManager::GetAsset<UTexture2D>(DisplayTexture); }
 	UMaterialInterface* GetItemMaterial() const { return UDigumAssetManager::GetAsset<UMaterialInterface>(DisplayMaterial); }

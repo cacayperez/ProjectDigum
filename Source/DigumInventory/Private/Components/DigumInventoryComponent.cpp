@@ -60,6 +60,10 @@ bool UDigumInventoryComponent::BuildItemProperties(const FDigumItemProperties& I
 	return false;
 }
 
+void UDigumInventoryComponent::OnItemDrop(const FDigumItemProperties& InItemProperties)
+{
+}
+
 UDigumInventorySlot* UDigumInventoryComponent::GetItemSlot(const int32 InIndex) const
 {
 	if(InventoryItems.IsValidIndex(InIndex))
@@ -218,7 +222,7 @@ bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const
 	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
 	if(Slot != nullptr)
 	{
-		Slot->Clear();
+		Slot->DecrementAmount(InAmount);
 		return true;
 	}
 	
@@ -235,20 +239,15 @@ TSubclassOf<ADigumItemActor> UDigumInventoryComponent::GetItemActorClass(const i
 	return nullptr;
 }
 
-/*
-template<typename T>
-T* UDigumInventoryComponent::GetItem(const int32 InSlotIndex) const
+void UDigumInventoryComponent::TryDropItem(const int32& InSlotIndex)
 {
-	static_assert(std::is_base_of<UDigumInventoryComponent, T>::value, "T must be a derived class of UDigumItem");
-	
-	/*UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
-	if(Slot != nullptr)
+	const UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	const FDigumItemProperties ItemProperties = Slot->GetItemProperties();
+	const int32 Amount = Slot->GetAmount();
+	if(RemoveItemFromSlot(InSlotIndex, Amount))
 	{
-		return Slot->GetItemObject();
-	}#1#
-	
-	return nullptr;
+		OnItemDrop(ItemProperties);
+		OnItemDropped.Broadcast(ItemProperties);
+	}
 }
-*/
-
 

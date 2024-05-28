@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Interface/DigumPickupInterface.h"
+#include "Properties/DigumItemProperties.h"
 #include "DigumPickupActor.generated.h"
 
 UCLASS()
@@ -24,4 +25,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnPickup(AActor* InPickupInstigator) override;
+	void SetItemProperties(const FDigumItemProperties& InItemProperties);
 };

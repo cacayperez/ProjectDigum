@@ -27,3 +27,7 @@ void ADigumPickupActor::Tick(float DeltaTime)
 void ADigumPickupActor::OnPickup(AActor* InPickupInstigator)
 {
 }
+
+void ADigumPickupActor::SetItemProperties(const FDigumItemProperties& InItemProperties)
+{
+}

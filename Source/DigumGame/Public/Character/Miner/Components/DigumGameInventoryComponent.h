@@ -17,6 +17,5 @@ class DIGUMGAME_API UDigumGameInventoryComponent : public UDigumInventoryCompone
 
 protected:
 	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem) override;
-	
-	
+	virtual void OnItemDrop(const FDigumItemProperties& InItemProperties) override;
 };
