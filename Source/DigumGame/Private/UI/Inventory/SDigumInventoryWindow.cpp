@@ -82,7 +82,6 @@ void SDigumInventoryWindow::StopDragItem()
 		// Assume that it is dropped in the world
 		if(bWidgetHandled == false && OutPayload != nullptr)
 		{
-			
 			UDigumGameInventoryComponent* InventoryComponent = WeakInventoryComponent.Get();
 			const UDigumInventorySlot* ItemSlot = Cast<UDigumInventorySlot>(OutPayload);
 			
@@ -95,7 +94,7 @@ void SDigumInventoryWindow::StopDragItem()
 			{
 				const int32 Index = ItemSlot->InventoryIndex;
 				InventoryComponent->RemoveItemFromSlot(Index);
-			
+				// TO-DO Call DropItemInWorld
 			}
 		}
 	}

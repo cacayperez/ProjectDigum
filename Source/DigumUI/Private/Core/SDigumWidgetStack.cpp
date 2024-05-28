@@ -15,19 +15,16 @@ SDigumWidgetStack::~SDigumWidgetStack()
 	StackItems.Empty();
 }
 
-void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder, const bool& bShouldFillAlign)
+void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder, EHorizontalAlignment HorizontalAlignment, EVerticalAlignment VerticalAlignment)
 {
 	const TSharedRef<SDigumWidget> Shared = Item.ToSharedRef();
-	EHorizontalAlignment HAlign = bShouldFillAlign ? HAlign_Fill : HAlign_Center;
-	EVerticalAlignment VAlign = bShouldFillAlign ? VAlign_Fill : VAlign_Center;
 	
 	AddSlot(ZOrder)
-	.HAlign(HAlign)
-	.VAlign(VAlign)
+	.HAlign(HorizontalAlignment)
+	.VAlign(VerticalAlignment)
 	[
 		Shared
 	];
-
 	Shared->SetParentContainer(SharedThis(this));
 	StackItems.Add(Shared);
 }
@@ -79,15 +76,19 @@ void SDigumWidgetStack::Tick(const FGeometry& AllottedGeometry, const double InC
 
 bool SDigumWidgetStack::DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const
 {
-	for(const TSharedRef<SDigumWidget>& Item : StackItems)
+	if(StackItems.IsEmpty()) return false;
+
+	// Start loop at the end of the array (top of the stack)
+    const int32 LastIndex = (StackItems.Num() - 1 >= 0) ? StackItems.Num() - 1 : 0;
+	for(int32 i = LastIndex; i >= 0; i--)
 	{
+		const TSharedRef<SDigumWidget>& Item = StackItems[i];
 		if(Item->GetWidgetGeometry().IsUnderLocation(Position))
 		{
 			OutWidget = Item;
 			return true;
 		}
 	}
-
 	return false;
 }
 
@@ -101,7 +102,7 @@ bool SDigumWidgetStack::SupportsKeyboardFocus() const
 	return true;
 }
 
-void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item, const bool& bShouldFillAlign)
+void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item, EHorizontalAlignment HorizontalAlignment, EVerticalAlignment VerticalAlignment)
 {
 	if(Item == nullptr)
 	{
@@ -116,18 +117,18 @@ void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item, con
 	}
 	else
 	{
-		AddToStack_Internal(Item, ZOrder, bShouldFillAlign);
+		AddToStack_Internal(Item, ZOrder, HorizontalAlignment, VerticalAlignment);
 	}
 }
 
-void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject, const bool& bShouldFillAlign)
+void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject, EHorizontalAlignment HorizontalAlignment, EVerticalAlignment VerticalAlignment)
 {
 	if(WidgetObject == nullptr)
 	{
 		return;
 	}
 
-	AddItemToStack(WidgetObject->GetWidget(), bShouldFillAlign);
+	AddItemToStack(WidgetObject->GetWidget(), HorizontalAlignment, VerticalAlignment);
 }
 
 void SDigumWidgetStack::RemoveWidget(const TSharedPtr<SDigumWidget>& Item)
@@ -141,7 +142,7 @@ void SDigumWidgetStack::AddDraggableItemToStack(const TSharedPtr<SDigumDragWidge
 	{
 		bHasDraggedWidget = true;
 		DraggedWidget = Item;
-		AddItemToStack(Item);
+		AddItemToStack(Item, EHorizontalAlignment::HAlign_Center, EVerticalAlignment::VAlign_Center);
 	}
 }
 

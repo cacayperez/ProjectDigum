@@ -44,7 +44,6 @@ TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateWindow()
 TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateBackground()
 {
 	TSharedPtr<SOverlay> Widget = SNew(SOverlay);
-
 	UMaterialInterface* Material = BackgroundMaterialAttribute.Get();
 	const FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get()));
 
@@ -68,12 +67,14 @@ void SDigumActionBarWindow::OnReceiveDropPayload(UObject* InPayload)
 	UE_LOG(LogTemp, Warning, TEXT("SDigumActionBarWindow::OnReceiveDropPayload - Not Implemented"));
 }
 
+
 void SDigumActionBarWindow::DrawWindow()
 {
+	ActionBarWindow = OnCreateWindow();
 	_Container->ClearChildren();
 	_Container->AddSlot()
 	[
-		OnCreateWindow().ToSharedRef()
+		ActionBarWindow.ToSharedRef()
 	];
 }
 

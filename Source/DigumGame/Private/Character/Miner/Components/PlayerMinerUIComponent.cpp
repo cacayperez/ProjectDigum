@@ -150,7 +150,7 @@ void UPlayerMinerUIComponent::InitializeActionBarWidget()
 		{
 			// InventoryWidget->OnCreateWidget();
 			ActionBarWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
-			WidgetStack->AddItemToStack(ActionBarWidget, true);
+			WidgetStack->AddItemToStack(ActionBarWidget, EHorizontalAlignment::HAlign_Center, EVerticalAlignment::VAlign_Bottom);
 		}
 		
 	}
