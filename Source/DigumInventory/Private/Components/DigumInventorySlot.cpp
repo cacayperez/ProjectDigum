@@ -52,6 +52,7 @@ void UDigumInventorySlot::SwapContent(UDigumInventorySlot* InOtherSlot)
 	
 	SetItemProperties(OtherProperties);
 	SetItemObject(OtherItemObject);
+	OnInventorySlotContentChanged.Broadcast();
 }
 
 UTexture2D* UDigumInventorySlot::GetItemTexture() const

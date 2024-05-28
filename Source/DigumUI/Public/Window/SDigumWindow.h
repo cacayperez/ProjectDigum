@@ -39,8 +39,10 @@ protected:
 	TAttribute<FDigumWindowStyle*> WindowStyle;
 	FVector2D StartDrag;
 	FVector2D DragMovePosition;
-	
-	bool bDragWindow = false;
+
+	bool bShowWindowHeader = false;
+	bool bEnableDragWindow = false;
+	bool bIsDraggingWindow = false;
 
 	TSharedPtr<SWidget> WindowHeader;
 	TSharedPtr<SWidget> WindowContent;
@@ -49,7 +51,7 @@ protected:
 	virtual TSharedPtr<SWidget> OnCreateContent();
 	virtual TSharedPtr<SWidget> OnCreateHeader();
 
-	void DrawWindow();
+	virtual void DrawWindow();
 public:
 
 	void ToggleVisibility();

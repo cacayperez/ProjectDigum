@@ -25,7 +25,7 @@ protected:
 	
 	TArray<TSharedRef<SDigumWidget>> StackItems;
 	
-	void AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder = 0);
+	void AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder = 0, const bool& bShouldFillAlign = false);
 	void RemoveFromStack_Internal(const TSharedPtr<SDigumWidget>& Item);
 	void ClearStack_Internal();
 	bool DoesWidgetExist(const TSharedPtr<SDigumWidget>& Item) const;
@@ -39,8 +39,8 @@ protected:
 	virtual bool IsInteractable() const override;
 	virtual bool SupportsKeyboardFocus() const override;
 public:
-	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item);
-	void AddItemToStack(const UDigumWidget* WidgetObject);
+	void AddItemToStack(const TSharedPtr<SDigumWidget>& Item, const bool& bShouldFillAlign = false);
+	void AddItemToStack(const UDigumWidget* WidgetObject, const bool& bShouldFillAlign = false);
 	void RemoveWidget(const TSharedPtr<SDigumWidget>& Item);
 	void AddDraggableItemToStack(const TSharedPtr<SDigumDragWidget>& Item);
 	bool RemoveDraggedItemFromStack(UObject*& OutPayload);

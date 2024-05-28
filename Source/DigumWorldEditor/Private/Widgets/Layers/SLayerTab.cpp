@@ -15,14 +15,6 @@ void SLayerTab::Construct(const FArguments& InArgs, TSharedPtr<FDigumWorldEditor
 	SBaseTab::Construct(SBaseTab::FArguments(), InToolkit);
 }
 
-void SLayerTab::OnLayerUpdated()
-{
-	if(ToolkitPtr.IsValid())
-	{
-		ToolkitPtr.Pin()->OnLayerUpdated();
-	}
-}
-
 void SLayerTab::OnSetLayerName(const int32& InLayerIndex, const FText& Text)
 {
 	if(ToolkitPtr.IsValid())

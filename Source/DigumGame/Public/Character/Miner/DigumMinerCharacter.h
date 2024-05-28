@@ -122,9 +122,11 @@ public:
 	virtual void SelectActionBar_4();
 
 	void UpdateMeshScale();
+	void OnInventoryContentChanged();
 
 	UFUNCTION()
 	void ActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
+	
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }

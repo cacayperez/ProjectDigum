@@ -19,6 +19,7 @@ class DIGUMGAME_API UDigumInventoryWidget : public UDigumWindow
 {
 	GENERATED_BODY()
 
+protected:
 	UPROPERTY(EditAnywhere, Category = "Digum Window")
 	TObjectPtr<UMaterialInterface> InventorySlotMaterial;
 	
@@ -28,5 +29,6 @@ public:
 	~UDigumInventoryWidget();
 	virtual void OnCreateWidget() override;
 	virtual TSharedPtr<SDigumWidget> GetWidget() const override;
+	void OnUpdateContent();
 	virtual void SetInventoryComponent(UDigumGameInventoryComponent* InventoryComponent);
 };

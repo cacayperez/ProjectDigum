@@ -30,28 +30,15 @@ void SDigumWidget::Construct(const FArguments& InArgs)
 	BackgroundMaterialAttribute = InArgs._BackgroundMaterial;
 	_ParentContainer = InArgs._ParentContainer.Get();
 	
-
-	_BGContainer = SNew(SOverlay);
 	_Container = SNew(SDigumWidgetStack);
 
-	UMaterialInterface* Material = BackgroundMaterialAttribute.Get();
-	const FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get()));
-
-	if(Material && MaterialBrush)
-	{
-		_BGContainer->AddSlot()
-		[
-			SNew(SImage)
-			.Image(MaterialBrush)
-		];
-	}
 	
 	ChildSlot
 	[
 		SNew(SOverlay)
 		+ SOverlay::Slot()
 		[
-			_BGContainer.ToSharedRef()
+			OnCreateBackground().ToSharedRef()
 		]
 		+ SOverlay::Slot()
 		[
@@ -188,6 +175,27 @@ void SDigumWidget::MouseClickLeftUp()
 FVector2D SDigumWidget::ComputeDesiredSize(float LayoutScaleMultiplier) const
 {
 	return FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get());
+}
+
+TSharedPtr<SWidget> SDigumWidget::OnCreateBackground()
+{
+	TSharedPtr<SOverlay> Widget = SNew(SOverlay);
+
+	UMaterialInterface* Material = BackgroundMaterialAttribute.Get();
+	const FSlateMaterialBrush* MaterialBrush = new FSlateMaterialBrush(*Material, FVector2D(WidthOverrideAttribute.Get(), HeightOverrideAttribute.Get()));
+
+	if(Material && MaterialBrush)
+	{
+		Widget->AddSlot()
+		.HAlign(HAlign_Center)
+		.VAlign(VAlign_Center)
+		[
+			SNew(SImage)
+			.Image(MaterialBrush)
+		];
+	}
+
+	return Widget;
 }
 
 bool SDigumWidget::CanBeginDrag() const

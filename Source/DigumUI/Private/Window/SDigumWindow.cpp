@@ -14,18 +14,25 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 void SDigumWindow::Construct(const FArguments& InArgs)
 {
 	WindowStyle = InArgs._WindowStyle;
+	
 	SDigumWidget::Construct(
 		SDigumWidget::FArguments()
 		.ParentContainer(InArgs._ParentContainer)
 		.BackgroundMaterial(InArgs._BackgroundMaterial)
 		.HeightOverride(InArgs._HeightOverride)
 		.WidthOverride(InArgs._WidthOverride));
-	
+
 }
 
 void SDigumWindow::OnConstruct()
 {
 	SDigumWidget::OnConstruct();
+
+	if(FDigumWindowStyle* Style = WindowStyle.Get())
+	{
+		bShowWindowHeader = Style->ShouldShowHeader();
+		bEnableDragWindow = Style->IsDraggable();
+	}
 	
 	DrawWindow();
 }
@@ -47,7 +54,7 @@ int32 SDigumWindow::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 
 void SDigumWindow::OnTick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	if(bDragWindow)
+	if(bIsDraggingWindow)
 	{
 		// TODO: Fix snapping issue
 		const FVector2D MouseCoords = FSlateApplication::Get().GetCursorPos();
@@ -60,23 +67,31 @@ void SDigumWindow::OnTick(const FGeometry& AllottedGeometry, const double InCurr
 
 TSharedPtr<SWidget> SDigumWindow::OnCreateWindow()
 {
-	return SNew(SBox)
-	.VAlign(VAlign_Fill)
-	.HAlign(HAlign_Fill)
-	[
-		SNew(SVerticalBox)
-		+ SVerticalBox::Slot()
+	TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);
+	
+	if(bShowWindowHeader)
+	{
+		VerticalBox->AddSlot()
 		.VAlign(VAlign_Center)
 		.AutoHeight()
 		[
 			OnCreateHeader().ToSharedRef()
-		]
-		+ SVerticalBox::Slot()
-		.VAlign(VAlign_Center)
-		.HAlign(HAlign_Center)
-		[
-			OnCreateContent().ToSharedRef()
-		]
+		];
+	}
+	
+	VerticalBox->AddSlot()
+	.VAlign(VAlign_Center)
+	.HAlign(HAlign_Center)
+	.FillHeight(1.0)
+	[
+		OnCreateContent().ToSharedRef()
+	];
+	
+	return SNew(SBox)
+	.VAlign(VAlign_Fill)
+	.HAlign(HAlign_Fill)
+	[
+		VerticalBox.ToSharedRef()
 	];
 	
 
@@ -99,20 +114,21 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()
 		.WindowStyle(WindowStyle.Get())
 		.HeightOverride(50)
 		.WidthOverride(WidthOverrideAttribute.Get());
-		Header->SetEnableDrag(true);
+	
+	Header->SetEnableDrag(bEnableDragWindow);
 	
 	Header->OnMouseDragStartDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
 		UE_LOG(LogTemp, Error, TEXT("I am dragging"));
 		MousePosition = DragOffset;
-		bDragWindow = true;
+		bIsDraggingWindow = true;
 	});
 
 	Header->OnMouseDragStopDelegate.AddLambda([this](const FVector2D& DragOffset)
 	{
 		UE_LOG(LogTemp, Error, TEXT("I am stopping drag"));
 		MousePosition = DragOffset;
-		bDragWindow = false;
+		bIsDraggingWindow = false;
 
 	});
 

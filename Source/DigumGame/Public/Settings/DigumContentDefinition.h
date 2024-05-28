@@ -7,6 +7,7 @@
 #include "DigumContentDefinition.generated.h"
 
 
+class UDigumActionBarWidget;
 class UDigumInventoryWidget;
 // Used for organizing primary game content, dlc, etc.
 USTRUCT(BlueprintType)
@@ -28,6 +29,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category="User Interface")
 	TSoftClassPtr<UDigumInventoryWidget> PlayerInventoryWidgetClass;
+
+	UPROPERTY(EditAnywhere, Category="User Interface")
+	TSoftClassPtr<UDigumActionBarWidget> PlayerActionBarWidgetClass;
 };
 
 /**

@@ -15,13 +15,15 @@ SDigumWidgetStack::~SDigumWidgetStack()
 	StackItems.Empty();
 }
 
-void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder)
+void SDigumWidgetStack::AddToStack_Internal(const TSharedPtr<SDigumWidget>& Item, const int32 ZOrder, const bool& bShouldFillAlign)
 {
 	const TSharedRef<SDigumWidget> Shared = Item.ToSharedRef();
+	EHorizontalAlignment HAlign = bShouldFillAlign ? HAlign_Fill : HAlign_Center;
+	EVerticalAlignment VAlign = bShouldFillAlign ? VAlign_Fill : VAlign_Center;
 	
 	AddSlot(ZOrder)
-	.HAlign(HAlign_Center)
-	.VAlign(VAlign_Center)
+	.HAlign(HAlign)
+	.VAlign(VAlign)
 	[
 		Shared
 	];
@@ -99,7 +101,7 @@ bool SDigumWidgetStack::SupportsKeyboardFocus() const
 	return true;
 }
 
-void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
+void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item, const bool& bShouldFillAlign)
 {
 	if(Item == nullptr)
 	{
@@ -114,18 +116,18 @@ void SDigumWidgetStack::AddItemToStack(const TSharedPtr<SDigumWidget>& Item)
 	}
 	else
 	{
-		AddToStack_Internal(Item, ZOrder);
+		AddToStack_Internal(Item, ZOrder, bShouldFillAlign);
 	}
 }
 
-void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject)
+void SDigumWidgetStack::AddItemToStack(const UDigumWidget* WidgetObject, const bool& bShouldFillAlign)
 {
 	if(WidgetObject == nullptr)
 	{
 		return;
 	}
 
-	AddItemToStack(WidgetObject->GetWidget());
+	AddItemToStack(WidgetObject->GetWidget(), bShouldFillAlign);
 }
 
 void SDigumWidgetStack::RemoveWidget(const TSharedPtr<SDigumWidget>& Item)

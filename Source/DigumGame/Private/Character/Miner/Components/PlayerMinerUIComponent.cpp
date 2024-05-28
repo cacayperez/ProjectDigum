@@ -4,9 +4,11 @@
 #include "Character/Miner/Components/PlayerMinerUIComponent.h"
 
 #include "Character/Miner/DigumMinerCharacter.h"
+#include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Core/SDigumWidgetStack.h"
 #include "Settings/DigumContentDefinition.h"
 #include "Settings/DigumGameDeveloperSettings.h"
+#include "UI/ActionBar/DigumActionBarWidget.h"
 #include "UI/Inventory/DigumInventoryWidget.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
 #include "Widgets/SWeakWidget.h"
@@ -92,7 +94,9 @@ void UPlayerMinerUIComponent::InitializeUI()
 			OwningController->bShowMouseCursor = true;
 		}
 
-		// Initialize Stuff
+		// Initialize Widgets
+		
+		InitializeActionBarWidget();
 		InitializeInventoryWidget();
 		InitializeCharacterMenuWidget();
 	}
@@ -124,6 +128,29 @@ void UPlayerMinerUIComponent::InitializeInventoryWidget()
 		{
 			// InventoryWidget->OnCreateWidget();
 			InventoryWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+		}
+		
+	}
+}
+
+void UPlayerMinerUIComponent::InitializeActionBarWidget()
+{
+	// TODO add default class to settings
+	if(ActionBarWidgetClass == nullptr)
+	{
+		const FDigumContentCategory* Content = UDigumGameDeveloperSettings::Get()->GetContentCategoryData(TEXT("Primary"));
+		ActionBarWidgetClass = Content->PlayerActionBarWidgetClass.LoadSynchronous();
+	}
+
+	if(ActionBarWidgetClass)
+	{
+		ActionBarWidget = UDigumWidget::Create<UDigumActionBarWidget>(this, ActionBarWidgetClass);
+	
+		if(ActionBarWidget)
+		{
+			// InventoryWidget->OnCreateWidget();
+			ActionBarWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+			WidgetStack->AddItemToStack(ActionBarWidget, true);
 		}
 		
 	}

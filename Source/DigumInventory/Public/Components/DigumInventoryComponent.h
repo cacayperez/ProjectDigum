@@ -40,11 +40,16 @@ public:
 	UDigumInventoryComponent(const FObjectInitializer& ObjectInitializer);
 
 	virtual void InitializeComponent() override;
+	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 protected:
 
+	DECLARE_MULTICAST_DELEGATE(FOnInventoryContentChanged);
+
+	FOnInventoryContentChanged OnInventoryContentChanged;
+	
 	virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
 	// virtual bool BuildItemProperties(const FDigumItemProperties& InItemProperties, UDigumItem*& OutBuiltItem);
 
@@ -58,17 +63,21 @@ private:
 	TArray<UDigumInventorySlot*> GetInventoryItems_Internal() const;
 	
 public:
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
 	FDigumInventoryInitProperties InitProperties;
 
 	UFUNCTION(BlueprintCallable, Category = "Digum Inventory", meta=(DisplayName="Get Inventory Items"))
 	TArray<UDigumInventorySlot*> GetInventoryItems() const;
 
+	void OnInventorySlotContentChanged();
 	bool RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount = 1);
 	TSubclassOf<ADigumItemActor> GetItemActorClass(const int32 InSlotIndex) const;
 	
 	template<typename T>
 	T* GetItem(const int32 InSlotIndex) const;
+
+	FOnInventoryContentChanged& GetOnInventoryContentChangedDelegate() { return OnInventoryContentChanged; }
 };
 
 template <typename T>

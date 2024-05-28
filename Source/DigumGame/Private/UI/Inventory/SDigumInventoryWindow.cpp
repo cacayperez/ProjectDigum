@@ -26,6 +26,8 @@ void SDigumInventoryWindow::Construct(const FArguments& InArgs)
 	bCanSupportFocus = true;
 	WeakInventoryComponent = InArgs._InventoryComponent.Get();
 	InventorySlotMaterialAttribute = InArgs._InventorySlotMaterial;
+	GridHeightAttribute = InArgs._GridHeight;
+	GridWidthAttribute = InArgs._GridWidth;
 	SDigumWindow::Construct(SDigumWindow::FArguments()
 		.WindowStyle(InArgs._WindowStyle)
 		.BackgroundMaterial(InArgs._BackgroundMaterial)
@@ -91,8 +93,8 @@ void SDigumInventoryWindow::StopDragItem()
 			
 			if(InventoryComponent && ItemSlot)
 			{
-				int32 Index = ItemSlot->InventoryIndex;
-				InventoryComponent->RemoveItemFromSlot(ItemSlot->InventoryIndex);
+				const int32 Index = ItemSlot->InventoryIndex;
+				InventoryComponent->RemoveItemFromSlot(Index);
 			
 			}
 		}
@@ -105,7 +107,12 @@ void SDigumInventoryWindow::StopDragItem()
 TSharedPtr<SWidget> SDigumInventoryWindow::OnCreateContent()
 {
 	InventoryGridPanel = SNew(SGridPanel);
-	return InventoryGridPanel;
+	return SNew(SVerticalBox)
+	+ SVerticalBox::Slot()
+	.VAlign(VAlign_Center)
+	[
+		InventoryGridPanel.ToSharedRef()
+	];
 }
 
 TSharedPtr<SDigumInventorySlot> SDigumInventoryWindow::CreateWidgetItem(UDigumInventorySlot* Item) const
@@ -134,25 +141,34 @@ void SDigumInventoryWindow::UpdateInventoryGridPanel()
 	if(InventoryComponent != nullptr)
 	{
 		TArray<UDigumInventorySlot*> InventoryItems = InventoryComponent->GetInventoryItems();
-		for(int32 i = 0; i < InventoryItems.Num(); i++)
+		const int32 Width = GridWidthAttribute.Get();
+		const int32 Height = GridHeightAttribute.Get();
+		int32 Index = 0;
+		const int32 MaxRows = FMath::CeilToInt(static_cast<float>(InventoryItems.Num() / Width));
+		for(int Row = 0; Row < Height; Row++)
 		{
-			int32 Row = i / GridWidth;
-			int32 Column = i % GridWidth;
-			TSharedPtr<SDigumInventorySlot> ItemWidget = CreateWidgetItem(InventoryItems[i]);
-			ItemWidget->SetInventoryWindow(SharedThis(this));
-			InventoryItemSlotsWidgets.Add(ItemWidget.ToSharedRef());
+			if(Row >= MaxRows) break;
 			
-			if(ItemWidget.IsValid())
+			for(int Column = 0; Column < Width; Column++)
 			{
-				InventoryGridPanel->AddSlot(Column, Row)
-				.HAlign(HAlign_Center)
-				.VAlign(VAlign_Center)
-				.Padding(3)
-				[
-					ItemWidget.ToSharedRef()
-				];
+				TSharedPtr<SDigumInventorySlot> ItemWidget = CreateWidgetItem(InventoryItems[Index]);
+				ItemWidget->SetInventoryWindow(SharedThis(this));
+				InventoryItemSlotsWidgets.Add(ItemWidget.ToSharedRef());
+				
+				if(ItemWidget.IsValid())
+				{
+					InventoryGridPanel->AddSlot(Column, Row)
+					.HAlign(HAlign_Center)
+					.VAlign(VAlign_Center)
+					.Padding(3)
+					[
+						ItemWidget.ToSharedRef()
+					];
+				}
+				Index++;
 			}
 		}
+		
 	}
 }
 

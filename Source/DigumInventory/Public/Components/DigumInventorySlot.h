@@ -22,9 +22,15 @@ class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 	TObjectPtr<UDigumItem> ItemObject;
 	
 public:
-	bool bEmpty = true;
 	
 	UDigumInventorySlot();
+
+protected:
+	DECLARE_MULTICAST_DELEGATE(FOnInventorySlotContentChanged);
+
+	FOnInventorySlotContentChanged OnInventorySlotContentChanged;
+public:
+	bool bEmpty = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
 	FDigumInventoryItemProperties ItemProperties;
@@ -48,4 +54,6 @@ public:
 	UTexture2D* GetItemTexture() const;
 	UMaterialInterface* GetDisplayMaterial();
 	TSubclassOf<ADigumItemActor> GetItemActorClass() const;
+
+	FOnInventorySlotContentChanged& GetOnInventorySlotContentChanged() { return OnInventorySlotContentChanged; }
 };

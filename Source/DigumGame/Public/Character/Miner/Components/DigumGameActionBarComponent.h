@@ -62,4 +62,5 @@ public:
 	
 
 	FOnActivateItemAction& OnActivateItemActionDelegate() { return OnActivateItemAction; }
+	int32 GetActiveActionIndex() const { return ActiveActionIndex; }
 };

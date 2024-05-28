@@ -30,6 +30,8 @@ void UDigumInventoryComponent::BeginPlay()
 		UDigumInventorySlot* Slot = NewObject<UDigumInventorySlot>(this);
 		Slot->InventoryIndex = i;
 		InventoryItems.Add(Slot);
+
+		Slot->GetOnInventorySlotContentChanged().AddUObject(this, &UDigumInventoryComponent::OnInventorySlotContentChanged);
 	}
 
 	for(const auto Property : InitProperties.DefaultItems)
@@ -204,6 +206,11 @@ TArray<UDigumInventorySlot*> UDigumInventoryComponent::GetInventoryItems_Interna
 TArray<UDigumInventorySlot*> UDigumInventoryComponent::GetInventoryItems() const
 {
 	return GetInventoryItems_Internal();
+}
+
+void UDigumInventoryComponent::OnInventorySlotContentChanged()
+{
+	OnInventoryContentChanged.Broadcast();
 }
 
 bool UDigumInventoryComponent::RemoveItemFromSlot(const int32 InSlotIndex, const int32 InAmount)

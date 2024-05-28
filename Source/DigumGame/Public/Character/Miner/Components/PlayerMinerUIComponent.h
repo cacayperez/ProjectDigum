@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PlayerMinerUIComponent.generated.h"
 
+class UDigumActionBarWidget;
 class UDigumWidget;
 class UDigumInventoryWidget;
 class SDigumWidget;
@@ -35,8 +36,14 @@ class DIGUMGAME_API UPlayerMinerUIComponent : public UActorComponent
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UDigumInventoryWidget> InventoryWidgetClass;
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UDigumActionBarWidget> ActionBarWidgetClass;
+
 	UPROPERTY()
 	TObjectPtr<UDigumInventoryWidget> InventoryWidget;
+
+	UPROPERTY()
+	TObjectPtr<UDigumActionBarWidget> ActionBarWidget;
 
 	UPROPERTY()
 	TObjectPtr<UDigumWidget> CharacterWidget;
@@ -67,6 +74,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void InitializeUI();
 	virtual void InitializeInventoryWidget();
+	virtual void InitializeActionBarWidget();
 	virtual void InitializeCharacterMenuWidget();
 
 };

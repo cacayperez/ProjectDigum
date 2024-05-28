@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "DigumWidget.h"
 #include "UObject/Object.h"
+#include "Window/SDigumWindow.h"
 #include "DigumWindow.generated.h"
 
 USTRUCT()
@@ -31,10 +32,19 @@ public:
 	FText TitleName;
 
 	UPROPERTY(EditAnywhere)
+	bool bShowHeader = true;
+
+	UPROPERTY(EditAnywhere)
+	bool bEnableWindowDrag = true;
+	
+	UPROPERTY(EditAnywhere)
 	FDigumFontSettings HeaderFontSettings;
 
 	UPROPERTY(EditAnywhere)
 	FDigumFontSettings ContentFontSettings;
+	
+	bool ShouldShowHeader() const { return bShowHeader; }
+	bool IsDraggable() const { return bEnableWindowDrag; }
 };
 /**
  * 

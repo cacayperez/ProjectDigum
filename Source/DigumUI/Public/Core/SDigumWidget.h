@@ -50,7 +50,7 @@ private:
 	
 protected:
 	mutable FGeometry WidgetGeometry;
-	TSharedPtr<SOverlay> _BGContainer;
+	// TSharedPtr<SOverlay> _BGContainer;
 	TSharedPtr<SDigumWidgetStack> _Container;
 	TSharedPtr<SDigumWidgetStack> _ParentContainer;
 	
@@ -70,6 +70,7 @@ protected:
 
 	// Override with height and width attribute
 	virtual FVector2D ComputeDesiredSize(float LayoutScaleMultiplier) const override;
+	virtual TSharedPtr<SWidget> OnCreateBackground();
 
 public:
 	FOnMouseClickLeftButton OnMouseClickLeftButtonDownDelegate;

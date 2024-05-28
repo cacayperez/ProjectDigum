@@ -190,6 +190,7 @@ void ADigumMinerCharacter::BeginPlay()
 	// Bind Action Bar Event
 	if(GetActionBarComponent() && GetInventoryComponent() && GetEquipComponent())
 	{
+		GetInventoryComponent()->GetOnInventoryContentChangedDelegate().AddUObject(this, &ADigumMinerCharacter::OnInventoryContentChanged);
 		TArray<UDigumInventorySlot*> Slots = GetInventoryComponent()->GetInventoryItems();
 		TArray<int32> SlotIndices;
 		for(int32 i = 0; i < 5; i++)
@@ -382,4 +383,37 @@ void ADigumMinerCharacter::UpdateMeshScale()
 		Scale.X = FMath::Abs(Scale.X);
 		GetMesh()->SetRelativeScale3D(Scale);
 	}
+}
+
+void ADigumMinerCharacter::OnInventoryContentChanged()
+{
+	// Check for inventory and active action mismatch;
+	if(GetActionBarComponent() && GetInventoryComponent() && GetEquipComponent())
+	{
+		const int32 ActiveActionIndex = GetActionBarComponent()->GetActiveActionIndex();
+		ADigumItemActor* ItemActor = GetEquipComponent()->GetEquippedItemActor(EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+		if(ActiveActionIndex != INDEX_NONE)
+		{
+			UE_LOG(LogDigumMinerCharacter, Warning, TEXT("ActiveActionIndex: %d"), ActiveActionIndex);
+			const TSubclassOf<ADigumItemActor> ItemActorClass = GetInventoryComponent()->GetItemActorClass(ActiveActionIndex);
+
+			// Check if item actor is already equipped
+			if(ItemActorClass && !ItemActor)
+			{
+				EquipItem(ActiveActionIndex);
+			}
+
+			// Check if item actor has been removed
+			if(!ItemActorClass && ItemActor)
+			{
+				GetEquipComponent()->ClearEquippedItem(EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+			}
+
+			// Check if item actor is different
+			if(ItemActorClass && ItemActor && ItemActorClass != ItemActor->GetClass())
+			{
+				EquipItem(ActiveActionIndex);
+			}
+		}
+	}	
 }

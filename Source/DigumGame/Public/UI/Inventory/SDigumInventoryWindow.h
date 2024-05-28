@@ -16,12 +16,16 @@ struct FDigumWindowStyle;
 class DIGUMGAME_API SDigumInventoryWindow : public SDigumWindow
 {
 public:
-	 SLATE_BEGIN_ARGS(SDigumInventoryWindow){}
+	 SLATE_BEGIN_ARGS(SDigumInventoryWindow)
+		 :	_GridHeight(5),
+			_GridWidth(5) {}
 		SLATE_ATTRIBUTE(UDigumGameInventoryComponent*, InventoryComponent)
 		SLATE_ATTRIBUTE(TSharedPtr<SDigumWidgetStack>, ParentContainer)
 		SLATE_ATTRIBUTE(UMaterialInterface*, BackgroundMaterial)
 		SLATE_ATTRIBUTE(UMaterialInterface*, InventorySlotMaterial)
 		SLATE_ATTRIBUTE(FDigumWindowStyle*, WindowStyle);
+		SLATE_ATTRIBUTE(int32, GridWidth)
+		SLATE_ATTRIBUTE(int32, GridHeight)
 		SLATE_ATTRIBUTE(float, HeightOverride)
 		SLATE_ATTRIBUTE(float, WidthOverride)
 	 SLATE_END_ARGS()
@@ -35,10 +39,10 @@ public:
 
 protected:
 	TAttribute<UMaterialInterface*> InventorySlotMaterialAttribute;
+	TAttribute<int32> GridWidthAttribute;
+	TAttribute<int32> GridHeightAttribute;
 	
 	TSharedPtr<SGridPanel> InventoryGridPanel;
-	int32 GridWidth = 5;
-	int32 GridHeight = 5;
 	bool bIsTransactingItem = false;
 
 	TArray<TSharedRef<SDigumInventorySlot>> InventoryItemSlotsWidgets;
@@ -47,8 +51,7 @@ protected:
 	virtual TSharedPtr<SWidget> OnCreateContent() override;
 	virtual TSharedPtr<SDigumInventorySlot> CreateWidgetItem(UDigumInventorySlot* Item) const;
 
-	void UpdateInventoryGridPanel();
-
 public:
 	void SetInventoryComponent(UDigumGameInventoryComponent* InInventoryComponent);
+	void UpdateInventoryGridPanel();
 };

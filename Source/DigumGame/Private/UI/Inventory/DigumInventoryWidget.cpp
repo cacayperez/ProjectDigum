@@ -3,6 +3,7 @@
 
 #include "UI/Inventory/DigumInventoryWidget.h"
 
+#include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
 
 
@@ -31,8 +32,20 @@ TSharedPtr<SDigumWidget> UDigumInventoryWidget::GetWidget() const
 	return InventorySlate;
 }
 
-void UDigumInventoryWidget::SetInventoryComponent(UDigumGameInventoryComponent* InventoryComponent)
+void UDigumInventoryWidget::OnUpdateContent()
 {
 	if(InventorySlate)
+	{
+		InventorySlate->UpdateInventoryGridPanel();
+	}
+}
+
+void UDigumInventoryWidget::SetInventoryComponent(UDigumGameInventoryComponent* InventoryComponent)
+{
+	if(InventorySlate && InventoryComponent)
+	{
+		InventoryComponent->GetOnInventoryContentChangedDelegate().AddUObject(this, &UDigumInventoryWidget::OnUpdateContent);
 		InventorySlate->SetInventoryComponent(InventoryComponent);
+		
+	}
 }
