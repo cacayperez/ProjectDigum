@@ -236,7 +236,7 @@ TArray<int32> UDigumWorldAsset::GetHierarchies()
 
 	return Hierarchies;
 }
-
+#if WITH_EDITOR
 
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
@@ -254,4 +254,4 @@ void UDigumWorldAsset::EditorRefresh()
 {
 	OnDigumWorldAssetUpdated.Broadcast();
 }
-
+#endif
