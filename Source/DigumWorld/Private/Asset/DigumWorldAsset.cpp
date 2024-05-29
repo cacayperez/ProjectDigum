@@ -37,7 +37,9 @@ void UDigumWorldAsset::AddSwatchPaletteItem(FDigumWorldSwatchPaletteItem InSwatc
 		Swatches.Add(InSwatch);
 	}
 
+#if WITH_EDITOR
 	OnDigumWorldAssetUpdated.Broadcast();
+#endif
 }
 
 void UDigumWorldAsset::AddNewLayer()
@@ -45,7 +47,9 @@ void UDigumWorldAsset::AddNewLayer()
 	FDigumWorldAssetLayer NewLayer;
 	NewLayer.LayerName = FText::FromString("New Layer");
 	Layers.Add(NewLayer);
+#if WITH_EDITOR
 	OnDigumWorldAssetUpdated.Broadcast();
+#endif
 }
 
 void UDigumWorldAsset::UpdateLayer(int32 InIndex, const FDigumWorldAssetLayer& InLayer)
@@ -55,7 +59,9 @@ void UDigumWorldAsset::UpdateLayer(int32 InIndex, const FDigumWorldAssetLayer& I
 		UE_LOG(LogTemp, Warning, TEXT("TO: %s"), *InLayer.LayerName.ToString())
 		Layers[InIndex].LayerName = InLayer.LayerName;
 		Layers[InIndex].bIsVisible = InLayer.bIsVisible;
+#if WITH_EDITOR
 		OnDigumWorldAssetUpdated.Broadcast();
+#endif
 	}
 }
 
@@ -130,7 +136,9 @@ void UDigumWorldAsset::RemoveLayer(const int32& InIndex)
 	if(Layers.IsValidIndex(InIndex))
 	{
 		Layers.RemoveAt(InIndex);
+#if WITH_EDITOR
 		OnDigumWorldAssetUpdated.Broadcast();
+#endif
 	}
 
 }
@@ -140,7 +148,9 @@ void UDigumWorldAsset::DeleteLayer(int32 InIndex)
 	if(Layers.IsValidIndex(InIndex))
 	{
 		Layers.RemoveAt(InIndex);
+#if WITH_EDITOR
 		OnDigumWorldAssetUpdated.Broadcast();
+#endif
 	}
 }
 
@@ -150,7 +160,9 @@ void UDigumWorldAsset::SetLayerName(const int32& InLayerIndex, FText& InLayerNam
 	if(Layer)
 	{
 		Layer->SetLayerName(InLayerName);
+#if WITH_EDITOR
 		OnDigumWorldAssetUpdated.Broadcast();
+#endif
 	}
 }
 
@@ -160,14 +172,19 @@ void UDigumWorldAsset::SetLayerVisibility(const int32& InLayerIndex, const bool&
 	if(Layer)
 	{
 		Layer->SetVisibility(bInVisibility);
+#if WITH_EDITOR
 		OnDigumWorldAssetUpdated.Broadcast();
+#endif
 	}
 }
 
 void UDigumWorldAsset::RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch)
 {
 	Swatches.Remove(Swatch);
+#if WITH_EDITOR
 	OnDigumWorldAssetUpdated.Broadcast();
+#endif
+	
 }
 
 void UDigumWorldAsset::SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex)
@@ -181,6 +198,43 @@ void UDigumWorldAsset::SwapLayers(const int32& InLayerIndexA, const int32& InLay
 
 	GetLayers().Swap(StartIndex, EndIndex);
 	OutEndIndex = EndIndex;
+}
+
+TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderLayers()
+{
+	// TODO
+	TArray<int32> Hierarchies = GetHierarchies();
+
+	for(int32 HierarchyIndex : Hierarchies)
+	{
+		TArray<FDigumWorldAssetLayer> HierarchyLayers;
+		for(auto Layer : Layers)
+		{
+			if(Layer.HierarchyIndex == HierarchyIndex)
+			{
+				HierarchyLayers.Add(Layer);
+			}
+		}
+
+	}
+	
+	return {};
+}
+
+TArray<int32> UDigumWorldAsset::GetHierarchies()
+{
+	TArray<int32> Hierarchies;
+	for(auto Layer : Layers)
+	{
+		int32 Index = Layer.HierarchyIndex;
+
+		if(!Hierarchies.Contains(Index))
+		{
+			Hierarchies.Add(Index);
+		}
+	}
+
+	return Hierarchies;
 }
 
 
