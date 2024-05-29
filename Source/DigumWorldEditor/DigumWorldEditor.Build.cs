@@ -10,7 +10,6 @@ public class DigumWorldEditor : ModuleRules
             new string[]
             {
                 "Core", 
-                "UnrealEd",
                 "KismetWidgets",
                 "DigumWorld"
             }
@@ -21,6 +20,7 @@ public class DigumWorldEditor : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
+                "UnrealEd",
                 "Slate",
                 "SlateCore", 
                 "InputCore",
