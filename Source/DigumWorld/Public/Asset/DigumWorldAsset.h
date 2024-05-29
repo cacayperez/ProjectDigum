@@ -154,6 +154,10 @@ struct FDigumWorldAssetLayer
 
 	UPROPERTY()
 	bool bIsVisible = true;
+
+	// -1 for background, 0 for player, etc
+	UPROPERTY()
+	int32 HierarchyIndex = 0;
 	
 public:
 	TArray<FDigumWorldAssetCoordinate>& GetAllCoordinates();
@@ -230,7 +234,8 @@ public:
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 	void RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch);
 	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex);
-	
+	TArray<FDigumWorldAssetLayer> GetOrderLayers();
+	TArray<int32> GetHierarchies();
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

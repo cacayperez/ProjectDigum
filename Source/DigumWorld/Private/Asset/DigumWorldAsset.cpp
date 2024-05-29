@@ -224,15 +224,15 @@ TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderLayers()
 TArray<int32> UDigumWorldAsset::GetHierarchies()
 {
 	TArray<int32> Hierarchies;
-	for(auto Layer : Layers)
+	/*for(FDigumWorldAssetLayer* Layer : GetLayers)
 	{
-		int32 Index = Layer.HierarchyIndex;
+		int32 Index = Layer->HierarchyIndex;
 
 		if(!Hierarchies.Contains(Index))
 		{
 			Hierarchies.Add(Index);
 		}
-	}
+	}*/
 
 	return Hierarchies;
 }
