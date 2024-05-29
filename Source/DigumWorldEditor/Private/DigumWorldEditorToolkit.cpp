@@ -424,6 +424,18 @@ void FDigumWorldEditorToolkit::SetLayerVisibility(const int32& InLayerIndex, con
 	}
 }
 
+void FDigumWorldEditorToolkit::SetLayerHierarchyIndex(const int32& InLayerIndex, const int32& InHierarchyIndex)
+{
+	if(GEditor && GetAssetBeingEdited())
+	{
+		GEditor->BeginTransaction(FText::FromString("DigumWorldEditor: SetLayerVisibility"));
+		GetAssetBeingEdited()->Modify();
+		GetAssetBeingEdited()->SetLayerHierarchy(InLayerIndex, InHierarchyIndex);
+		GEditor->EndTransaction();
+		
+	}
+}
+
 void FDigumWorldEditorToolkit::SetActiveTool(const int32& InToolIndex)
 {
 	ActivePaintToolIndex = InToolIndex;

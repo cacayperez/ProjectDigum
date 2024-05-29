@@ -25,7 +25,7 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 
 	UPROPERTY()
 	TArray<float> Health;
-	
+
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
@@ -36,7 +36,7 @@ protected:
 
 	bool GetInstancedHitIndex(const FVector HitLocation, const float& InMaxRange, int32& OutIndex);
 public:
-	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
+	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);
 	void DestroyInstance(const int32& InIndex = INDEX_NONE);

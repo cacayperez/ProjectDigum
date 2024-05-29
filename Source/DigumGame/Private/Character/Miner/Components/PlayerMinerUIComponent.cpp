@@ -95,7 +95,7 @@ void UPlayerMinerUIComponent::InitializeUI()
 			FInputModeGameAndUI InputMode;
 			InputMode.SetWidgetToFocus(WidgetStack);
 			InputMode.SetHideCursorDuringCapture(false);
-			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);	
+			// InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);	
 			OwningController->SetInputMode(InputMode);
 		
 			OwningController->bShowMouseCursor = true;

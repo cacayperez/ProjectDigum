@@ -51,16 +51,17 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 	if(WorldAsset == nullptr) return;
 
 	Editor_CleanActors();
-	
-	for(int32 i = 0; i < WorldAsset->GetLayers().Num(); i++)
+	TArray<FDigumWorldAssetLayer> OrderedLayers = WorldAsset->GetOrderedLayers();
+	for(int32 i = 0; i < OrderedLayers.Num(); i++)
 	{
-		TArray<FDigumWorldAssetCoordinate> Coordinates = WorldAsset->GetCoordinates(i);
+		TArray<FDigumWorldAssetCoordinate> Coordinates = OrderedLayers[i].GetAllCoordinates();
+		const int32 HierarchyIndex = OrderedLayers[i].HierarchyIndex;
 		TMap<FName, FDigumWorldAssetCoordinateArray> Group;
 		for(int32 c = 0; c < Coordinates.Num(); c++)
 		{
 			FName SwatchName = Coordinates[c].SwatchName;
 			FDigumWorldAssetCoordinate Coordinate = Coordinates[c];
-			UE_LOG(LogTemp, Warning, TEXT("SwatchName: %s"), *SwatchName.ToString());
+		
 			if(Group.Contains(SwatchName))
 			{
 				FDigumWorldAssetCoordinateArray& GroupCoordinates = Group[SwatchName];
@@ -79,7 +80,7 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 			FDigumWorldAssetCoordinateArray Value = It.Value();
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Owner = this;
-			
+			UE_LOG(LogTemp, Warning, TEXT("Key: %s"), *Key.ToString());
 			UDigumWorldSwatchAsset* Swatch = UDigumAssetManager::GetAsset<UDigumWorldSwatchAsset>(WorldAsset->GetSwatch(Key)->SoftSwatchAsset);
 
 			if(Swatch)
@@ -88,7 +89,7 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 				{
 					if(ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity))
 					{
-						NewActor->InitializeSwatchAsset(Swatch, Value);
+						NewActor->InitializeSwatchAsset(Swatch, Value, HierarchyIndex);
 						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 						NewActor->SetFolderPath(GetFolderPath());
 						NewActor->FinishSpawning(FTransform::Identity);

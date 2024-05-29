@@ -24,6 +24,7 @@ public:
 	void OnSetLayerName(const int32& InLayerIndex, const FText& Text);
 	void OnSetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB);
+	void OnSetLayerHierarchy(const int32& InLayerIndex, const int32& InHierarchy);
 
 protected:
 	TSharedPtr<SWidget> OnCreateLayerMenu();

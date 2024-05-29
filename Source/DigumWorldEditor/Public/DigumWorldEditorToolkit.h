@@ -21,7 +21,6 @@ public:
 	virtual FLinearColor GetWorldCentricTabColorScale() const override { return FLinearColor::Yellow; }
 
 
-
 protected:
 	TSharedRef<SDockTab> SpawnTab_Tools(const FSpawnTabArgs& SpawnTabArgs);
 	TSharedRef<SDockTab> SpawnTab_Details(const FSpawnTabArgs& SpawnTabArgs);
@@ -69,6 +68,7 @@ void Initialize(UDigumWorldAsset* InWorldAssetBeingEdited, EToolkitMode::Type In
 	void CallToolAction(const int32& InUtilityToolIndex);
 	void SetLayerName(const int32& InLayerIndex, const FText& InLayerName);
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInLayerVisibility);
+	void SetLayerHierarchyIndex(const int32& InLayerIndex, const int32& InHierarchyIndex);
 	void SetActiveTool(const int32& InToolIndex);
 	void SetActiveSelector(const int32& InSelectorIndex);
 

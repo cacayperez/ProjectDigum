@@ -15,6 +15,6 @@ class DIGUMWORLD_API UDigumWorldSettings : public UDeveloperSettings
 	GENERATED_BODY()
 public:
 	UPROPERTY(Config, EditAnywhere, Category = "World", meta=(DisplayName="Grid Size"))
-	float GridSize = 100.0f;
+	FVector GridSize = FVector(160.0f, 200.0f, 160.0f);
 	
 };

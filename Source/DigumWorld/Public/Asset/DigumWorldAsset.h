@@ -116,6 +116,15 @@ public:
 	}
 	int32 CoordinateCount() const { return Coordinates.Num(); }
 	FDigumWorldAssetCoordinate* GetAt(int32 InArrayIndex);
+	FDigumWorldAssetCoordinate* GetCoordinate(const int32& InX, const int32& InY)
+	{
+		FDigumWorldAssetCoordinate* Coordinate =  Coordinates.FindByPredicate([&InX, &InY](const FDigumWorldAssetCoordinate& Coordinate)
+		{
+			return InX == Coordinate.X && InY == Coordinate.Y;
+		});
+
+		return Coordinate;
+	}
 
 	
 };
@@ -190,6 +199,13 @@ public:
 	bool IsVisible() const { return bIsVisible; }
 	void SetVisibility(const bool InVisibility) { bIsVisible = InVisibility; }
 	void SetLayerName(const FText& InText) { LayerName = InText; }
+	FDigumWorldAssetCoordinate* GetCoordinate(const int32& InX, const int32& InY)
+	{
+		return CoordinateArray.GetCoordinate(InX, InY);
+	}
+
+	int32 GetHierarchyIndex() const { return HierarchyIndex; }
+	void SetHierarchyIndex(const int32& InIndex) { HierarchyIndex = InIndex; }
 };
 
 /**
@@ -234,8 +250,9 @@ public:
 	void SetLayerVisibility(const int32& InLayerIndex, const bool& bInVisibility);
 	void RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch);
 	void SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndexB, int32& OutEndIndex);
-	TArray<FDigumWorldAssetLayer> GetOrderLayers();
+	TArray<FDigumWorldAssetLayer> GetOrderedLayers();
 	TArray<int32> GetHierarchies();
+	void SetLayerHierarchy(const int32& InLayerIndex, const int32& InHierarchyIndex);
 
 #if WITH_EDITOR
 	DECLARE_MULTICAST_DELEGATE(FOnDigumWorldAssetUpdated);

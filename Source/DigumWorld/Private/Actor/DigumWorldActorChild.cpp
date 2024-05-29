@@ -15,6 +15,8 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 {
 	PrimaryActorTick.bCanEverTick = false;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
+	
+	
 }
 
 void ADigumWorldActorChild::BeginPlay()
@@ -48,7 +50,6 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 		FTransform InstanceTransform;
 		if(InstancedMeshComponent->GetInstanceTransform(i, InstanceTransform))
 		{
-		
 			
 			float DistanceSquared = (ActorLocation + InstanceTransform.GetLocation() - HitLocation).SizeSquared();
 			if(DistanceSquared < MinDistanceSquared)
@@ -70,14 +71,14 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 }
 
 void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
-                                                  FDigumWorldAssetCoordinateArray Coordinates)
+                                                  FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex)
 {
 	SwatchAsset = InSwatchAsset;
 	if(SwatchAsset)
 	{
 		Health.Empty();
 		InstancedMeshComponent->ClearInstances();
-		int32 GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+		FVector GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 		UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh);
 		if(Mesh)
 		{
@@ -87,15 +88,16 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is nullll"));
 		}
-		const float HalfGrid = GridSize * 0.5f;
+		const float HalfGridX = GridSize.X * 0.5f;
+		const float HalfGridY = GridSize.Y * 0.5f;
 		
 		for(int32 i = 0; i < Coordinates.CoordinateCount(); i++)
 		{
 			FDigumWorldAssetCoordinate* Coordinate = Coordinates.GetAt(i);
 			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
-			const float X = Coordinate->X * HalfGrid;
-			const float Y = 0.0f;
-			const float Z = -((Coordinate->Y * HalfGrid) + HalfGrid);
+			const float X = Coordinate->X * HalfGridX;
+			const float Y = HierarchyIndex * HalfGridY;
+			const float Z = -((Coordinate->Y * HalfGridX) + HalfGridX);
 			FVector Location = FVector(X, Y, Z);
 			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			
@@ -169,6 +171,7 @@ void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator
 		}
 	}
 }
+
 
 
 

@@ -178,6 +178,18 @@ void UDigumWorldAsset::SetLayerVisibility(const int32& InLayerIndex, const bool&
 	}
 }
 
+void UDigumWorldAsset::SetLayerHierarchy(const int32& InLayerIndex, const int32& InHierarchyIndex)
+{
+	FDigumWorldAssetLayer* Layer = GetLayer(InLayerIndex);
+	if(Layer)
+	{
+		Layer->SetHierarchyIndex(InHierarchyIndex);
+#if WITH_EDITOR
+		OnDigumWorldAssetUpdated.Broadcast();
+#endif
+	}
+}
+
 void UDigumWorldAsset::RemoveSwatch(const FDigumWorldSwatchPaletteItem& Swatch)
 {
 	Swatches.Remove(Swatch);
@@ -200,12 +212,13 @@ void UDigumWorldAsset::SwapLayers(const int32& InLayerIndexA, const int32& InLay
 	OutEndIndex = EndIndex;
 }
 
-TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderLayers()
+TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderedLayers()
 {
 	// TODO
 	TArray<int32> Hierarchies = GetHierarchies();
-
-	for(int32 HierarchyIndex : Hierarchies)
+	TArray<FDigumWorldAssetLayer> MergedLayersArray;
+	
+	for(const int32 HierarchyIndex : Hierarchies)
 	{
 		TArray<FDigumWorldAssetLayer> HierarchyLayers;
 		for(auto Layer : Layers)
@@ -216,26 +229,41 @@ TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderLayers()
 			}
 		}
 
+		FDigumWorldAssetLayer MergedLayer = FDigumWorldAssetLayer();
+		MergedLayer.HierarchyIndex = HierarchyIndex;
+		// start at end of layer
+		for(int32 i = HierarchyLayers.Num()-1; i >= 0 ; i--)
+		{
+			FDigumWorldAssetLayer Layer = HierarchyLayers[i];
+			for(FDigumWorldAssetCoordinate Coordinate : Layer.GetAllCoordinates())
+			{
+				MergedLayer.AddCoordinate(Coordinate);
+			}
+		}
+
+		MergedLayersArray.Add(MergedLayer);
 	}
 	
-	return {};
+	return MergedLayersArray;
 }
 
 TArray<int32> UDigumWorldAsset::GetHierarchies()
 {
 	TArray<int32> Hierarchies;
-	/*for(FDigumWorldAssetLayer* Layer : GetLayers)
+	for(FDigumWorldAssetLayer& Layer : GetLayers())
 	{
-		int32 Index = Layer->HierarchyIndex;
+		int32 Index = Layer.HierarchyIndex;
 
 		if(!Hierarchies.Contains(Index))
 		{
 			Hierarchies.Add(Index);
 		}
-	}*/
+	}
 
 	return Hierarchies;
 }
+
+
 #if WITH_EDITOR
 
 void UDigumWorldAsset::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

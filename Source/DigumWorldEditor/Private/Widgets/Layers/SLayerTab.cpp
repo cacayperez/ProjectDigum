@@ -39,6 +39,14 @@ void SLayerTab::SwapLayers(const int32& InLayerIndexA, const int32& InLayerIndex
 	}
 }
 
+void SLayerTab::OnSetLayerHierarchy(const int32& InLayerIndex, const int32& InHierarchy)
+{
+	if(ToolkitPtr.IsValid())
+	{
+		ToolkitPtr.Pin()->SetLayerHierarchyIndex(InLayerIndex, InHierarchy);
+	}
+}
+
 TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 {
 	TSharedPtr<SHorizontalBox> a = SNew(SHorizontalBox);
@@ -163,6 +171,11 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerList()
 			LayerItem->OnSetLayerVisibility.AddLambda([this, i](const bool& bInVisibility)
 			{
 				OnSetLayerVisibility(i, bInVisibility);
+			});
+
+			LayerItem->OnSetLayerHierarchy.AddLambda([this, i](const int32& InHierarchy)
+			{
+				OnSetLayerHierarchy(i, InHierarchy);
 			});
 
 			LayerItems.Add(LayerItem);

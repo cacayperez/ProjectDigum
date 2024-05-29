@@ -36,16 +36,22 @@ protected:
 	DECLARE_MULTICAST_DELEGATE(FOnLayerUpdated);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetLayerName, const FText&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetLayerVisibility, const bool&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetLayerHierarchy, const int32&);
 
 public:
 	FOnLayerUpdated OnLayerUpdated;
 	FOnSetLayerName OnSetLayerName;
 	FOnSetLayerVisibility OnSetLayerVisibility;
+	FOnSetLayerHierarchy OnSetLayerHierarchy;
 
 	ECheckBoxState GetVisibilityState() const;
 	TSharedPtr<SWidget> OnCreateVisibilityWidget();
 	FText GetLayerName() const;
 	void OnLayerNameCommitted(const FText& Text, ETextCommit::Type Arg);
 	TSharedPtr<SWidget> OnCreateLayerNameWidget();
+	void OnLayerHierarchyCommitted(const FText& Text, ETextCommit::Type Arg);
+	void OnLayerHierarchyChanged(const FText& Text);
+	FText GetLayerHierarchyText() const;
+	TSharedPtr<SWidget> OnCreateLayerHierarchyWidget();
 
 };
