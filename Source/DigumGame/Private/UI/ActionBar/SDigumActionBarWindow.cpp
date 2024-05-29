@@ -11,7 +11,7 @@ BEGIN_SLATE_FUNCTION_BUILD_OPTIMIZATION
 
 
 // overriden for custom alignment
-TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateWindow()
+/*TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateWindow()
 {
 	TSharedPtr<SVerticalBox> VerticalBox = SNew(SVerticalBox);
 	
@@ -35,13 +35,12 @@ TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateWindow()
 	
 	return SNew(SVerticalBox)
 	+ SVerticalBox::Slot()
-	.VAlign(VAlign_Bottom)
 	[
 		VerticalBox.ToSharedRef()
 	];
-}
+}*/
 
-TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateBackground()
+/*TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateBackground()
 {
 	TSharedPtr<SOverlay> Widget = SNew(SOverlay);
 	UMaterialInterface* Material = BackgroundMaterialAttribute.Get();
@@ -50,8 +49,6 @@ TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateBackground()
 	if(Material && MaterialBrush)
 	{
 		Widget->AddSlot()
-		.VAlign(VAlign_Bottom)
-		.HAlign(HAlign_Center)
 		[
 			SNew(SImage)
 			.Image(MaterialBrush)
@@ -59,7 +56,7 @@ TSharedPtr<SWidget> SDigumActionBarWindow::OnCreateBackground()
 	}
 
 	return Widget;
-}
+}*/
 
 void SDigumActionBarWindow::OnReceiveDropPayload(UObject* InPayload)
 {
@@ -68,6 +65,7 @@ void SDigumActionBarWindow::OnReceiveDropPayload(UObject* InPayload)
 }
 
 
+/*
 void SDigumActionBarWindow::DrawWindow()
 {
 	ActionBarWindow = OnCreateWindow();
@@ -77,5 +75,6 @@ void SDigumActionBarWindow::DrawWindow()
 		ActionBarWindow.ToSharedRef()
 	];
 }
+*/
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

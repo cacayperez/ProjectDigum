@@ -11,7 +11,9 @@
 #include "UI/ActionBar/DigumActionBarWidget.h"
 #include "UI/Inventory/DigumInventoryWidget.h"
 #include "UI/Inventory/SDigumInventoryWindow.h"
+#include "Widgets/SCanvas.h"
 #include "Widgets/SWeakWidget.h"
+#include "Widgets/Layout/SConstraintCanvas.h"
 #include "Window/SDigumWindow.h"
 
 
@@ -79,9 +81,14 @@ void UPlayerMinerUIComponent::InitializeUI()
 {
 	if(GEngine && GEngine->GameViewport)
 	{
+		FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+		FVector2D ViewportCenter = ViewportSize / 2;
 		WidgetStack = SNew(SDigumWidgetStack);
 		WidgetStack->SetCanTick(true);
+	
+		
 		GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(_Container, SWeakWidget).PossiblyNullContent(WidgetStack.ToSharedRef()));
+		
 		
 		if(OwningController.IsValid())
 		{
