@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Actor/DigumActor.h"
 #include "GameFramework/Actor.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumWorldActor.generated.h"
 
 class ADigumWorldActorChild;
@@ -31,6 +32,8 @@ public:
 	// Sets default values for this actor's properties
 	ADigumWorldActor(const FObjectInitializer& ObjectInitializer);
 
+	UFUNCTION()
+	void OnWorldRequest(const EDigumWorld_Request& InDigumWorld_Request, const FDigumWorldRequestParams& InDigumWorldRequestParams);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

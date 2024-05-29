@@ -19,3 +19,8 @@ ADigumItemActor::~ADigumItemActor()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ADigumItemActor::~ADigumItemActor"));
 }
+
+void ADigumItemActor::SetItemInstigator(AActor* InInstigator)
+{
+	ItemInstigator = InInstigator;
+}

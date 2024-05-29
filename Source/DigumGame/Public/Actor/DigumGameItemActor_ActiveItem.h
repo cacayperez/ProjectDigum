@@ -26,8 +26,6 @@ class DIGUMGAME_API ADigumGameItemActor_ActiveItem : public ADigumItemActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TObjectPtr<AActor> ItemInstigator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Item", meta=(AllowPrivateAccess="true"))
 	TMap<TEnumAsByte<EDigumGameItem_ActionKey>, TSoftClassPtr<UDigumAction>> Actions;
@@ -41,5 +39,5 @@ public:
 	TSubclassOf<UDigumAction> GetActionClass(const EDigumGameItem_ActionKey ActionKey) const;
 	virtual void OnActionBegin(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey);
 	virtual void OnActionFinished(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey);
-	AActor* GetItemInstigator() const { return ItemInstigator; }
+
 };

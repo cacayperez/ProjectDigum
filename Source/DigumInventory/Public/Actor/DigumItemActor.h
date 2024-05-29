@@ -16,12 +16,20 @@ class DIGUMINVENTORY_API ADigumItemActor : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Item", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
-;
-	
+
 public:
 	// Sets default values for this actor's properties
 	ADigumItemActor(const FObjectInitializer& ObjectInitializer);
 	~ADigumItemActor();
+
+protected:
+	UPROPERTY()
+	TObjectPtr<AActor> ItemInstigator;
+	
+public:
 	
 	FORCEINLINE UStaticMeshComponent* GetMesh() const { return Mesh; }
+	void SetItemInstigator(AActor* InInstigator);
+
+	AActor* GetItemInstigator() const { return ItemInstigator; }
 };

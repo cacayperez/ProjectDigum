@@ -70,10 +70,14 @@ void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> Item
 	{
 		USkeletalMeshComponent* Mesh = Character->GetMesh();
 		
-		ADigumItemActor* ItemActor = GetWorld()->SpawnActor<ADigumItemActor>(ItemActorClass, Character->GetActorLocation(), Character->GetActorRotation());
+		ADigumItemActor* ItemActor = GetWorld()->SpawnActorDeferred<ADigumItemActor>(ItemActorClass, FTransform::Identity);
 		if(ItemActor && Mesh)
 		{
+			ItemActor->SetActorLocation(Character->GetActorLocation());
+			ItemActor->SetItemInstigator(GetOwner());
+			ItemActor->FinishSpawning(FTransform::Identity);
 			ItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));
+			
 			SetEquippedItemActor(EquipSlot, ItemActor);
 		}
 	}
