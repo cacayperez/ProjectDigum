@@ -3,7 +3,6 @@
 
 #include "DigumAction.h"
 
-DEFINE_LOG_CATEGORY(LogDigumAction);
 
 UDigumAction::~UDigumAction()
 {

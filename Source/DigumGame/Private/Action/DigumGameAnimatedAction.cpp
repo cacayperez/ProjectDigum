@@ -7,7 +7,6 @@
 #include "Notifies/DigumActionBeginNotify.h"
 #include "Notifies/DigumActionEndNotify.h"
 
-DEFINE_LOG_CATEGORY(LogDigumAction);
 
 UDigumGameAnimatedAction::~UDigumGameAnimatedAction()
 {
@@ -60,7 +59,7 @@ void UDigumGameAnimatedAction::OnExecuteAction(AActor* InExecutor, UObject* InPa
 			}
 			else
 			{
-				UE_LOG(LogDigumAction, Error, TEXT("Failed to play animation montage"));
+				// UE_LOG(LogDigumAction, Error, TEXT("Failed to play animation montage"));
 				EndAction(EDigumActionResult::DigumAction_Failed);
 			}
 		}

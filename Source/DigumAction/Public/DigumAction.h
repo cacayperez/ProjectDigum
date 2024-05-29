@@ -6,7 +6,6 @@
 #include "UObject/Object.h"
 #include "DigumAction.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogDigumAction, Log, All);
 /**
  * 
  */
