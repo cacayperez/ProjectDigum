@@ -25,16 +25,19 @@ void UDigumWorldEditorSelector::AddSelection(FDigumWorldAssetCoordinate Coordina
 
 void UDigumWorldEditorSelector::ClearSelection()
 {
+	bEnableGeometry = false;
 	Selection.Clear();
 }
 
 void UDigumWorldEditorSelector::EndSelection()
 {
+	bEnableGeometry = false;
 	OnEndSelectionDelegate.Broadcast();
 }
 
 void UDigumWorldEditorSelector::BeginSelection()
 {
+	bEnableGeometry = true;
 }
 
 void UDigumWorldEditorSelector::SelectionGeometry(const FGeometry& AllottedGeometry,

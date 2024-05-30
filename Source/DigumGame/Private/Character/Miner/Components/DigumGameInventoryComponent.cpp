@@ -8,8 +8,10 @@
 #include "Properties/DigumItem.h"
 #include "Asset/DigumItemAsset.h"
 #include "Asset/DigumItemTable.h"
+#include "..\..\..\..\..\DigumCore\Public\Interface\IDigumActorInterface.h"
 #include "Item/DigumGameItem.h"
 #include "Item/DigumGameItemAsset.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Settings/DigumContentDefinition.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 
@@ -60,6 +62,24 @@ void UDigumGameInventoryComponent::OnItemDrop(const FDigumItemProperties& InItem
 {
 	const FName ContentCategory = InItemProperties.ContentCategory;
 	const FName ItemID = InItemProperties.ItemID;
+	FVector ForwardVector = FVector::ZeroVector;
+
+	if(GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UIDigumActorInterface::StaticClass()))
+	{
+		TScriptInterface<IIDigumActorInterface> Interface = GetOwner();
+		if(Interface)
+		{
+			ForwardVector = Interface->GetForwardDirection();
+		}
+		else
+		{
+			return;
+		}
+	}
+	else
+	{
+		return;
+	}
 	
 	if(const FDigumContentCategory* ContentCategoryData = UDigumGameDeveloperSettings::GetContentCategoryData(ContentCategory))
 	{
@@ -80,7 +100,7 @@ void UDigumGameInventoryComponent::OnItemDrop(const FDigumItemProperties& InItem
 				if(ADigumPickupActor* PickupActor = GetWorld()->SpawnActorDeferred<ADigumPickupActor>(PickupActorClass,FTransform::Identity))
 				{
 					const FVector Location = GetOwner()->GetActorLocation();
-					const FVector ForwardLocation = GetOwner()->GetActorForwardVector() * 100.0f;
+					const FVector ForwardLocation = ForwardVector * 200.0f;
 					const FVector SpawnLocation = Location + ForwardLocation;
 					PickupActor->SetActorLocation(SpawnLocation);
 					PickupActor->SetItemProperties(InItemProperties);
@@ -93,3 +113,13 @@ void UDigumGameInventoryComponent::OnItemDrop(const FDigumItemProperties& InItem
 		}
 	}
 }
+
+void UDigumGameInventoryComponent::FindBestDropLocation(UWorld* WorldContext, const float& InRadius, const FVector& InStartLocation,
+	FVector& OutDropLocation)
+{
+	TArray<FHitResult> OutResult;
+	const bool bHit = UKismetSystemLibrary::SphereTraceMulti(WorldContext, InStartLocation, InStartLocation, InRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, TArray<AActor*>(), EDrawDebugTrace::None, OutResult, true);
+
+	
+}
+

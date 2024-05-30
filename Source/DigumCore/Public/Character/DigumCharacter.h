@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "..\Interface\IDigumActorInterface.h"
 #include "DigumCharacter.generated.h"
 
 UCLASS(Abstract, Blueprintable, BlueprintType, ClassGroup = (DigumCore))
-class DIGUMCORE_API ADigumCharacter : public ACharacter
+class DIGUMCORE_API ADigumCharacter : public ACharacter, public IIDigumActorInterface
 {
 	GENERATED_BODY()
 
@@ -22,4 +23,5 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual FVector GetForwardDirection() const override;
 };

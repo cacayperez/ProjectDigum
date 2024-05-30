@@ -55,7 +55,7 @@ void UDigumInventorySlot::DecrementAmount(const int32& InAmount)
 	}
 }
 
-void UDigumInventorySlot::SetItemProperties(const FDigumInventoryItemProperties& InItemProperties)
+void UDigumInventorySlot::SetItemProperties(const FDigumItemProperties& InItemProperties)
 {
 	if(InItemProperties.IsValid())
 	{
@@ -87,8 +87,8 @@ void UDigumInventorySlot::SwapContent(UDigumInventorySlot* InOtherSlot)
 		return;
 	}
 	
-	const FDigumInventoryItemProperties ThisProperties = ItemProperties;
-	const FDigumInventoryItemProperties OtherProperties = InOtherSlot->ItemProperties;
+	const FDigumItemProperties ThisProperties = ItemProperties;
+	const FDigumItemProperties OtherProperties = InOtherSlot->ItemProperties;
 	UDigumItem* ThisItemObject = ItemObject.Get();
 	UDigumItem* OtherItemObject = InOtherSlot->GetItemObject();
 	

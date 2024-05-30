@@ -33,7 +33,7 @@ public:
 	bool bEmpty = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
-	FDigumInventoryItemProperties ItemProperties;
+	FDigumItemProperties ItemProperties;
 
 	UPROPERTY()
 	int32 InventoryIndex = INDEX_NONE;
@@ -52,7 +52,7 @@ public:
 	UDigumItem* GetItemObject() const { return ItemObject.Get(); }
 
 	
-	void SetItemProperties(const FDigumInventoryItemProperties& InItemProperties);
+	void SetItemProperties(const FDigumItemProperties& InItemProperties);
 	void SetItemObject(UDigumItem* InItemObject);
 	void Clear();
 	void SwapContent(UDigumInventorySlot* InOtherSlot);

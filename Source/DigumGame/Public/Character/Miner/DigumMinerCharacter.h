@@ -6,6 +6,7 @@
 #include "InputActionValue.h"
 #include "Character/DigumCharacter.h"
 #include "Interface/IDigumActionComponentInterface.h"
+#include "Interface/IDigumInventoryInterface.h"
 #include "DigumMinerCharacter.generated.h"
 
 
@@ -33,7 +34,7 @@ enum EDigumMinerState : uint8
 };
 
 UCLASS()
-class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigumActionComponentInterface
+class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigumActionComponentInterface, public IIDigumInventoryInterface
 {
 	GENERATED_BODY()
 	
@@ -126,12 +127,15 @@ public:
 
 	UFUNCTION()
 	void ActivateEquippedItemAction(const FDigumGameActionParams& InActionParams);
+
+	virtual FVector GetForwardDirection() const override;
+	virtual UDigumInventoryComponent* GetInventoryComponent() const override;
 	
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
 	FORCEINLINE UCameraComponent* GetCameraComponent() const { return CameraComponent; }
-	FORCEINLINE UDigumGameInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE UDigumPickupHandlerComponent* GetPickupHandlerComponent() const { return PickupHandlerComponent; }
+	FORCEINLINE UDigumGameInventoryComponent* GetGameInventoryComponent() const { return InventoryComponent;}
 	FORCEINLINE UDigumGameActionBarComponent* GetActionBarComponent() const { return ActionBarComponent; }
 	FORCEINLINE UDigumGameEquipComponent* GetEquipComponent() const { return EquipComponent; }
 	FORCEINLINE FOnToggleInventory& OnToggleInventoryDelegate() { return OnToggleInventory; }

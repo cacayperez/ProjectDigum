@@ -13,6 +13,7 @@ UDigumPickupHandlerComponent::UDigumPickupHandlerComponent()
 void UDigumPickupHandlerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	OnPickupEnabled(bPickupEnabled);
 }
 
 void UDigumPickupHandlerComponent::OnPickupEnabled(const bool bInEnabled)
@@ -33,7 +34,6 @@ void UDigumPickupHandlerComponent::UpdatePickupDetection()
 	{
 		return;
 	}
-
 	TArray<FHitResult> OutHitResult;
 	const FVector Start = GetOwner()->GetActorLocation();
 	const FVector End =  GetOwner()->GetActorLocation();
@@ -47,7 +47,7 @@ void UDigumPickupHandlerComponent::UpdatePickupDetection()
 				Start,
 				End,
 				PickupRadius,
-				UEngineTypes::ConvertToTraceType(ECC_Camera),
+				UEngineTypes::ConvertToTraceType(ECC_Visibility),
 				false,
 				TArray<AActor*>(),
 				EDrawDebugTrace::ForDuration,
@@ -62,7 +62,7 @@ void UDigumPickupHandlerComponent::UpdatePickupDetection()
 			Start,
 			End,
 			PickupRadius,
-			UEngineTypes::ConvertToTraceType(ECC_Camera),
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
 			false,
 			TArray<AActor*>(),
 			EDrawDebugTrace::None,
@@ -71,17 +71,25 @@ void UDigumPickupHandlerComponent::UpdatePickupDetection()
 		
 	if(bHitResult)
 	{
+		
 		for(auto HitResult : OutHitResult)
 		{
-			if(AActor* HitActor = HitResult.GetActor())
+			AActor* HitActor = HitResult.GetActor();
+			
+			// Check if the actor is a pickup
+			if(HitActor && HitActor->GetClass()->ImplementsInterface(UDigumPickupInterface::StaticClass()))
 			{
-				// Check if the actor is a pickup
-				if(HitActor->GetClass()->ImplementsInterface(UDigumPickupInterface::StaticClass()))
+				UE_LOG(LogTemp, Warning, TEXT("UDigumPickupHandlerComponent::UpdatePickupDetection"));
+				TScriptInterface<IDigumPickupInterface> Interface = HitActor;
+				if(Interface)
 				{
+					Interface->OnPickup(GetOwner());
 					OnPickupDetected.Broadcast(HitActor);
-					
 				}
+				
+				
 			}
+			
 		}
 	}
 }

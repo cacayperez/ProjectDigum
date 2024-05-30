@@ -31,6 +31,9 @@ protected:
 
 	UPROPERTY()
 	float ZoomFactor = 1.0f;
+
+	UPROPERTY()
+	bool bEnableGeometry = false;
 	
 	DECLARE_MULTICAST_DELEGATE(FOnSelectSelector);
 	DECLARE_MULTICAST_DELEGATE(FOnBeginSelection);
@@ -62,4 +65,5 @@ public:
 	void SetSquareSize(const float& InSquareSize) { SquareSize = InSquareSize; }
 	void SetSwatchName(const FName& InSwatchName) { SwatchName = InSwatchName; }
 	void SetZoomFactor(const float& InZoomFactor) { ZoomFactor = InZoomFactor; }
+	bool IsGeometryEnabled() const { return bEnableGeometry; }
 };

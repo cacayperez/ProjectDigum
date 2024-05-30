@@ -104,7 +104,7 @@ int32 UDigumInventoryComponent::FindEmptySlot() const
 	return INVALID_SLOT_INDEX;
 }
 
-bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemProperties& InItemProperties, int32& OutExcessAmount)
+bool UDigumInventoryComponent::AddItem_Internal(const FDigumItemProperties& InItemProperties, int32& OutExcessAmount)
 {
 	UDigumItem* BuiltItem = nullptr;
 	
@@ -166,7 +166,7 @@ bool UDigumInventoryComponent::AddItem_Internal(const FDigumInventoryItemPropert
 
 		if(EmptySlot != nullptr)
 		{
-			FDigumInventoryItemProperties NewItemProperties = InItemProperties;
+			FDigumItemProperties NewItemProperties = InItemProperties;
 			const int32 AmountToAdd = FMath::Min(RemainingAmount, StackSize);
 			NewItemProperties.ItemAmount = AmountToAdd;
 
@@ -250,4 +250,13 @@ void UDigumInventoryComponent::TryDropItem(const int32& InSlotIndex)
 		OnItemDropped.Broadcast(ItemProperties);
 	}
 }
+
+void UDigumInventoryComponent::TryAddItem(const FDigumItemProperties& InItemProperties, int32 OutExcessAmount)
+{
+	if(AddItem_Internal(InItemProperties, OutExcessAmount))
+	{
+		OnInventoryContentChanged.Broadcast();
+	}
+}
+
 

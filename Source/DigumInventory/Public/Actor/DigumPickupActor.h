@@ -13,6 +13,9 @@ class DIGUMINVENTORY_API ADigumPickupActor : public AActor, public IDigumPickupI
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	FDigumItemProperties ItemProperties;
+	
 public:
 	// Sets default values for this actor's properties
 	ADigumPickupActor();

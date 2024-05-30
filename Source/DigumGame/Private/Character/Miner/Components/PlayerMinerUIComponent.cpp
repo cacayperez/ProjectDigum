@@ -134,7 +134,7 @@ void UPlayerMinerUIComponent::InitializeInventoryWidget()
 		if(InventoryWidget)
 		{
 			// InventoryWidget->OnCreateWidget();
-			InventoryWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+			InventoryWidget->SetInventoryComponent(OwningMiner->GetGameInventoryComponent());
 		}
 		
 	}
@@ -156,7 +156,7 @@ void UPlayerMinerUIComponent::InitializeActionBarWidget()
 		if(ActionBarWidget)
 		{
 			// InventoryWidget->OnCreateWidget();
-			ActionBarWidget->SetInventoryComponent(OwningMiner->GetInventoryComponent());
+			ActionBarWidget->SetInventoryComponent(OwningMiner->GetGameInventoryComponent());
 			WidgetStack->AddItemToStack(ActionBarWidget, EHorizontalAlignment::HAlign_Center, EVerticalAlignment::VAlign_Bottom);
 		}
 		

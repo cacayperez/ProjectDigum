@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DigumInventorySlot.h"
+#include "Actor/DigumPickupActor.h"
 #include "Properties/DigumInventoryItemProperties.h"
 #include "DigumInventoryComponent.generated.h"
 
@@ -43,7 +44,8 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
+
+
 protected:
 
 	DECLARE_MULTICAST_DELEGATE(FOnInventoryContentChanged);
@@ -62,7 +64,7 @@ private:
 	bool FindItemsWithItemID(const FName& InItemID, TArray<UDigumInventorySlot*>& OutResult);
 	int32 FindEmptySlot() const;
 	
-	bool AddItem_Internal(const FDigumInventoryItemProperties& InItemProperties, int32& OutExcessAmount);
+	bool AddItem_Internal(const FDigumItemProperties& InItemProperties, int32& OutExcessAmount);
 	TArray<UDigumInventorySlot*> GetInventoryItems_Internal() const;
 	
 public:
@@ -84,6 +86,7 @@ public:
 	FOnItemDropped& GetOnItemDroppedDelegate() { return OnItemDropped; }
 	
 	void TryDropItem(const int32& InSlotIndex);
+	void TryAddItem(const FDigumItemProperties& InItemProperties, int32 OutExcessAmount = 0);
 };
 
 template <typename T>

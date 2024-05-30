@@ -156,7 +156,7 @@ void ADigumMinerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// Enable pickup detection
-	if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(false);
+	// if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(false);
 	
 	// constraint movement to the xz plane
 	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, 1.0f, 0.0f));
@@ -204,7 +204,9 @@ void ADigumMinerCharacter::BeginPlay()
 		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::ActivateEquippedItemAction);
 		EquipItem(GDigum_ActionBarIndex_0);
 	}
-	
+
+	// Pickup Handler
+
 }
 
 void ADigumMinerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -304,6 +306,16 @@ void ADigumMinerCharacter::ActivateEquippedItemAction(const FDigumGameActionPara
 	ActivateEquippedItemAction_Internal(InActionParams);
 
 	Server_TryActivateEquippedItemAction(InActionParams);
+}
+
+FVector ADigumMinerCharacter::GetForwardDirection() const
+{
+	return GetActorForwardVector() * FacedDirection;
+}
+
+UDigumInventoryComponent* ADigumMinerCharacter::GetInventoryComponent() const
+{
+	return InventoryComponent;
 }
 
 UDigumActionComponent* ADigumMinerCharacter::GetActionComponent() const

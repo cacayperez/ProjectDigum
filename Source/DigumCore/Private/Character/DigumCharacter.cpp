@@ -22,3 +22,8 @@ void ADigumCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
+
+FVector ADigumCharacter::GetForwardDirection() const
+{
+	return GetActorForwardVector();
+}

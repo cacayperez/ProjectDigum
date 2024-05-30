@@ -64,7 +64,7 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 				if(GetActiveLayerIndex() != INDEX_NONE)
 				{
 					const int32 IndexA = GetActiveLayerIndex();
-					const int32 IndexB = IndexA - 1;
+					const int32 IndexB = IndexA + 1;
 					SwapLayers(IndexA, IndexB);
 				}
 
@@ -80,7 +80,7 @@ TSharedPtr<SWidget> SLayerTab::OnCreateLayerMenu()
 				if(GetActiveLayerIndex() != INDEX_NONE)
 				{
 					const int32 IndexA = GetActiveLayerIndex();
-					const int32 IndexB = IndexA + 1;
+					const int32 IndexB = IndexA - 1;
 					SwapLayers(IndexA, IndexB);
 				}
 

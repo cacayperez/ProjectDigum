@@ -209,7 +209,11 @@ void UDigumWorldAsset::SwapLayers(const int32& InLayerIndexA, const int32& InLay
 	const int32 EndIndex = FMath::Clamp<int32>(InLayerIndexB, 0, LayerCount - 1);
 
 	GetLayers().Swap(StartIndex, EndIndex);
-	OutEndIndex = EndIndex;
+	OutEndIndex = StartIndex;
+
+#if WITH_EDITOR
+	OnDigumWorldAssetUpdated.Broadcast();
+#endif
 }
 
 TArray<FDigumWorldAssetLayer> UDigumWorldAsset::GetOrderedLayers()

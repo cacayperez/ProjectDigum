@@ -503,7 +503,7 @@ bool FDigumWorldEditorToolkit::IsLeftButtonHeldDown() const
 
 void FDigumWorldEditorToolkit::BeginSelection()
 {
-	if(GetActiveSelector())
+	if(GetActiveSelector() && IsToolkitWindowFocused())
 	{
 		GetActiveSelector()->BeginSelection();
 	}
@@ -521,7 +521,7 @@ void FDigumWorldEditorToolkit::AddSelection(const int32& InX, const int32& InY)
 
 void FDigumWorldEditorToolkit::EndSelection()
 {
-	if(GetActiveSelector())
+	if(GetActiveSelector() && IsToolkitWindowFocused())
 	{
 		GetActiveSelector()->EndSelection();
 	}
@@ -531,7 +531,7 @@ void FDigumWorldEditorToolkit::SelectionGeometry(const FGeometry& Geometry,
 	FSlateWindowElementList& OutDrawElements, int32 LayerId)
 {
 	
-	if(GetActiveSelector() && IsToolkitWindowFocused())
+	if(GetActiveSelector() && GetActiveSelector()->IsGeometryEnabled() && IsToolkitWindowFocused())
 	{
 		GetActiveSelector()->SelectionGeometry(Geometry, OutDrawElements, LayerId);
 	}

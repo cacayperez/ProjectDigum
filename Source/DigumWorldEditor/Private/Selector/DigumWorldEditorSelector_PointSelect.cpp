@@ -41,6 +41,11 @@ void UDigumWorldEditorSelector_PointSelect::AddSelection(FDigumWorldAssetCoordin
 void UDigumWorldEditorSelector_PointSelect::SelectionGeometry(const FGeometry& AllottedGeometry,
 	FSlateWindowElementList& OutDrawElements, int32 NewLayerId)
 {
+	if(IsGeometryEnabled() == false)
+	{
+		return;
+	}
+	
 	FVector2D CursporPos = FSlateApplication::Get().GetCursorPos();
 	FVector2D LocalCursorPos = AllottedGeometry.AbsoluteToLocal(CursporPos);
 

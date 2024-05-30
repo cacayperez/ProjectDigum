@@ -18,7 +18,7 @@ class DIGUMINVENTORY_API UDigumPickupHandlerComponent : public UActorComponent
 	bool bDebug = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Pickup Handler", meta=(AllowPrivateAccess="true"))
-	float PickupRadius = 100.0f;
+	float PickupRadius = 75.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Pickup Handler", meta=(AllowPrivateAccess="true"))
 	bool bPickupEnabled = true;
@@ -30,7 +30,7 @@ public:
 	UDigumPickupHandlerComponent();
 
 protected:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPickupDetected, AActor*, PickedupActor);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPickupDetected, AActor*);
 	
 	FOnPickupDetected OnPickupDetected;
 	FTimerHandle PickupTimerHandle;
@@ -45,5 +45,5 @@ public:
 	void SetPickupRadius(const float InRadius);
 	bool IsPickupEnabled() const;
 
-	FOnPickupDetected& OnPickupDetectedDelegate() { return OnPickupDetected; }
+	FOnPickupDetected& GetOnPickupDetectedDelegate() { return OnPickupDetected; }
 };
