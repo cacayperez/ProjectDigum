@@ -120,6 +120,6 @@ void UDigumGameInventoryComponent::FindBestDropLocation(UWorld* WorldContext, co
 	TArray<FHitResult> OutResult;
 	const bool bHit = UKismetSystemLibrary::SphereTraceMulti(WorldContext, InStartLocation, InStartLocation, InRadius, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, TArray<AActor*>(), EDrawDebugTrace::None, OutResult, true);
 
-	
+	// TODO
 }
 
