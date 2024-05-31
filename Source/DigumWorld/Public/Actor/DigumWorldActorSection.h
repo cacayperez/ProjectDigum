@@ -8,7 +8,7 @@
 
 class ADigumWorldActorChild;
 class UDigumWorldProceduralAsset;
-struct FDigumWorldProceduralMappedCoordinates;
+struct FDigumWorldProceduralCoordinateArray;
 
 UCLASS()
 class DIGUMWORLD_API ADigumWorldActorSection : public AActor
@@ -33,6 +33,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void InitializeSection(FDigumWorldProceduralMappedCoordinates* MappedCoordinates, UDigumWorldProceduralAsset* ProceduralAsset);
+	void InitializeSection(FDigumWorldProceduralCoordinateArray* CoordinateArray, UDigumWorldProceduralAsset* ProceduralAsset);
 	void DestroySection();
 };

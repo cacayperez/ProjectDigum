@@ -28,11 +28,12 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralMappedCoordinates* MappedCoordinates, UDigumWorldProceduralAsset* ProceduralAsset)
+void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralCoordinateArray* CoordinateArray, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	TMap<FName, FDigumWorldProceduralCoordinateArray>* Blocks = MappedCoordinates->GetMappedCoordinates();
-
-	for (auto It = Blocks->CreateConstIterator(); It; ++It)
+	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
+	CoordinateArray->MakeMappedCoordinates(Blocks);
+	
+	for (auto It = Blocks.CreateConstIterator(); It; ++It)
 	{
 		FName BlockID = It->Key;
 		FDigumWorldProceduralCoordinateArray BlockCoordinates = It->Value;

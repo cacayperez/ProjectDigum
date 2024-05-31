@@ -18,13 +18,16 @@ struct FDigumWorldProceduralCoordinate
 public:
 	FDigumWorldProceduralCoordinate() : X(0), Y(0) { }
 	FDigumWorldProceduralCoordinate(const int32& InX, const int32& InY) { X = InX; Y = InY; }
-	FDigumWorldProceduralCoordinate(const int32& InX, const int32& InY, const float InNoiseValue) { X = InX; Y = InY; NoiseValue = InNoiseValue;}
+	FDigumWorldProceduralCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const float InNoiseValue) { BlockID = InBlockID; X = InX; Y = InY; NoiseValue = InNoiseValue;}
 	
 	UPROPERTY()
 	int32 X;
 
 	UPROPERTY()
 	int32 Y;
+
+	UPROPERTY()
+	int32 Hierarchy = 0;
 	
 	UPROPERTY()
 	float NoiseValue = -1.0f;
@@ -48,10 +51,18 @@ public:
 		Coordinates.Add(Coordinate);
 	}
 
-	void AddCoordinate(const int32& InX, const int32& InY, const float InNoiseValue)
+	void AddCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const int32& InHierarchy, const float& InNoiseValue)
 	{
-		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InX, InY, InNoiseValue);
+		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InX, InY);
+		Coordinate.BlockID = InBlockID;
+		Coordinate.Hierarchy = InHierarchy;
+		Coordinate.NoiseValue = InNoiseValue;
 		Coordinates.Add(Coordinate);
+	}
+
+	void AddCoordinate(const FDigumWorldProceduralCoordinate& InCoordinate)
+	{
+		Coordinates.Add(InCoordinate);
 	}
 
 	int32 CoordinateCount() const { return Coordinates.Num(); }
@@ -60,6 +71,14 @@ public:
 	{
 		if(InIndex < 0 || InIndex >= Coordinates.Num()) return nullptr;
 		return &Coordinates[InIndex];
+	}
+
+	void MakeMappedCoordinates(TMap<FName, FDigumWorldProceduralCoordinateArray>& OutMappedCoordinates)
+	{
+		for(FDigumWorldProceduralCoordinate& Coordinate : Coordinates)
+		{
+			OutMappedCoordinates.FindOrAdd(Coordinate.BlockID).AddCoordinate(Coordinate);
+		}
 	}
 };
 
@@ -94,22 +113,17 @@ public:
 	int32 SectionCoordinateY;
 	
 	UPROPERTY()
-	TMap<int32, FDigumWorldProceduralMappedCoordinates> CoordinateData;
+	FDigumWorldProceduralCoordinateArray CoordinateData;
 
 
-	void AddCoordinate(const int32 Hierarchy, const FName& BlockID, const int32 InX, const int32 InY)
+	void AddCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const int32& InHierarchy, const float& InNoiseValue)
 	{
-		CoordinateData.FindOrAdd(Hierarchy).AddCoordinate(BlockID, InX, InY);
+		CoordinateData.AddCoordinate(InBlockID, InX, InY, InHierarchy, InNoiseValue);
 	}
 
-	FDigumWorldProceduralMappedCoordinates* GetCoordinateArray(const int32&  Hierarchy)
+	FDigumWorldProceduralCoordinateArray* GetCoordinateArray()
 	{
-		return CoordinateData.Find(Hierarchy);
-	}
-
-	FDigumWorldProceduralMappedCoordinates* GetMappedCoordinates(const int32& InHierarchy)
-	{
-		return CoordinateData.Find(InHierarchy);
+		return &CoordinateData;
 	}
 
 	int32 GetX() const { return SectionCoordinateX; }
@@ -195,10 +209,13 @@ class DIGUMWORLD_API UDigumWorldGenerator : public UObject
 {
 	GENERATED_BODY()
 private:
+	static float GetPerlinNoiseValue(const int32 InX, const int32 InY, const FRandomStream& InRandomStream);
+	static float GetPerlinNoiseValue3D(const int32 InX, const int32 InY, const int32 InZ, const FRandomStream& InRandomStream);
+	
 	static void GenerateUndergroundVeins(FDigumWorldProceduralMap& OutMap);
 	static void GenerateTrees(FDigumWorldProceduralMap& OutMap);
 	static void GenerateFoliage(FDigumWorldProceduralMap& OutMap);
-	static float GetPerlinNoiseValue(const int32 InX, const int32 InY, const FRandomStream& RandomStream);
+
 	static float NormalizeNoiseValue(const float InNoiseValue);
 	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks);
 	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);

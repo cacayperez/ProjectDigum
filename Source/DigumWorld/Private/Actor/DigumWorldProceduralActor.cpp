@@ -55,12 +55,11 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 			float SectionWidth = Rules->SectionWidth * HalfGridX;
 			float SectionHeight = Rules->SectionHeight * HalfGridZ;
 
-			
 			for(auto& Section : ProceduralMap.GetSections())
 			{
 				// TODO implement Hierarchies
-				FDigumWorldProceduralMappedCoordinates* MappedCoordinates = Section.GetMappedCoordinates(0);
-				if(MappedCoordinates == nullptr) continue;
+				FDigumWorldProceduralCoordinateArray* CoordinateArray = Section.GetCoordinateArray();
+				if(CoordinateArray == nullptr) continue;
 				const float SX = Section.GetX();
 				const float SY = Section.GetY();
 				const float X = (SX * (SectionWidth/2));
@@ -73,10 +72,10 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 				{
 					NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 					NewSection->SetFolderPath(GetFolderPath());
-					NewSection->InitializeSection(MappedCoordinates, ProceduralAsset);
+					NewSection->InitializeSection(CoordinateArray, ProceduralAsset);
 					NewSection->FinishSpawning(SectionTransform);
 					NewSection->SetActorLocation(SectionLocation);
-					UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
+					// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
 					SectionActors.Add(NewSection);
 				}
 			}

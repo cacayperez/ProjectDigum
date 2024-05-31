@@ -83,24 +83,6 @@ void ADigumMinerCharacter::ActivateEquippedItemAction_Internal(const FDigumGameA
 		}
 		// GetEquipComponent()->ActivateAction(ActionParams);
 	}
-	
-	/*
-	if(GetInventoryComponent())
-	{
-		// Todo - move action class to item actor instance instead.
-		const UDigumGameItem* Item = GetInventoryComponent()->GetItem<UDigumGameItem>(InItemIndex);
-		if(Item && Item->ActionClass && GetActionComponent())
-		{
-			FDigumActionProperties Properties;
-			Properties.ActionClass = Item->ActionClass;
-			Properties.ActionInstigator = this;
-
-			GetActionComponent()->TryExecutionAction(Properties);
-			
-			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Activated: %s"), *Item->ItemName.ToString());
-			UE_LOG(LogDigumMinerCharacter, Log, TEXT("Item Action: %s"), *Item->ActionClass->GetName());
-		}
-	}*/
 }
 
 // Sets default values
@@ -160,6 +142,7 @@ void ADigumMinerCharacter::BeginPlay()
 	
 	// constraint movement to the xz plane
 	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, 1.0f, 0.0f));
+	
 	GetCharacterMovement()->bConstrainToPlane = true;
 	
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))

@@ -70,15 +70,11 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSectionX, const int32&
 			{
 				const int32 PositionX = InSectionX * InWidth + x;
 				const int32 PositionY = InSectionY * InHeight + y;
-				const float NoiseValue = GetPerlinNoiseValue(PositionX, PositionY, InRandomStream);
+				const float NoiseValue = GetPerlinNoiseValue3D(PositionX, PositionY, HierchyIndex, InRandomStream);
 				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
 
 				FName BlockID = GetBlockIDFromNoiseValue(NormalizedNoise, InCumulativeWeights, InBlocks);
-				UE_LOG(LogTemp, Warning, TEXT("BlockID: %s"), *BlockID.ToString());
-				FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, NoiseValue);	
-				Coordinate.BlockID = BlockID;
-
-				OutSection.AddCoordinate(HierchyIndex, BlockID, x, y);
+				OutSection.AddCoordinate(BlockID, x, y, HierchyIndex, NoiseValue);
 			}
 		}
 	}
@@ -141,4 +137,14 @@ float UDigumWorldGenerator::GetPerlinNoiseValue(const int32 InX, const int32 InY
 	constexpr  float Scale = 0.1f;
 	const FVector2D NoiseInput = FVector2D(InX * Scale, InY * Scale) + FVector2D(RandomStream.GetFraction(), RandomStream.GetFraction());
 	return FMath::PerlinNoise2D(NoiseInput);
+}
+
+float UDigumWorldGenerator::GetPerlinNoiseValue3D(const int32 InX, const int32 InY, const int32 InZ,
+	const FRandomStream& InRandomStream)
+{
+	constexpr float Scale = 0.1f;
+	const FVector RandomStreamFraction = FVector(InRandomStream.GetFraction(), InRandomStream.GetFraction(), InRandomStream.GetFraction());
+	const FVector VectorScale = FVector(InX * Scale, InY * Scale, InZ * Scale);
+	const FVector NoiseInput = VectorScale + RandomStreamFraction;
+	return FMath::PerlinNoise3D(NoiseInput);
 }

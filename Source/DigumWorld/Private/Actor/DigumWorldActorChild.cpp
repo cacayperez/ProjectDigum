@@ -130,16 +130,17 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is nullll"));
 		}
-		const float HalfGridX = GridSize.X * 0.5f;
-		const float HalfGridY = GridSize.Y * 0.5f;
+		const float GridX = GridSize.X;
+		const float GridY = GridSize.Y;
+		const float GridZ = GridSize.Z;
 		
 		for(int32 i = 0; i < Coordinates.CoordinateCount(); i++)
 		{
 			FDigumWorldProceduralCoordinate* Coordinate = Coordinates.GetCoordinate(i);
 			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
-			const float X = Coordinate->X * HalfGridX;
-			const float Y = HierarchyIndex * HalfGridY;
-			const float Z = -((Coordinate->Y * HalfGridX) + HalfGridX);
+			const float X = Coordinate->X * GridX;
+			const float Y = Coordinate->Hierarchy * GridY;
+			const float Z = -((Coordinate->Y * GridX) + GridX);
 			FVector Location = FVector(X, Y, Z);
 			FTransform Transform = FTransform(FRotator::ZeroRotator, GetActorLocation() + Location, FVector(1.0f));
 			
