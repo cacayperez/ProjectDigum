@@ -58,6 +58,7 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 			
 			for(auto& Section : ProceduralMap.GetSections())
 			{
+				// TODO implement Hierarchies
 				FDigumWorldProceduralMappedCoordinates* MappedCoordinates = Section.GetMappedCoordinates(0);
 				if(MappedCoordinates == nullptr) continue;
 				const float SX = Section.GetX();
