@@ -1,7 +1,7 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Actor/DigumGameItemActor_ActiveItem.h"
+#include "Actor/Equip/DigumGameItemActor_ActiveItem.h"
 
 #include "DigumAction.h"
 #include "Asset/DigumAssetManager.h"

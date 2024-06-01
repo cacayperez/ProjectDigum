@@ -44,7 +44,7 @@ public:
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	bool GetItemProperties(const int32& InSlotIndex, FDigumItemProperties& OutProperties) const;
 
 protected:
 

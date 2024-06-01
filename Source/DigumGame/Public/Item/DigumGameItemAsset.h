@@ -8,6 +8,7 @@
 #include "DigumGameItemAsset.generated.h"
 
 class UDigumAction;
+class ADigumBuildPreviewActor;
 /**
  * 
  */
@@ -18,4 +19,9 @@ class DIGUMGAME_API UDigumGameItemAsset : public UDigumItemAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftClassPtr<UDigumAction> Action;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TSoftClassPtr<AActor> BuildPreviewActorClass;
+
+	TSubclassOf<AActor> GetBuildPreviewActorClass() const;
 };

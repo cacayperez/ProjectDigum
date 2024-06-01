@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Procedural/DigumWorldGenerator.h"
 #include "DigumWorldActorSection.generated.h"
 
+struct FDigumWorldProceduralSection;
 class ADigumWorldActorChild;
 class UDigumWorldProceduralAsset;
 struct FDigumWorldProceduralCoordinateArray;
@@ -21,6 +23,9 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;
 
+	UPROPERTY()
+	FDigumWorldProceduralSection SectionData;
+
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorSection();
@@ -33,6 +38,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void InitializeSection(FDigumWorldProceduralCoordinateArray* CoordinateArray, UDigumWorldProceduralAsset* ProceduralAsset);
+	void InitializeSection(FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void DestroySection();
 };

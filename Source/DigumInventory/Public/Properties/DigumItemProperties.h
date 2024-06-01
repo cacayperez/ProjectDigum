@@ -53,6 +53,11 @@ public:
 		return ItemID != NAME_None;
 	}
 
+	FORCEINLINE FName GetItemID() const
+	{
+		return ItemID;
+	}
+
 	FORCEINLINE void AddPrefix(const FDigumItemAffixProperties& InPrefix)
 	{
 		ItemPrefixes.Add(InPrefix);
@@ -67,5 +72,7 @@ public:
 	{
 		return ItemAmount;
 	}
+
+	FORCEINLINE FName GetContentCategory() const { return ContentCategory; }
 };
 

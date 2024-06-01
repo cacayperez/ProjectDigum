@@ -84,7 +84,7 @@ void UDigumPickupHandlerComponent::UpdatePickupDetection()
 				if(Interface)
 				{
 					Interface->OnPickup(GetOwner());
-					OnPickupDetected.Broadcast(HitActor);
+					// OnPickupDetected.Broadcast(HitActor);
 				}
 				
 				

@@ -54,8 +54,20 @@ void UDigumInventoryComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+bool UDigumInventoryComponent::GetItemProperties(const int32& InSlotIndex, FDigumItemProperties& OutProperties) const
+{
+	UDigumInventorySlot* Slot = GetItemSlot(InSlotIndex);
+	if(Slot && Slot->HasValidItem())
+	{
+		OutProperties = Slot->GetItemProperties();
+		return true;
+	}
+	
+	return false;
+}
+
 bool UDigumInventoryComponent::BuildItemProperties(const FDigumItemProperties& InItemProperties,
-	UDigumItem*& OutBuiltItem)
+                                                   UDigumItem*& OutBuiltItem)
 {
 	return false;
 }

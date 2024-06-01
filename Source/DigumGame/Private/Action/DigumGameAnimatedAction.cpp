@@ -76,7 +76,6 @@ void UDigumGameAnimatedAction::EndAction(EDigumActionResult Result)
 	
 	OnEndAction(Result);
 	
-	
 	bFinishedExecuting = true;
 }
 

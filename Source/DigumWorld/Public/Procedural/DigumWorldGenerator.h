@@ -192,7 +192,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 MaxElevation = 100;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	int32 NumberOfHierarchies = 3;
 
 	UPROPERTY(EditAnywhere) 

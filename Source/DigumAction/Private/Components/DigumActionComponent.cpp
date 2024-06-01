@@ -50,6 +50,7 @@ void UDigumActionComponent::CheckActions()
 
 void UDigumActionComponent::TryExecuteAction(const FDigumActionProperties& Properties)
 {
+	// TODO Refactor to make it more efficient when checking blocking actions
 	if(Properties.ActionClass && Properties.ActionInstigator)
 	{
 		if(UDigumAction* Action = NewObject<UDigumAction>(this, Properties.ActionClass))

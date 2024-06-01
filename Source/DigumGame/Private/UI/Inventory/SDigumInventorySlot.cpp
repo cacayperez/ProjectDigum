@@ -29,6 +29,7 @@ void SDigumInventorySlot::OnConstruct()
 		{
 			UMaterialInterface* Material = InventorySlot->GetDisplayMaterial();
 			const FText ItemName = InventorySlot->GetItemObject()->ItemName;
+			const FText ItemAmount = FText::AsNumber(InventorySlot->GetItemAmount());
 
 			if(Material)
 			{
@@ -47,8 +48,18 @@ void SDigumInventorySlot::OnConstruct()
 			
 			_Container->AddSlot()
 			[
-				SNew(STextBlock)
-				.Text(ItemName)
+				SNew(SVerticalBox)
+				+SVerticalBox::Slot()
+				[
+					SNew(STextBlock)
+					.Text(ItemName)
+				]
+				+SVerticalBox::Slot()
+				.AutoHeight()
+				[
+					SNew(STextBlock)
+					.Text(ItemAmount)
+				]
 			];
 			
 			SetEnableDrag(true);

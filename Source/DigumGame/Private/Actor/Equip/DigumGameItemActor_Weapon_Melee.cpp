@@ -1,7 +1,7 @@
 ﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
 
 
-#include "Actor/DigumGameItemActor_Weapon_Melee.h"
+#include "Actor/Equip/DigumGameItemActor_Weapon_Melee.h"
 
 #include "Actor/DigumWorldActorChild.h"
 #include "Interface/IDigumWorldInteractionInterface.h"
@@ -12,12 +12,10 @@ ADigumGameItemActor_Weapon_Melee::ADigumGameItemActor_Weapon_Melee(const FObject
 	: Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
-
 	
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(RootComponent);
 	BoxComponent->SetupAttachment(GetMesh());
-	
 }
 
 void ADigumGameItemActor_Weapon_Melee::BeginPlay()
@@ -35,14 +33,12 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 {
 	if(GetBoxComponent() == nullptr) return;
 	
-	
 	const FVector Start = GetBoxComponent()->GetComponentLocation();
 	// HACK : Adding +1.0f due to some weird behavior with the box trace
 	// identical Start and End locations will not return any hits and always returns FVector::ZeroVector
 	const FVector End = GetBoxComponent()->GetComponentLocation() + 1.0f; 
 	const FVector BoxSize = GetBoxComponent()->GetScaledBoxExtent();
 	const FRotator Rotation = GetBoxComponent()->GetComponentRotation();
-
 	
 	TArray<FHitResult> OutHitResult;
 	TArray<AActor*> IgnoredActors;

@@ -16,5 +16,10 @@ class DIGUMWORLD_API ADigumWorldActorChild_GridSquare : public ADigumWorldActorC
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild_GridSquare(const FObjectInitializer& ObjectInitializer);
+
+protected:
+	virtual void OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation) override;
+
+	void SpawnBlockPickup(const FVector& InLocation);
 	
 };

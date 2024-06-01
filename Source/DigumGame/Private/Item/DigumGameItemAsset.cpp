@@ -2,3 +2,8 @@
 
 
 #include "Item/DigumGameItemAsset.h"
+
+TSubclassOf<AActor> UDigumGameItemAsset::GetBuildPreviewActorClass() const
+{
+	return UDigumAssetManager::GetSubclass<AActor>(BuildPreviewActorClass);
+}

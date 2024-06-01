@@ -22,12 +22,9 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 	
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDigumWorldISMComponent> InstancedMeshComponent;
-
-	UPROPERTY()
-	TObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;
-
+	
 	UPROPERTY()
 	TArray<float> Health;
 
@@ -36,16 +33,21 @@ public:
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
 	
 protected:
+	UPROPERTY()
+	TObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;
+	
 	virtual void BeginPlay() override;
 	virtual void OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
+	virtual void BuildChildProperties(UDigumWorldSwatchAsset* InSwatchAsset);
 
 	bool GetInstancedHitIndex(const FVector HitLocation, const float& InMaxRange, int32& OutIndex);
+	virtual void OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation);
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);
-	void DestroyInstance(const int32& InIndex = INDEX_NONE);
+	virtual void DestroyInstance(const int32& InIndex = INDEX_NONE);
 	virtual void OnInteract_Implementation(const AActor* InInstigator, const FDigumWorldRequestParams& InParams) override;
 	// void DestroyInstance(const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 };

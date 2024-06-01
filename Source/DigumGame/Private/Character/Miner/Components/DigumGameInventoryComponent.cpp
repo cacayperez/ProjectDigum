@@ -9,6 +9,7 @@
 #include "Asset/DigumItemAsset.h"
 #include "Asset/DigumItemTable.h"
 #include "..\..\..\..\..\DigumCore\Public\Interface\IDigumActorInterface.h"
+#include "Functions/DigumGameItemHelperFunctions.h"
 #include "Item/DigumGameItem.h"
 #include "Item/DigumGameItemAsset.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -22,8 +23,24 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 {
 	const FName ContentCategory = InItemProperties.ContentCategory;
 	const FName ItemID = InItemProperties.ItemID;
-	
-	if(const FDigumContentCategory* ContentCategoryData = UDigumGameDeveloperSettings::GetContentCategoryData(ContentCategory))
+
+
+	if(const UDigumGameItemAsset* GameItemAsset = UDigumGameItemHelperFunctions::GetGameItemAsset(ItemID, ContentCategory))
+	{
+		UDigumGameItem* Item = NewObject<UDigumGameItem>();
+		Item->ItemID = ItemID;
+		Item->StackSize = GameItemAsset->StackSize;
+		Item->ItemName = GameItemAsset->ItemName;
+		Item->ItemDescription = GameItemAsset->ItemDescription;
+		Item->DisplayTexture = GameItemAsset->GetItemTexture();
+		Item->DisplayMaterial = GameItemAsset->GetItemMaterial();
+		Item->ActionClass = GameItemAsset->Action.LoadSynchronous();
+		Item->ItemActorClass = GameItemAsset->GetItemActorClass();
+				
+		OutBuiltItem = Item;
+		return true;
+	}
+	/*if(const FDigumContentCategory* ContentCategoryData = UDigumGameDeveloperSettings::GetContentCategoryData(ContentCategory))
 	{
 		UDataTable* ItemTable = UDigumAssetManager::GetAsset<UDataTable>(ContentCategoryData->ItemTable);
 		if(ItemTable == nullptr)
@@ -39,21 +56,11 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 			UDigumGameItemAsset* GameItemAsset = Cast<UDigumGameItemAsset>(Asset);
 			if(GameItemAsset)
 			{
-				UDigumGameItem* Item = NewObject<UDigumGameItem>();
-				Item->ItemID = ItemID;
-				Item->StackSize = GameItemAsset->StackSize;
-				Item->ItemName = GameItemAsset->ItemName;
-				Item->ItemDescription = GameItemAsset->ItemDescription;
-				Item->DisplayTexture = GameItemAsset->GetItemTexture();
-				Item->DisplayMaterial = GameItemAsset->GetItemMaterial();
-				Item->ActionClass = GameItemAsset->Action.LoadSynchronous();
-				Item->ItemActorClass = GameItemAsset->GetItemActorClass();
 				
-				OutBuiltItem = Item;
-				return true;
 			}
 		}
 	}
+	*/
 
 	return false;
 }

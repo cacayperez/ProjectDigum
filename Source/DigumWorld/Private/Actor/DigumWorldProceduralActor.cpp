@@ -52,8 +52,8 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 			FVector GridSize = UDigumWorldSettings::GetGridSize();
 			const float HalfGridX = GridSize.X * 0.5f;
 			const float HalfGridZ = GridSize.Z * 0.5f;
-			float SectionWidth = Rules->SectionWidth * HalfGridX;
-			float SectionHeight = Rules->SectionHeight * HalfGridZ;
+			float SectionWidth = Rules->SectionWidth * GridSize.X;
+			float SectionHeight = Rules->SectionHeight * GridSize.Z;
 
 			for(auto& Section : ProceduralMap.GetSections())
 			{
@@ -62,18 +62,18 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 				if(CoordinateArray == nullptr) continue;
 				const float SX = Section.GetX();
 				const float SY = Section.GetY();
-				const float X = (SX * (SectionWidth/2));
-				const float Z = -(SY * (SectionHeight/2));
+				const float X = (SX * (SectionWidth));
+				const float Z = -(SY * (SectionHeight));
 				FVector SectionLocation = FVector(X, 0, Z);
 				FTransform SectionTransform = FTransform(FRotator::ZeroRotator, SectionLocation);
 
-				ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), SectionTransform);
+				ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity);
 				if(NewSection)
 				{
-					NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					NewSection->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 					NewSection->SetFolderPath(GetFolderPath());
-					NewSection->InitializeSection(CoordinateArray, ProceduralAsset);
-					NewSection->FinishSpawning(SectionTransform);
+					NewSection->InitializeSection(Section, ProceduralAsset);
+					NewSection->FinishSpawning(FTransform::Identity);
 					NewSection->SetActorLocation(SectionLocation);
 					// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
 					SectionActors.Add(NewSection);

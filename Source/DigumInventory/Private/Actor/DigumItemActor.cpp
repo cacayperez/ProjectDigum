@@ -24,3 +24,13 @@ void ADigumItemActor::SetItemInstigator(AActor* InInstigator)
 {
 	ItemInstigator = InInstigator;
 }
+
+void ADigumItemActor::SetItemProperties(const FDigumItemProperties& InItemProperties)
+{
+	ItemProperties = InItemProperties;
+}
+
+FDigumItemProperties* ADigumItemActor::GetItemProperties()
+{
+	return &ItemProperties;
+}

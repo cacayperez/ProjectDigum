@@ -7,6 +7,7 @@
 #include "DigumGameEquipComponent.generated.h"
 
 
+struct FDigumItemProperties;
 class ADigumItemActor;
 
 UENUM()
@@ -42,7 +43,7 @@ private:
 	void SetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot, ADigumItemActor* ItemActor);
 	
 public:
-	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const FDigumItemProperties& InItemProperties, const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
 	// ADigumItemActor*& GetEquippedItemActor() const { return EquippedItemActor; }
 	
 	ADigumItemActor* GetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot);

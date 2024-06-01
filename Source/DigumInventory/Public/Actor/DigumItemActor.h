@@ -4,7 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Properties/DigumItemProperties.h"
 #include "DigumItemActor.generated.h"
+
 
 UCLASS()
 class DIGUMINVENTORY_API ADigumItemActor : public AActor
@@ -16,6 +18,9 @@ class DIGUMINVENTORY_API ADigumItemActor : public AActor
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Item", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
+
+	UPROPERTY()
+	FDigumItemProperties ItemProperties;
 
 public:
 	// Sets default values for this actor's properties
@@ -32,4 +37,6 @@ public:
 	void SetItemInstigator(AActor* InInstigator);
 
 	AActor* GetItemInstigator() const { return ItemInstigator; }
+	void SetItemProperties(const FDigumItemProperties& InItemProperties);
+	FDigumItemProperties* GetItemProperties();
 };

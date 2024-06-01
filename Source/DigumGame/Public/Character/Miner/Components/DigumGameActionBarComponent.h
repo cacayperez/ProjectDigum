@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DigumGameEquipComponent.h"
-#include "Actor/DigumGameItemActor_ActiveItem.h"
+#include "Actor/Equip/DigumGameItemActor_ActiveItem.h"
 #include "Components/ActorComponent.h"
 #include "DigumGameActionBarComponent.generated.h"
 

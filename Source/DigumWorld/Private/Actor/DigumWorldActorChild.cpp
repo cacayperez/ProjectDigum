@@ -19,7 +19,7 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	
 	PrimaryActorTick.bCanEverTick = false;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
-	
+	InstancedMeshComponent->SetupAttachment(Root);
 	
 }
 
@@ -38,6 +38,10 @@ void ADigumWorldActorChild::BeginPlay()
 
 void ADigumWorldActorChild::OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
                                                             FDigumWorldAssetCoordinateArray Coordinates)
+{
+}
+
+void ADigumWorldActorChild::BuildChildProperties(UDigumWorldSwatchAsset* InSwatchAsset)
 {
 }
 
@@ -74,12 +78,20 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 	return false;
 }
 
+void ADigumWorldActorChild::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
+{
+	
+}
+
 void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
                                                   FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex)
 {
 	SwatchAsset = InSwatchAsset;
+	
 	if(SwatchAsset)
 	{
+		BuildChildProperties(SwatchAsset);
+		
 		Health.Empty();
 		InstancedMeshComponent->ClearInstances();
 		FVector GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
@@ -116,8 +128,10 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 	FDigumWorldProceduralCoordinateArray Coordinates, const int32 HierarchyIndex)
 {
 	SwatchAsset = InSwatchAsset;
+	
 	if(SwatchAsset)
 	{
+		BuildChildProperties(SwatchAsset);
 		Health.Empty();
 		InstancedMeshComponent->ClearInstances();
 		FVector GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
@@ -188,10 +202,11 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 	if(InIndex == INDEX_NONE) return;
 
 	FTransform Transform;
-	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform))
+	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
 	{
 		InstancedMeshComponent->RemoveInstance(InIndex);
-		//Health.Remove(InIndex);
+		OnDestroyChildInstance(InIndex, Transform.GetLocation());
+		
 	}
 }
 
@@ -203,7 +218,6 @@ void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator
 		// UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
 		if(Health.IsValidIndex(InParams.HitInstanceIndex))
 		{
-			
 			UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
 			Health[InParams.HitInstanceIndex] -= InParams.Magnitude;
 			if(Health[InParams.HitInstanceIndex] <= 0.0f)

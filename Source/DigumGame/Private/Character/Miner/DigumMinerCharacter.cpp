@@ -274,8 +274,10 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 	if(GetInventoryComponent() && GetEquipComponent())
 	{
 		const TSubclassOf<ADigumItemActor> ItemActorClass = GetInventoryComponent()->GetItemActorClass(InItemIndex);
+		FDigumItemProperties ItemProperties;
+		GetInventoryComponent()->GetItemProperties(InItemIndex, ItemProperties);
 		if(ItemActorClass) UE_LOG(LogDigumMinerCharacter, Warning, TEXT("ItemActorClass: %s"), *ItemActorClass->GetName());
-		EquipComponent->EquipItem(ItemActorClass);
+		EquipComponent->EquipItem(ItemActorClass, ItemProperties);
 
 		if(GetActionComponent())
 		{

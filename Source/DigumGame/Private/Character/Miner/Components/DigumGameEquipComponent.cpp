@@ -53,7 +53,7 @@ void UDigumGameEquipComponent::SetEquippedItemActor(const EDigumGame_EquipSlot E
 	EquippedItems.Add(EquipSlot, ItemActor);
 }
 
-void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass,
+void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const FDigumItemProperties& InItemProperties, 
                                          const EDigumGame_EquipSlot EquipSlot)
 {
 	const ACharacter* Character = Cast<ACharacter>(GetOwner());
@@ -75,6 +75,7 @@ void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> Item
 		{
 			ItemActor->SetActorLocation(Character->GetActorLocation());
 			ItemActor->SetItemInstigator(GetOwner());
+			ItemActor->SetItemProperties(InItemProperties);
 			ItemActor->FinishSpawning(FTransform::Identity);
 			ItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));
 			

@@ -8,3 +8,12 @@ ADigumWorldActorChild_GridSquare::ADigumWorldActorChild_GridSquare(const FObject
 {
 	PrimaryActorTick.bCanEverTick = false;
 }
+
+void ADigumWorldActorChild_GridSquare::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
+{
+	
+}
+
+void ADigumWorldActorChild_GridSquare::SpawnBlockPickup(const FVector& InLocation)
+{
+}
