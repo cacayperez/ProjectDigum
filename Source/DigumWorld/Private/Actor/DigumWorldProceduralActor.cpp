@@ -32,8 +32,8 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, const float& InSectionHeight,
 	FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	const FDigumWorldProceduralCoordinateArray* CoordinateArray = InSection.GetCoordinateArray();
-	if(CoordinateArray == nullptr) return;;
+	/*const FDigumWorldProceduralCoordinateArray* CoordinateArray = InSection.GetCoordinateArray();
+	if(CoordinateArray == nullptr) return;;*/
 	
 	const float SX = InSection.GetX();
 	const float SY = InSection.GetY();
@@ -60,7 +60,7 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
 	const int32 SectionX = FMath::FloorToInt(LocalPosition.X / SectionSize.X);
 	const int32 SectionY = -FMath::CeilToInt((LocalPosition.Z) / SectionSize.Y);
 	UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
-	for(ADigumWorldActorSection* Section : SectionActors)
+	/*for(ADigumWorldActorSection* Section : SectionActors)
 	{
 		if(Section == nullptr) continue;
 
@@ -73,27 +73,20 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
 			return;
 		}
 
-		/*if(Section->GetX() == SectionX && Section->GetY() == SectionY)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
-			UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
-			Section->AddBlock(InBlockID, InBlockLocation);
-			return;
-		}*/
-	}
+	}*/
 	
-    /*SectionActors.FindByPredicate([SectionX, SectionY, InBlockID, InBlockLocation](const TWeakObjectPtr<ADigumWorldActorSection>& Section)
+    SectionActors.FindByPredicate([&](ADigumWorldActorSection*& Section)
     {
-        if(const FDigumWorldProceduralSection* SectionData = Section->GetSectionData())
+		if(Section == nullptr) return false;
+    	FDigumWorldProceduralSection SectionData = Section->GetSectionData();
+        if(SectionData.GetX() == FMath::Abs(SectionX) && SectionData.GetY() ==  FMath::Abs(SectionY))
         {
-            if(SectionData->GetX() == SectionX && SectionData->GetY() == SectionY)
-            {
-                Section->AddBlock(InBlockID, InBlockLocation);
-                return true;
-            }
+        	Section->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
+            return true;
         }
+        
         return false;
-    });*/
+    });
 
 	// TODO: Handle if section not found
 }
@@ -122,12 +115,19 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 			const float SectionWidth = Rules->SectionWidth * GridSize.X;
 			const float SectionHeight = Rules->SectionHeight * GridSize.Z;
 
+			SetActorLocation(FVector(0, 0, 0));
+
 			SectionSize = FVector2D(SectionWidth, SectionHeight);
 			
 			for(auto& Section : ProceduralMap.GetSections())
 			{
 				CreateSection(SectionWidth, SectionHeight, Section, ProceduralAsset);
 			}
+
+			const float TotalWidth = Rules->SectionCount_HorizontalAxis * SectionWidth;
+			const float TotalHeight = Rules->SectionCount_VerticalAxis * SectionHeight;
+
+			SetActorLocation(FVector(-TotalWidth / 2, 0, TotalHeight / 2));
 		}
 		
 #if WITH_EDITOR

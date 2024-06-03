@@ -33,7 +33,10 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 
 void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	
+	SectionData = InSection;
+	SectionX = InSection.GetX();
+	SectionY = InSection.GetY();
+	SectionSize = InSectionSize;
 	GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
 	FDigumWorldProceduralCoordinateArray* Array = InSection.GetCoordinateArray();
@@ -42,10 +45,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	{
 		return;
 	}
-	SectionData = InSection;
-	SectionX = InSection.GetX();
-	SectionY = InSection.GetY();
-	SectionSize = InSectionSize;
+
 	Array->MakeMappedCoordinates(Blocks);
 
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
@@ -101,6 +101,8 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
 	Coordinate.Hierarchy = 0;
 
+	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), Coordinate.X, Coordinate.Y);
+
 	CoordinateArray.AddCoordinate(Coordinate);
 	
 	if(ChildActor)
@@ -109,7 +111,25 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	}
 	else
 	{
-		
+		UDigumWorldSwatchAsset* Asset = UDigumWorldFunctionHelpers::GetSwatchAsset(InBlockID, TEXT("Primary"));
+		if(Asset)
+		{
+			if(TSubclassOf<ADigumWorldActorChild> ChildClass = Asset->GetChildActorClass())
+			{
+				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
+				if(NewActor)
+				{
+					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					// NewActor->SetFolderPath(GetFolderPath());
+					NewActor->InitializeSwatchAsset(InBlockID, Asset, CoordinateArray);
+					NewActor->FinishSpawning(FTransform::Identity);
+					NewActor->SetActorLocation(GetActorLocation());
+					
+					WorldChildActors.FindOrAdd(InBlockID, NewActor);
+				}
+			}
+		}
+
 	}
 
 	// create block if it doesnt exist

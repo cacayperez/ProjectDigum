@@ -78,7 +78,6 @@ void ADigumMinerCharacter::ActivateEquippedItemAction_Internal(const FDigumGameA
 		
 		if(ActiveItemActor)
 		{
-			UE_LOG(LogDigumMinerCharacter, Log, TEXT("THis works...: %s"), *ActiveItemActor->GetName());
 			ActiveItemActor->TryActivateItem(this, InActionParams.ActionKey);
 		}
 		// GetEquipComponent()->ActivateAction(ActionParams);

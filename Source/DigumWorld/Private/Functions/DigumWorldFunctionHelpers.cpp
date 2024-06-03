@@ -50,3 +50,15 @@ UDataTable* UDigumWorldFunctionHelpers::GetSwatchDataTable(const FName ContentCa
 		
 	return nullptr;
 }
+
+TSubclassOf<ADigumWorldActorChild> UDigumWorldFunctionHelpers::GetChildActorClass(const FName& BlockID,
+	const FName& ContentCategory)
+{
+	UDigumWorldSwatchAsset* SwatchAsset = GetSwatchAsset(BlockID, ContentCategory);
+
+	if(SwatchAsset)
+	{
+		return SwatchAsset->GetChildActorClass();
+	}
+	return nullptr;
+}

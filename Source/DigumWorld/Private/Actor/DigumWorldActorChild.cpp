@@ -28,11 +28,11 @@ void ADigumWorldActorChild::BeginPlay()
 	Super::BeginPlay();
 
 	// Initialize Health
-	int32 InstanceCount = InstancedMeshComponent->GetInstanceCount();
+	/*int32 InstanceCount = InstancedMeshComponent->GetInstanceCount();
 	for(int32 i = 0; i < InstanceCount; i++)
 	{
 		Health.Add(1.0f);
-	}
+	}*/
 	
 }
 
@@ -169,6 +169,7 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 			
 		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
+		Health.Add(1.0f);
 	}
 }
 

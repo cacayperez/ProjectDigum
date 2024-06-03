@@ -52,6 +52,7 @@ protected:
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates);
+	
 	virtual void AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);

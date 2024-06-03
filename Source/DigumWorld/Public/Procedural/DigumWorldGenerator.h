@@ -210,19 +210,26 @@ class DIGUMWORLD_API UDigumWorldGenerator : public UObject
 {
 	GENERATED_BODY()
 private:
-	static float GetPerlinNoiseValue(const int32 InX, const int32 InY, const FRandomStream& InRandomStream);
-	static float GetPerlinNoiseValue3D(const int32 InX, const int32 InY, const int32 InZ, const FRandomStream& InRandomStream);
+	static float GetPerlinNoiseValue1D(const float InX, const FRandomStream& InRandomStream);
+	static float GetPerlinNoiseValue2D(const float InX, const int32 InY, const FRandomStream& InRandomStream);
+	static float GetPerlinNoiseValue3D(const float InX, const int32 InY, const int32 InZ, const FRandomStream& InRandomStream);
 	
 	static void GenerateUndergroundVeins(FDigumWorldProceduralMap& OutMap);
 	static void GenerateTrees(FDigumWorldProceduralMap& OutMap);
 	static void GenerateFoliage(FDigumWorldProceduralMap& OutMap);
+	static float GetGroundNoise(const float& X, const FRandomStream& InRandomStream);
+	static float QuadraticBezier(float t, float P0, float P1, float P2);
+	static float CubicBezier(float t, float P0, float P1, float P2, float P3);
+	static TArray<float> SmoothTerrain(const TArray<float>& GroundCurve, int32 SmoothingPasses);
+
 
 	static float NormalizeNoiseValue(const float InNoiseValue);
 	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks);
 	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);
+	static TArray<float> GenerateGroundCurve(const int32& InWidth, const int32& InHeight, const int32& SectionX, const FRandomStream& InRandomStream);
 	// static void GenerateSection(const )
 public:
-	static bool GenerateSection(const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, const TArray<FDigumWorldProceduralBlock>& InBlocks, const TArray<TPair<float, float>>& InCumulativeWeights,
+	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, const TArray<FDigumWorldProceduralBlock>& InBlocks, const TArray<TPair<float, float>>& InCumulativeWeights,
 	                          FDigumWorldProceduralSection& OutSection, const int32& NumOfHierarchies = 1);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
 
