@@ -120,7 +120,7 @@ void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigu
 	if(BlockPreview)
 	{
 		FVector TargetLocation = BlockPreview->GetPreviewTargetLocation();
-
+		UE_LOG(LogTemp, Warning, TEXT("TargetLocation: %s"), *TargetLocation.ToString());
 		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldProceduralActor::StaticClass());
 		if(Actor)
 		{

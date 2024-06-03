@@ -33,6 +33,9 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	FVector GridSize;
 
 	UPROPERTY()
+	FVector2D SectionSize;
+	
+	UPROPERTY()
 	int32 SectionX;
 
 	UPROPERTY()
@@ -50,13 +53,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void InitializeSection(FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation);
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
 
-	int32 GetX() const { return SectionX; }
-	int32 GetY() const { return SectionY; }
+	int32 GetX() const;
+	int32 GetY() const;
 };

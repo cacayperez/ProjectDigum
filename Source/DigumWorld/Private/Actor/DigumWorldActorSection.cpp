@@ -31,11 +31,13 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
+void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
+	
 	GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
 	FDigumWorldProceduralCoordinateArray* Array = InSection.GetCoordinateArray();
+	
 	if(!Array)
 	{
 		return;
@@ -43,6 +45,7 @@ void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& In
 	SectionData = InSection;
 	SectionX = InSection.GetX();
 	SectionY = InSection.GetY();
+	SectionSize = InSectionSize;
 	Array->MakeMappedCoordinates(Blocks);
 
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
@@ -56,14 +59,14 @@ void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& In
 		{
 			if(TSubclassOf<ADigumWorldActorChild> ChildClass = SwatchAsset->GetChildActorClass())
 			{
-				FTransform ChildTransform(FRotator::ZeroRotator, GetActorLocation());
-				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, ChildTransform);
+				// FTransform ChildTransform(FRotator::ZeroRotator, GetActorLocation());
+				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
 				if(NewActor)
 				{
 					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 					// NewActor->SetFolderPath(GetFolderPath());
 					NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
-					NewActor->FinishSpawning(ChildTransform);
+					NewActor->FinishSpawning(FTransform::Identity);
 					
 					WorldChildActors.FindOrAdd(BlockID, NewActor);
 				}
@@ -87,9 +90,9 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(InBlockID);
 	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
 	FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate();
-	Coordinate.X = 0;
-	Coordinate.Y = 2;
-	Coordinate.Hierarchy = 2;
+	Coordinate.X = InLocation.X / GridSize.X;
+	Coordinate.Y = -InLocation.Z / GridSize.Z;
+	Coordinate.Hierarchy = 0;
 
 	CoordinateArray.AddCoordinate(Coordinate);
 	
@@ -116,5 +119,16 @@ void ADigumWorldActorSection::DestroySection()
 	}
 
 	Destroy();
+}
+
+int32 ADigumWorldActorSection::GetX() const
+{
+	return FMath::CeilToInt(GetActorLocation().X / SectionSize.X);
+}
+
+int32 ADigumWorldActorSection::GetY() const
+{
+	return FMath::CeilToInt(GetActorLocation().Z / SectionSize.Y);
+	
 }
 

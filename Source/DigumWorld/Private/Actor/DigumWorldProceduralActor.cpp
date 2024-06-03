@@ -46,7 +46,7 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 	{
 		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 		NewSection->SetFolderPath(GetFolderPath());
-		NewSection->InitializeSection(InSection, ProceduralAsset);
+		NewSection->InitializeSection(FVector2D(InSectionWidth, InSectionHeight),InSection, ProceduralAsset);
 		NewSection->FinishSpawning(FTransform::Identity);
 		NewSection->SetActorLocation(SectionLocation);
 		// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
@@ -56,17 +56,18 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 
 void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
-	const int32 SectionX = FMath::FloorToInt(InBlockLocation.X / SectionSize.X);
-	const int32 SectionY = FMath::FloorToInt(InBlockLocation.Z / SectionSize.Y);
+	const int32 SectionX = FMath::CeilToInt(InBlockLocation.X / SectionSize.X);
+	const int32 SectionY = FMath::CeilToInt(InBlockLocation.Z / SectionSize.Y) * -1;
 
 	for(ADigumWorldActorSection* Section : SectionActors)
 	{
 		if(Section == nullptr) continue;
 		
 		UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
+		
+		UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
 		if(Section->GetX() == SectionX && Section->GetY() == SectionY)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
 			Section->AddBlock(InBlockID, InBlockLocation);
 			return;
 		}
