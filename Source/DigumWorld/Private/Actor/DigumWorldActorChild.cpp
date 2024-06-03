@@ -168,6 +168,7 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 		FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			
 		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
 	}
 }
 

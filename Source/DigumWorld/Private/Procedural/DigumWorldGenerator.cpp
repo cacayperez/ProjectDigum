@@ -75,6 +75,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSectionX, const int32&
 
 				FName BlockID = GetBlockIDFromNoiseValue(NormalizedNoise, InCumulativeWeights, InBlocks);
 				OutSection.AddCoordinate(BlockID, x, y, HierchyIndex, NoiseValue);
+				UE_LOG(LogTemp, Warning, TEXT("Hierarchy: %i"), HierchyIndex);
 			}
 		}
 	}

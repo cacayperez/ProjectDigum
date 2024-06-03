@@ -19,6 +19,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 
 	// important to set this to true to avoid the performance hit of the old RemoveAt() behavior
 	bSupportRemoveAtSwap = true;
+	NumCustomDataFloats = 1;
 	//SetCastShadow(true);
 	bCastDynamicShadow = false;
 }
@@ -169,5 +170,25 @@ void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType
 bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
 {
 	return RemoveInstanceInternal_Custom(InstanceIndex, false);
+}
+
+void UDigumWorldISMComponent::SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex)
+{
+	float Brightness = 1.0f;
+	if(InstanceIndex != INDEX_NONE)
+	{
+		// Currently supporting 1 level of hierarchy
+		// maybe consider multiple levels of hierarchy in the future
+		// but for now, we will just use a single level of hierarchy, due to performance reasons
+		if(InHierarchyIndex != 0)
+		{
+			Brightness = 0.2f;
+		}
+		else
+		{
+			Brightness = 1.0f;
+		}
+		SetCustomDataValue(InstanceIndex, 0, Brightness, true);
+	}
 }
 

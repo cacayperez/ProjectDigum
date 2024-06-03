@@ -136,6 +136,5 @@ int32 ADigumWorldActorSection::GetX() const
 int32 ADigumWorldActorSection::GetY() const
 {
 	return FMath::FloorToInt(GetActorLocation().Z / SectionSize.Y);
-	
 }
 

@@ -28,4 +28,5 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	virtual bool RemoveInstance(int32 InstanceIndex) override;
+	void SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex);
 };
