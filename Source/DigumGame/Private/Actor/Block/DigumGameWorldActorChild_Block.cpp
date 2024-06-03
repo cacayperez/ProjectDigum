@@ -26,7 +26,7 @@ void ADigumGameWorldActorChild_Block::OnDestroyChildInstance(const int32& InInde
 		if(PickupActor)
 		{
 			FDigumItemProperties ItemProperties = FDigumItemProperties();
-			ItemProperties.ItemID = TEXT("DefaultBlock");
+			ItemProperties.ItemID = BlockID; 
 			ItemProperties.ItemAmount = 1;
 			ItemProperties.ContentCategory = TEXT("Primary");
 			PickupActor->SetItemProperties(ItemProperties);

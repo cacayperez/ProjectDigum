@@ -36,7 +36,7 @@ void ADigumPickupActor::OnPickup(AActor* InPickupInstigator)
 			if(UDigumInventoryComponent* InventoryComponent = Interface->GetInventoryComponent())
 			{
 				int32 Excess = 0;
-				UE_LOG(LogTemp, Warning, TEXT("ADigumPickupActor::OnPickup"));
+				UE_LOG(LogTemp, Warning, TEXT("ADigumPickupActor::OnPickup, %s"), *ItemProperties.GetItemID().ToString());
 				InventoryComponent->TryAddItem(ItemProperties, Excess);
 				if(Excess <= 0)
 				{

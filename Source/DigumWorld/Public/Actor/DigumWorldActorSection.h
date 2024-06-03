@@ -20,11 +20,23 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 	
+	/*UPROPERTY()
+	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;*/
+
 	UPROPERTY()
-	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;
+	TMap<FName, ADigumWorldActorChild*> WorldChildActors;
 
 	UPROPERTY()
 	FDigumWorldProceduralSection SectionData;
+
+	UPROPERTY()
+	FVector GridSize;
+
+	UPROPERTY()
+	int32 SectionX;
+
+	UPROPERTY()
+	int32 SectionY;
 
 public:
 	// Sets default values for this actor's properties
@@ -39,5 +51,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void InitializeSection(FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
+	void AddBlock(const FName& InBlockID, const FVector& InLocation);
+	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
+	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
+
+	int32 GetX() const { return SectionX; }
+	int32 GetY() const { return SectionY; }
 };

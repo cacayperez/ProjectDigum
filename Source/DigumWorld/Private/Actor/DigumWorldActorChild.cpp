@@ -94,7 +94,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 		
 		Health.Empty();
 		InstancedMeshComponent->ClearInstances();
-		FVector GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+		GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 		UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh);
 		if(Mesh)
 		{
@@ -124,26 +124,29 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 	}
 }
 
-void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
-	FDigumWorldProceduralCoordinateArray Coordinates, const int32 HierarchyIndex)
+void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset,
+	FDigumWorldProceduralCoordinateArray Coordinates)
 {
 	SwatchAsset = InSwatchAsset;
+	BlockID = InBlockID;
 	
 	if(SwatchAsset)
 	{
 		BuildChildProperties(SwatchAsset);
 		Health.Empty();
 		InstancedMeshComponent->ClearInstances();
-		FVector GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
-		UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh);
-		if(Mesh)
+		GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+		if(UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh))
 		{
 			InstancedMeshComponent->SetStaticMesh(Mesh);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Mesh is nullll"));
+			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
+
+		AddBlock(Coordinates);
+		/*
 		const float GridX = GridSize.X;
 		const float GridY = GridSize.Y;
 		const float GridZ = GridSize.Z;
@@ -160,10 +163,31 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 			
 			int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 		}
+		*/
 
 		// OnFinishedInitializeSwatchAsset(SwatchAsset, Coordinates);
 	}
 	
+}
+
+void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates)
+{
+	const float GridX = GridSize.X;
+	const float GridY = GridSize.Y;
+	const float GridZ = GridSize.Z;
+		
+	for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
+	{
+		FDigumWorldProceduralCoordinate* Coordinate = InCoordinates.GetCoordinate(i);
+		// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
+		const float X = Coordinate->X * GridX;
+		const float Y = Coordinate->Hierarchy * GridY;
+		const float Z = -((Coordinate->Y * GridZ));
+		FVector Location = FVector(X, Y, Z);
+		FTransform Transform = FTransform(FRotator::ZeroRotator, GetActorLocation() + Location, FVector(1.0f));
+			
+		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+	}
 }
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)

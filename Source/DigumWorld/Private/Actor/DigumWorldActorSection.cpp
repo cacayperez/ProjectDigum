@@ -4,8 +4,11 @@
 #include "Actor/DigumWorldActorSection.h"
 
 #include "Actor/DigumWorldActorChild.h"
+#include "Asset/DigumWorldAsset.h"
 #include "Asset/DigumWorldSwatchAsset.h"
+#include "Functions/DigumWorldFunctionHelpers.h"
 #include "Procedural/DigumWorldGenerator.h"
+#include "Settings/DigumWorldSettings.h"
 
 
 // Sets default values
@@ -30,7 +33,7 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 
 void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	
+	GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
 	FDigumWorldProceduralCoordinateArray* Array = InSection.GetCoordinateArray();
 	if(!Array)
@@ -38,14 +41,16 @@ void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& In
 		return;
 	}
 	SectionData = InSection;
+	SectionX = InSection.GetX();
+	SectionY = InSection.GetY();
 	Array->MakeMappedCoordinates(Blocks);
 
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
 	{
 		FName BlockID = It->Key;
 		FDigumWorldProceduralCoordinateArray BlockCoordinates = It->Value;
-
-		UDigumWorldSwatchAsset* SwatchAsset = ProceduralAsset->GetSwatchAsset(BlockID);
+		
+		UDigumWorldSwatchAsset* SwatchAsset = UDigumWorldFunctionHelpers::GetSwatchAsset(BlockID, TEXT("Primary"));
 
 		if(SwatchAsset)
 		{
@@ -57,24 +62,56 @@ void ADigumWorldActorSection::InitializeSection(FDigumWorldProceduralSection& In
 				{
 					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 					// NewActor->SetFolderPath(GetFolderPath());
-					NewActor->InitializeSwatchAsset(SwatchAsset, BlockCoordinates, 0);
+					NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
 					NewActor->FinishSpawning(ChildTransform);
 					
-					
-					WorldChildActors.Add(NewActor);
+					WorldChildActors.FindOrAdd(BlockID, NewActor);
 				}
 			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Swatch Asset not found for BlockID: %s"), *BlockID.ToString());
 		}
 	}
 }
 
+void ADigumWorldActorSection::CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates)
+{
+}
+
+
+void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& InLocation)
+{
+	// Check if block exists
+	ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(InBlockID);
+	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
+	FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate();
+	Coordinate.X = 0;
+	Coordinate.Y = 2;
+	Coordinate.Hierarchy = 2;
+
+	CoordinateArray.AddCoordinate(Coordinate);
+	
+	if(ChildActor)
+	{
+		ChildActor->AddBlock(CoordinateArray);
+	}
+	else
+	{
+		
+	}
+
+	// create block if it doesnt exist
+}
+
 void ADigumWorldActorSection::DestroySection()
 {
-	for(TWeakObjectPtr<AActor> Child : WorldChildActors)
+	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
 	{
-		if(Child.IsValid())
+		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
-			Child->Destroy();
+			ChildActor->Destroy();
 		}
 	}
 

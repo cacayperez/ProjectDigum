@@ -6,14 +6,3 @@
 #include "Asset/DigumAssetManager.h"
 #include "Asset/DigumWorldSwatchAsset.h"
 
-UDigumWorldSwatchAsset* UDigumWorldProceduralAsset::GetSwatchAsset(const FName& BlockID)
-{
-	for(const auto& Block : Blocks)
-	{
-		if(Block.BlockID == BlockID)
-		{
-			return UDigumAssetManager::GetAsset<UDigumWorldSwatchAsset>(Block.SwatchAsset);
-		}
-	}
-	return nullptr;
-}

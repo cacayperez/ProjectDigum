@@ -36,13 +36,13 @@ bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProcedur
 	
 	float TotalWeight = 0.0f;
 	float CumulativeSum = 0.0f;
-	for(const auto&	[BlockID, SwatchAsset, Weight] : Blocks)
+	for(const auto&	[BlockID, Weight] : Blocks)
 	{
 		// Weight Total
 		TotalWeight += Weight;
 	}
 	
-	for(const auto&	[BlockID, SwatchAsset, Weight] : Blocks)
+	for(const auto&	[BlockID, Weight] : Blocks)
 	{
 		float StartRange = CumulativeSum;
 		CumulativeSum += Weight;

@@ -3,11 +3,13 @@
 
 #include "Actor/Equip/DigumGameItemActor_Block.h"
 
+#include "Actor/DigumWorldProceduralActor.h"
 #include "Actor/Build/Preview/DigumBlockPreview.h"
 #include "DigumBuild/Public/Actor/DigumBuildPreviewActor.h"
 #include "Functions/DigumGameItemHelperFunctions.h"
 #include "Interface/IDigumPlayerCharacterInterface.h"
 #include "Item/DigumGameItemAsset.h"
+#include "Kismet/GameplayStatics.h"
 #include "Settings/DigumWorldSettings.h"
 
 
@@ -117,9 +119,19 @@ void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigu
 
 	if(BlockPreview)
 	{
-		FVector TargetLocation = BlockPreview->GetTargetLocation();
+		FVector TargetLocation = BlockPreview->GetPreviewTargetLocation();
 
-		
+		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldProceduralActor::StaticClass());
+		if(Actor)
+		{
+			if(ADigumWorldProceduralActor* ProceduralActor = Cast<ADigumWorldProceduralActor>(Actor))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("BlockID: %s"), *GetItemProperties()->GetItemID().ToString());
+				FName BlockID = GetItemProperties()->GetItemID();
+				ProceduralActor->AddBlock(BlockID, TargetLocation);
+			}
+			
+		}
 	}
 }
 

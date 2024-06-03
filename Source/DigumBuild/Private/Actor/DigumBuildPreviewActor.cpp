@@ -35,13 +35,13 @@ void ADigumBuildPreviewActor::SetTargetLocation(const FVector& InTargetLocation,
 	{
 		return;
 	}
-	TargetLocation = GridLocation;
+	TargetLocation = SnapToGrid(GridLocation, InGridSize);
 }
 
 bool ADigumBuildPreviewActor::IsBlockOccupied(const FVector& InLocation, const FVector& InGridSize)
 {
 	const float YOffset = 20.0f;
-	FVector BoxSize = InGridSize * 0.5f - 20.0f;
+	FVector BoxSize = InGridSize * 0.25f;
 	BoxSize.Y += YOffset;
 
 	const float LocationX = InLocation.X;
@@ -51,14 +51,12 @@ bool ADigumBuildPreviewActor::IsBlockOccupied(const FVector& InLocation, const F
 	FVector TraceLocation = FVector(LocationX, LocationY, LocationZ);
 	FHitResult OutHitResult;
 	bool bHit = UKismetSystemLibrary::BoxTraceSingle(GetWorld(), TraceLocation, TraceLocation, BoxSize, FRotator::ZeroRotator, UEngineTypes::ConvertToTraceType(ECC_WorldDynamic), true, TArray<AActor*>(), EDrawDebugTrace::ForOneFrame, OutHitResult, false);
-	/*if(bHit)
-	{
-		if(OutHitResult.Item)
-		{
-			return true;
-		}
-		if(AActor* Actor = OutHitResult.GetActor())
-			return true;
-	}*/
+
 	return bHit;
+}
+
+FVector ADigumBuildPreviewActor::SnapToGrid(const FVector& InLocation, const FVector& InGridSize) const
+{
+	const FVector GridLocation = FVector(FMath::RoundToFloat(InLocation.X / InGridSize.X) * InGridSize.X, 0.0f, FMath::RoundToFloat(InLocation.Z / InGridSize.Z) * InGridSize.Z);
+	return GridLocation;
 }

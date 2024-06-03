@@ -6,9 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "DigumWorldProceduralActor.generated.h"
 
-class ADigumWorldActorSection;
+struct FDigumWorldProceduralSection;
 struct FDigumWorldAssetCoordinateArray;
 struct FDigumWorldProceduralCoordinateArray;
+class UDigumWorldProceduralAsset;
+class ADigumWorldActorSection;
 
 UCLASS()
 class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
@@ -19,8 +21,10 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 	TObjectPtr<USceneComponent> Root;
 	
 	UPROPERTY()
-	TArray<TWeakObjectPtr<ADigumWorldActorSection>> SectionActors;
+	TArray<ADigumWorldActorSection*> SectionActors;
 
+	UPROPERTY()
+	FVector2D SectionSize;
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldProceduralActor();
@@ -32,6 +36,9 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void CreateSection(const float& InSectionWidth, const float& InSectionHeight, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Generate World"))
 	void Editor_GenerateProceduralWorld();

@@ -15,8 +15,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	FName ContentCategoryName;
 
-	UPROPERTY(Config, EditAnywhere, Category = "World", meta=(DisplayName="Procedural Rules"))
+	UPROPERTY(EditAnywhere, Category = "World", meta=(DisplayName="Procedural Rules"))
 	FDigumWorldProceduralRules ProceduralRules;
+
+	UPROPERTY(EditAnywhere, Category = "World", meta=(DisplayName="Table"))
+	UDataTable* BlockTable;
 };
 /**
  * 

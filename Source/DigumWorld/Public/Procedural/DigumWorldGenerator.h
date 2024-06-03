@@ -80,6 +80,7 @@ public:
 			OutMappedCoordinates.FindOrAdd(Coordinate.BlockID).AddCoordinate(Coordinate);
 		}
 	}
+
 };
 
 // TMap Wrapper for CoordinateArray

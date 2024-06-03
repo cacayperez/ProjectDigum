@@ -16,8 +16,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	FName BlockID = NAME_None;
 	
-	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;
+	/*UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;*/
 
 	UPROPERTY(EditAnywhere)
 	float Weight = 1.0f;
@@ -36,5 +36,5 @@ public:
 
 	int32 GetBlockCount() const { return Blocks.Num(); }
 	TArray<FDigumWorldProceduralBlock> GetBlocks() const { return Blocks;}
-	UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
+	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

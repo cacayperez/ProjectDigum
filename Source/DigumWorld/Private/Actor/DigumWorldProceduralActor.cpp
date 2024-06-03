@@ -29,6 +29,64 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, const float& InSectionHeight,
+	FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
+{
+	const FDigumWorldProceduralCoordinateArray* CoordinateArray = InSection.GetCoordinateArray();
+	if(CoordinateArray == nullptr) return;;
+	
+	const float SX = InSection.GetX();
+	const float SY = InSection.GetY();
+	const float X = (SX * (InSectionWidth));
+	const float Z = -(SY * (InSectionHeight));
+	FVector SectionLocation = FVector(X, 0, Z);
+
+	ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity);
+	if(NewSection)
+	{
+		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+		NewSection->SetFolderPath(GetFolderPath());
+		NewSection->InitializeSection(InSection, ProceduralAsset);
+		NewSection->FinishSpawning(FTransform::Identity);
+		NewSection->SetActorLocation(SectionLocation);
+		// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
+		SectionActors.Add(NewSection);
+	}
+}
+
+void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
+{
+	const int32 SectionX = FMath::FloorToInt(InBlockLocation.X / SectionSize.X);
+	const int32 SectionY = FMath::FloorToInt(InBlockLocation.Z / SectionSize.Y);
+
+	for(ADigumWorldActorSection* Section : SectionActors)
+	{
+		if(Section == nullptr) continue;
+		
+		UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
+		if(Section->GetX() == SectionX && Section->GetY() == SectionY)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
+			Section->AddBlock(InBlockID, InBlockLocation);
+			return;
+		}
+	}
+	
+    /*SectionActors.FindByPredicate([SectionX, SectionY, InBlockID, InBlockLocation](const TWeakObjectPtr<ADigumWorldActorSection>& Section)
+    {
+        if(const FDigumWorldProceduralSection* SectionData = Section->GetSectionData())
+        {
+            if(SectionData->GetX() == SectionX && SectionData->GetY() == SectionY)
+            {
+                Section->AddBlock(InBlockID, InBlockLocation);
+                return true;
+            }
+        }
+        return false;
+    });*/
+
+	// TODO: Handle if section not found
+}
 
 void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 {
@@ -49,42 +107,24 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 				return;
 			}
 
-			FVector GridSize = UDigumWorldSettings::GetGridSize();
-			const float HalfGridX = GridSize.X * 0.5f;
-			const float HalfGridZ = GridSize.Z * 0.5f;
-			float SectionWidth = Rules->SectionWidth * GridSize.X;
-			float SectionHeight = Rules->SectionHeight * GridSize.Z;
+			const FVector GridSize = UDigumWorldSettings::GetGridSize();
+			const float SectionWidth = Rules->SectionWidth * GridSize.X;
+			const float SectionHeight = Rules->SectionHeight * GridSize.Z;
 
+			SectionSize = FVector2D(SectionWidth, SectionHeight);
+			
 			for(auto& Section : ProceduralMap.GetSections())
 			{
-				// TODO implement Hierarchies
-				FDigumWorldProceduralCoordinateArray* CoordinateArray = Section.GetCoordinateArray();
-				if(CoordinateArray == nullptr) continue;
-				const float SX = Section.GetX();
-				const float SY = Section.GetY();
-				const float X = (SX * (SectionWidth));
-				const float Z = -(SY * (SectionHeight));
-				FVector SectionLocation = FVector(X, 0, Z);
-				FTransform SectionTransform = FTransform(FRotator::ZeroRotator, SectionLocation);
-
-				ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity);
-				if(NewSection)
-				{
-					NewSection->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-					NewSection->SetFolderPath(GetFolderPath());
-					NewSection->InitializeSection(Section, ProceduralAsset);
-					NewSection->FinishSpawning(FTransform::Identity);
-					NewSection->SetActorLocation(SectionLocation);
-					// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
-					SectionActors.Add(NewSection);
-				}
+				CreateSection(SectionWidth, SectionHeight, Section, ProceduralAsset);
 			}
 		}
 		
-
+#if WITH_EDITOR
 		MarkPackageDirty();
+#endif
 	}
 }
+
 
 void ADigumWorldProceduralActor::Editor_CleanActors()
 {
@@ -95,6 +135,8 @@ void ADigumWorldProceduralActor::Editor_CleanActors()
 			Child->DestroySection();
 		}
 	}
+#if WITH_EDITOR
 	MarkPackageDirty();
+#endif
 }
 

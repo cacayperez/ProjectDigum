@@ -26,5 +26,6 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	void SetTargetLocation(const FVector& InTargetLocation, const FVector& InGridSize = FVector(100.0f, 100.0f, 100.0f));
 	bool IsBlockOccupied(const FVector& InLocation, const FVector& InGridSize);
+	FVector SnapToGrid(const FVector& InLocation, const FVector& InGridSize) const;
 	FVector GetPreviewTargetLocation() const { return TargetLocation; }
 };
