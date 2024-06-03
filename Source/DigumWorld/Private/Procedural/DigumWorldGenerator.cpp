@@ -104,7 +104,7 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 	const FRandomStream RandomStream(Seed);
 	FDigumWorldProceduralMap TempMap = FDigumWorldProceduralMap();
 	
-	for(int32 h = -InRules.SectionCount_HorizontalAxis; h < InRules.SectionCount_HorizontalAxis; h++)
+	for(int32 h = 0; h < InRules.SectionCount_HorizontalAxis; h++)
 	{
 		for(int32 v = 0; v < InRules.SectionCount_VerticalAxis; v++)
 		{

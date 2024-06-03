@@ -104,16 +104,17 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is nullll"));
 		}
-		const float HalfGridX = GridSize.X * 0.5f;
-		const float HalfGridY = GridSize.Y * 0.5f;
+		const float GridX = GridSize.X;
+		const float GridY = GridSize.Y;
+		const float GridZ = GridSize.Z;
 		
 		for(int32 i = 0; i < Coordinates.CoordinateCount(); i++)
 		{
 			FDigumWorldAssetCoordinate* Coordinate = Coordinates.GetAt(i);
 			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
-			const float X = Coordinate->X * HalfGridX;
-			const float Y = HierarchyIndex * HalfGridY;
-			const float Z = -((Coordinate->Y * HalfGridX) + HalfGridX);
+			const float X = Coordinate->X * GridX;
+			const float Y = HierarchyIndex * GridY;
+			const float Z = -((Coordinate->Y * GridZ) + GridZ);
 			FVector Location = FVector(X, Y, Z);
 			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			
@@ -146,26 +147,6 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 		}
 
 		AddBlock(Coordinates);
-		/*
-		const float GridX = GridSize.X;
-		const float GridY = GridSize.Y;
-		const float GridZ = GridSize.Z;
-		
-		for(int32 i = 0; i < Coordinates.CoordinateCount(); i++)
-		{
-			FDigumWorldProceduralCoordinate* Coordinate = Coordinates.GetCoordinate(i);
-			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
-			const float X = Coordinate->X * GridX;
-			const float Y = Coordinate->Hierarchy * GridY;
-			const float Z = -((Coordinate->Y * GridX) + GridX);
-			FVector Location = FVector(X, Y, Z);
-			FTransform Transform = FTransform(FRotator::ZeroRotator, GetActorLocation() + Location, FVector(1.0f));
-			
-			int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
-		}
-		*/
-
-		// OnFinishedInitializeSwatchAsset(SwatchAsset, Coordinates);
 	}
 	
 }
@@ -182,11 +163,11 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 		// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
 		const float X = Coordinate->X * GridX;
 		const float Y = Coordinate->Hierarchy * GridY;
-		const float Z = -((Coordinate->Y * GridZ));
+		const float Z = -(Coordinate->Y * GridZ);
 		FVector Location = FVector(X, Y, Z);
-		FTransform Transform = FTransform(FRotator::ZeroRotator, GetActorLocation() + Location, FVector(1.0f));
+		FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			
-		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform, true);
+		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 	}
 }
 
@@ -228,6 +209,7 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 	FTransform Transform;
 	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("DestroyInstance %s"), *Transform.GetLocation().ToString());
 		InstancedMeshComponent->RemoveInstance(InIndex);
 		OnDestroyChildInstance(InIndex, Transform.GetLocation());
 		

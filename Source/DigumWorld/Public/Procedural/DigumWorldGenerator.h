@@ -107,10 +107,10 @@ struct FDigumWorldProceduralSection
 public:
 	FDigumWorldProceduralSection() : SectionCoordinateX(0), SectionCoordinateY(0) { }
 	FDigumWorldProceduralSection(const int32 InX, const int32 InY) { SectionCoordinateX = InX; SectionCoordinateY = InY; }
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	int32 SectionCoordinateX;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	int32 SectionCoordinateY;
 	
 	UPROPERTY()

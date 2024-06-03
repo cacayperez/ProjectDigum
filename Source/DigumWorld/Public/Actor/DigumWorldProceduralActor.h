@@ -25,6 +25,10 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 
 	UPROPERTY()
 	FVector2D SectionSize;
+	
+	UPROPERTY()
+	int32 LocalSectionWidth;
+	int32 LocalSectionHeight;
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldProceduralActor();

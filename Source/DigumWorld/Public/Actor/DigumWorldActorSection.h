@@ -26,7 +26,7 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY()
 	TMap<FName, ADigumWorldActorChild*> WorldChildActors;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	FDigumWorldProceduralSection SectionData;
 
 	UPROPERTY()
@@ -55,7 +55,7 @@ public:
 
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
-	void AddBlock(const FName& InBlockID, const FVector& InLocation);
+	void AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset = 0, const int32& HeightOffset = 0);
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }

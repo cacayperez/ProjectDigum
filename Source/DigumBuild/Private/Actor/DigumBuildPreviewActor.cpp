@@ -30,7 +30,7 @@ void ADigumBuildPreviewActor::Tick(float DeltaSeconds)
 void ADigumBuildPreviewActor::SetTargetLocation(const FVector& InTargetLocation, const FVector& InGridSize)
 {
 	const FVector GridLocation = FVector(FMath::RoundToFloat(InTargetLocation.X / InGridSize.X) * InGridSize.X, 0.0f, FMath::RoundToFloat(InTargetLocation.Z / InGridSize.Z) * InGridSize.Z);
-
+	GridSize = InGridSize;
 	if(IsBlockOccupied(GridLocation, InGridSize))
 	{
 		return;
@@ -44,9 +44,9 @@ bool ADigumBuildPreviewActor::IsBlockOccupied(const FVector& InLocation, const F
 	FVector BoxSize = InGridSize * 0.25f;
 	BoxSize.Y += YOffset;
 
-	const float LocationX = InLocation.X;
+	const float LocationX = InLocation.X + InGridSize.X / 2.0f;
 	const float LocationY = -(InLocation.Y + InGridSize.Y / 2.0f) + (YOffset * 2.0f);
-	const float LocationZ = InLocation.Z + InGridSize.Z / 2.0f;
+	const float LocationZ = (InLocation.Z + InGridSize.Z / 2.0f);
 	
 	FVector TraceLocation = FVector(LocationX, LocationY, LocationZ);
 	FHitResult OutHitResult;
@@ -63,5 +63,7 @@ FVector ADigumBuildPreviewActor::SnapToGrid(const FVector& InLocation, const FVe
 
 FVector ADigumBuildPreviewActor::GetPreviewTargetLocation() const
 {
-	return GetActorLocation();
+	FVector Location = GetActorLocation();
+	Location.Z += GridSize.Z;
+	return Location;
 }

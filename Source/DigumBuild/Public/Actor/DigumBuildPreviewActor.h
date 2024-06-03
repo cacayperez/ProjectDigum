@@ -19,6 +19,9 @@ class DIGUMBUILD_API ADigumBuildPreviewActor : public AActor
 
 	UPROPERTY()
 	FVector TargetLocation;
+
+	UPROPERTY()
+	FVector GridSize;
 public:
 	// Sets default values for this actor's properties
 	ADigumBuildPreviewActor();

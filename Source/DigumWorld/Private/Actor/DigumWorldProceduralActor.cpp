@@ -56,21 +56,30 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 
 void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
-	const int32 SectionX = FMath::CeilToInt(InBlockLocation.X / SectionSize.X);
-	const int32 SectionY = FMath::CeilToInt(InBlockLocation.Z / SectionSize.Y) * -1;
-
+	const FVector LocalPosition = InBlockLocation - GetActorLocation();
+	const int32 SectionX = FMath::FloorToInt(LocalPosition.X / SectionSize.X);
+	const int32 SectionY = -FMath::CeilToInt((LocalPosition.Z) / SectionSize.Y);
+	UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
 	for(ADigumWorldActorSection* Section : SectionActors)
 	{
 		if(Section == nullptr) continue;
-		
-		UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
-		
-		UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
-		if(Section->GetX() == SectionX && Section->GetY() == SectionY)
+
+		FDigumWorldProceduralSection SectionData = Section->GetSectionData();
+		if(SectionData.GetX() == FMath::Abs(SectionX) && SectionData.GetY() ==  FMath::Abs(SectionY))
 		{
-			Section->AddBlock(InBlockID, InBlockLocation);
+			const int32 XOffset = SectionX * LocalSectionWidth;
+			const int32 YOffset = SectionY * LocalSectionHeight;
+			Section->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
 			return;
 		}
+
+		/*if(Section->GetX() == SectionX && Section->GetY() == SectionY)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
+			UE_LOG(LogTemp, Warning, TEXT("Section %d, %d"), Section->GetX(), Section->GetY());
+			Section->AddBlock(InBlockID, InBlockLocation);
+			return;
+		}*/
 	}
 	
     /*SectionActors.FindByPredicate([SectionX, SectionY, InBlockID, InBlockLocation](const TWeakObjectPtr<ADigumWorldActorSection>& Section)
@@ -107,7 +116,8 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 				UE_LOG(LogTemp, Warning, TEXT("No sections generated"));
 				return;
 			}
-
+			LocalSectionWidth = Rules->SectionWidth;
+			LocalSectionHeight = Rules->SectionHeight;
 			const FVector GridSize = UDigumWorldSettings::GetGridSize();
 			const float SectionWidth = Rules->SectionWidth * GridSize.X;
 			const float SectionHeight = Rules->SectionHeight * GridSize.Z;
