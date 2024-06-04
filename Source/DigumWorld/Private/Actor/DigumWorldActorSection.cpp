@@ -91,9 +91,9 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					NewActor->FinishSpawning(FTransform::Identity);
 					
 					WorldChildActors.FindOrAdd(BlockID, NewActor);
-#if WITH_EDITOR
+/*#if WITH_EDITOR
 					NewActor->SetIsHiddenEdLayer(true);
-#endif
+#endif*/
 				}
 			}
 		}

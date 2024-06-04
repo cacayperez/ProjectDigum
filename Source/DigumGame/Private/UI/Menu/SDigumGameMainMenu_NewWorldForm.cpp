@@ -62,7 +62,7 @@ void SDigumGameMainMenu_NewWorldForm::Construct(const FArguments& InArgs)
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
-		.HAlign(HAlign_Right)
+		.FillWidth(0.3f)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString("World Name"))
@@ -86,7 +86,7 @@ void SDigumGameMainMenu_NewWorldForm::Construct(const FArguments& InArgs)
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
-		.HAlign(HAlign_Right)
+		.FillWidth(0.3f)
 		[
 			SNew(STextBlock)
 			.Text(FText::FromString("Seed"))
@@ -116,6 +116,7 @@ void SDigumGameMainMenu_NewWorldForm::Construct(const FArguments& InArgs)
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot()
+		.FillWidth(0.3f)
 		[
 			SNew(SSpacer)
 		]
@@ -142,27 +143,6 @@ void SDigumGameMainMenu_NewWorldForm::Construct(const FArguments& InArgs)
 	
 }
 
-TSharedPtr<SWidget> SDigumGameMainMenu_NewWorldForm::CreateInputRow(const FText& LabelText, const float& InputWidth, const FText& InputText, const FOnTextChanged& OnTextChange, const FOnTextCommitted& OnTextCommitted)
-{
-	return SNew(SHorizontalBox)
-	+ SHorizontalBox::Slot()
-	.HAlign(HAlign_Right)
-	[
-		SNew(STextBlock)
-		.Text(LabelText)
-	]
-	+ SHorizontalBox::Slot()
-	[
-		SNew(SBox)
-		.WidthOverride(InputWidth)
-		[
-			SNew(SEditableTextBox)
-			.Text(InputText)
-			.OnTextChanged(OnTextChange)
-			.OnTextCommitted(OnTextCommitted)
-		]
-	];
-}
 
 
 END_SLATE_FUNCTION_BUILD_OPTIMIZATION

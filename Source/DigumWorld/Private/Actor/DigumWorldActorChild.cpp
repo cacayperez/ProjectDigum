@@ -120,6 +120,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
 			
 			int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+			InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
 		}
 
 		OnFinishedInitializeSwatchAsset(SwatchAsset, Coordinates);

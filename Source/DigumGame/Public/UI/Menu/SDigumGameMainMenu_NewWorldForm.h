@@ -31,5 +31,5 @@ protected:
 	int32 CurrentSeed = 0;
 	FText WorldName;
 	FText WorldSeed;
-	TSharedPtr<SWidget> CreateInputRow(const FText& LabelText, const float& InputWidth, const FText& InputText,  const FOnTextChanged& OnTextChanged, const FOnTextCommitted& OnTextCommitted);
+	
 };

@@ -3,9 +3,8 @@
 
 #include "Components/DigumWorldPositioningComponent.h"
 
-#include "GameMode/DigumGameMode.h"
-#include "GameState/DigumGameState.h"
-#include "Interface/IDigumPlayerCharacterInterface.h"
+#include "Functions/DigumWorldFunctionHelpers.h"
+#include "Settings/DigumWorldSettings.h"
 
 
 // Sets default values for this component's properties
@@ -15,6 +14,7 @@ UDigumWorldPositioningComponent::UDigumWorldPositioningComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+	SetComponentTickInterval(0.2f);
 	// ...
 }
 
@@ -25,57 +25,38 @@ void UDigumWorldPositioningComponent::BeginPlay()
 	Super::BeginPlay();
 	if(GetWorld())
 	{
-		ADigumGameState* GameState = GetWorld()->GetGameState<ADigumGameState>();
-
-		// TODO: Implement this
-		// Get the game settings.
-	}
-	
-	/*
-	if(GetOwner() && GetOwner()->GetClass()->ImplementsInterface(UIDigumPlayerCharacterInterface::StaticClass()))
-	{
-		TScriptInterface<IIDigumPlayerCharacterInterface> Interface = GetOwner();
-		if(Interface)
+		// TODO Get Current Content Category from Game Mode
+		const FName CategoryName = TEXT("Primary");
+		if(const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>())
 		{
-			if(APlayerController* PlayerController = Interface->GetPlayerController())
+			const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(CategoryName);
+			if(Category)
 			{
+				GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
+				SectionWidth = Category->ProceduralRules.SectionWidth;
+				SectionHeight = Category->ProceduralRules.SectionHeight;
 				
+				const float UnitSectionWidth = SectionWidth * GridSize.X;
+				const float UnitSectionHeight = SectionHeight * GridSize.Z;
+				UnitSectionSize = FVector2D(UnitSectionWidth,  UnitSectionHeight);
+
+				const float TotalWidth = Category->ProceduralRules.SectionCount_HorizontalAxis * UnitSectionWidth;
+				const float TotalHeight = Category->ProceduralRules.SectionCount_VerticalAxis * UnitSectionHeight;
+
+				FVector Offset = (FVector(-TotalWidth / 2, 0, TotalHeight / 2));
+				WorldOffset = Offset;
 			}
-
-			
 		}
 	}
-	*/
-	
-	/*
-	if(const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>())
-	{
-		const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(InContentCategoryName);
-		if(Category)
-		{
-			const FVector GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
-			const int32 SectionWidth = Category->ProceduralRules.SectionWidth;
-			const int32 SectionHeight = Category->ProceduralRules.SectionHeight;
-			const float UnitSectionWidth = SectionWidth * GridSize.X;
-			const float UnitSectionHeight = SectionHeight * GridSize.Z;
-
-			OutXCoordinate = FMath::FloorToInt(InWorldLocation.X / UnitSectionWidth);
-			OutYCoordinate = -FMath::CeilToInt((InWorldLocation.Z) / UnitSectionHeight);
-
-			return true;
-		}
-	}
-	return false;
-	 */
 }
 
-
-// Called every frame
 void UDigumWorldPositioningComponent::TickComponent(float DeltaTime, ELevelTick TickType,
                                                     FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	const FVector Location = GetOwner()->GetActorLocation() - WorldOffset;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(Location , UnitSectionSize, CurrentCoordinate);
+	// UE_LOG(LogTemp, Warning, TEXT("Current Coordinate: %i, %i"), CurrentCoordinate.X, CurrentCoordinate.Y);
 }
 

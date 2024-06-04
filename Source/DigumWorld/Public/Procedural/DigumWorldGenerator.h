@@ -18,10 +18,10 @@ struct FDigumWorldProceduralSectionCoordinate
 public:
 	FDigumWorldProceduralSectionCoordinate() : X(0), Y(0) { }
 	FDigumWorldProceduralSectionCoordinate(const int32 InX, const int32 InY) { X = InX; Y = InY; }
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	int32 X;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	int32 Y;
 };
 
@@ -126,7 +126,7 @@ public:
 	FDigumWorldProceduralSection() : SectionCoordinate(0, 0) { }
 	FDigumWorldProceduralSection(const int32 InX, const int32 InY) { SectionCoordinate.X = InX; SectionCoordinate.Y = InY; }
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
 	
 	UPROPERTY()

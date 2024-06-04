@@ -63,9 +63,6 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 		// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
 		SectionActors.Add(NewSection);
 
-#if WITH_EDITOR
-		NewSection->bHiddenEd = true;
-#endif
 	}
 }
 
