@@ -62,3 +62,86 @@ TSubclassOf<ADigumWorldActorChild> UDigumWorldFunctionHelpers::GetChildActorClas
 	}
 	return nullptr;
 }
+
+bool UDigumWorldFunctionHelpers::GetLocalSectionSize(const FName& InContentCategoryName, int32& OutWidth,
+	int32& OutHeight)
+{
+	if(const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>())
+	{
+		const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(InContentCategoryName);
+		if(Category)
+		{
+			OutWidth = Category->ProceduralRules.SectionWidth;
+			OutHeight = Category->ProceduralRules.SectionHeight;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool UDigumWorldFunctionHelpers::GetSectionCoordinates(const FName& InContentCategoryName, const FVector& InWorldLocation,
+	int32& OutXCoordinate, int32& OutYCoordinate)
+{
+	if(const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>())
+	{
+		const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(InContentCategoryName);
+		if(Category)
+		{
+			const FVector GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
+			const int32 SectionWidth = Category->ProceduralRules.SectionWidth;
+			const int32 SectionHeight = Category->ProceduralRules.SectionHeight;
+			const float UnitSectionWidth = SectionWidth * GridSize.X;
+			const float UnitSectionHeight = SectionHeight * GridSize.Z;
+
+			OutXCoordinate = FMath::FloorToInt(InWorldLocation.X / UnitSectionWidth);
+			OutYCoordinate = -FMath::CeilToInt((InWorldLocation.Z) / UnitSectionHeight);
+
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UDigumWorldFunctionHelpers::GetSectionCoordinates(const FName& InContentCategoryName,
+	const TArray<FVector>& InWorldLocationArray, TArray<FDigumWorldProceduralSectionCoordinate>& OutSectionCoordinateArray)
+{
+	if(const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>())
+	{
+		const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(InContentCategoryName);
+		if(Category)
+		{
+			TArray<FDigumWorldProceduralSectionCoordinate> TempArray;
+			const FVector GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
+			const int32 SectionWidth = Category->ProceduralRules.SectionWidth;
+			const int32 SectionHeight = Category->ProceduralRules.SectionHeight;
+			const float UnitSectionWidth = SectionWidth * GridSize.X;
+			const float UnitSectionHeight = SectionHeight * GridSize.Z;
+
+			for(const FVector& Location: InWorldLocationArray)
+			{
+				const int32 X = FMath::FloorToInt(Location.X / UnitSectionWidth);
+				const int32 Y = -FMath::CeilToInt((Location.Z) / UnitSectionHeight);
+
+				TempArray.Add(FDigumWorldProceduralSectionCoordinate(X, Y));
+			}
+
+			if(TempArray.Num() > 0)
+			{
+				OutSectionCoordinateArray = TempArray;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+void UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(const FVector& InWorldLocation,
+	const FVector2D& InSectionUnitSize, FDigumWorldProceduralSectionCoordinate& OutSectionCoordinate)
+{
+	const int32 X = FMath::FloorToInt(InWorldLocation.X / InSectionUnitSize.X);
+	const int32 Y = -FMath::CeilToInt((InWorldLocation.Z) / InSectionUnitSize.Y);
+
+	const FDigumWorldProceduralSectionCoordinate SectionCoordinate = FDigumWorldProceduralSectionCoordinate(X, Y);
+	OutSectionCoordinate = SectionCoordinate;
+}

@@ -20,13 +20,14 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	PrimaryActorTick.bCanEverTick = false;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
-	
+
 }
 
 void ADigumWorldActorChild::BeginPlay()
 {
 	Super::BeginPlay();
 
+	
 	// Initialize Health
 	/*int32 InstanceCount = InstancedMeshComponent->GetInstanceCount();
 	for(int32 i = 0; i < InstanceCount; i++)
@@ -149,6 +150,19 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 		AddBlock(Coordinates);
 	}
 	
+}
+
+void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
+{
+	if(bValue == true)
+	{
+		InstancedMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		InstancedMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		
+	}
 }
 
 void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates)

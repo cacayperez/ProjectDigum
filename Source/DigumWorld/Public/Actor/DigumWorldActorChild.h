@@ -22,12 +22,12 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY()
 	TObjectPtr<UDigumWorldISMComponent> InstancedMeshComponent;
+
 	
 	UPROPERTY()
 	TArray<float> Health;
-
 
 public:
 	// Sets default values for this actor's properties
@@ -52,7 +52,8 @@ protected:
 public:
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates);
-	
+
+	virtual void SetWorldCollision(const bool& bValue);
 	virtual void AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);

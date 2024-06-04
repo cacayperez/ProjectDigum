@@ -28,11 +28,15 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 	
 	UPROPERTY()
 	int32 LocalSectionWidth;
+
+	UPROPERTY()
 	int32 LocalSectionHeight;
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldProceduralActor();
-
+	
+private:
+	void GenerateMap(const FName& InContentCategoryName);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -41,8 +45,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void CreateSection(const float& InSectionWidth, const float& InSectionHeight, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
-	void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	virtual void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+
+
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Generate World"))
 	void Editor_GenerateProceduralWorld();

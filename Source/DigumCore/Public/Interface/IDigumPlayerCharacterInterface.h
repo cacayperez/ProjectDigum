@@ -23,4 +23,5 @@ class DIGUMCORE_API IIDigumPlayerCharacterInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual APlayerController* GetPlayerController() const = 0;
+	virtual float GetVisibilityRadius() const = 0;
 };

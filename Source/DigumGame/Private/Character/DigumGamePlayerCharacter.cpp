@@ -17,3 +17,8 @@ APlayerController* ADigumGamePlayerCharacter::GetPlayerController() const
 	}
 	return nullptr;
 }
+
+float ADigumGamePlayerCharacter::GetVisibilityRadius() const
+{
+	return 3000.0f;
+}

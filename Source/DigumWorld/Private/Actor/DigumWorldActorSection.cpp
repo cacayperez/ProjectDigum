@@ -6,6 +6,7 @@
 #include "Actor/DigumWorldActorChild.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Asset/DigumWorldSwatchAsset.h"
+#include "Component/DigumVisibilityComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Settings/DigumWorldSettings.h"
@@ -16,13 +17,34 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 {
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
+
+	
+	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
+	
+}
+
+void ADigumWorldActorSection::OnSetWorldVisibility(bool bValue)
+{
+	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	{
+		if(ADigumWorldActorChild* ChildActor = It->Value)
+		{
+			ChildActor->SetActorHiddenInGame(bValue);
+			ChildActor->SetWorldCollision(bValue);
+		}
+	}
+
 }
 
 // Called when the game starts or when spawned
 void ADigumWorldActorSection::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if(VisibilityComponent)
+	{
+		VisibilityComponent->GetOnSetVisibilityDelegate().AddUObject(this, &ADigumWorldActorSection::OnSetWorldVisibility);
+	}
 }
 
 // Called every frame
@@ -69,6 +91,9 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					NewActor->FinishSpawning(FTransform::Identity);
 					
 					WorldChildActors.FindOrAdd(BlockID, NewActor);
+#if WITH_EDITOR
+					NewActor->SetIsHiddenEdLayer(true);
+#endif
 				}
 			}
 		}

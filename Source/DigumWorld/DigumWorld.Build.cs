@@ -9,7 +9,7 @@ public class DigumWorld : ModuleRules
         PublicDependencyModuleNames.AddRange(new string[] { "Core", "DigumCore" });
         
         // Utilities and Tools
-        PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" });
+        PublicDependencyModuleNames.AddRange(new string[] { "DeveloperSettings" , "DigumCore"});
 
         PrivateDependencyModuleNames.AddRange(
             new string[]

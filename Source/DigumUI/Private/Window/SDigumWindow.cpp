@@ -71,21 +71,10 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateWindow()
 	
 	if(bShowWindowHeader)
 	{
-		VerticalBox->AddSlot()
-		.VAlign(VAlign_Center)
-		.AutoHeight()
-		[
-			OnCreateHeader().ToSharedRef()
-		];
+		AddHeaderContentToSlot(VerticalBox);
 	}
 	
-	VerticalBox->AddSlot()
-	.VAlign(VAlign_Center)
-	.HAlign(HAlign_Center)
-	.FillHeight(1.0)
-	[
-		OnCreateContent().ToSharedRef()
-	];
+	AddWindowContentToSlot(VerticalBox);
 	
 	return SNew(SBox)
 	.VAlign(VAlign_Fill)
@@ -93,9 +82,6 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateWindow()
 	[
 		VerticalBox.ToSharedRef()
 	];
-	
-
-			
 }
 
 TSharedPtr<SWidget> SDigumWindow::OnCreateContent()
@@ -105,6 +91,33 @@ TSharedPtr<SWidget> SDigumWindow::OnCreateContent()
 		SNew(STextBlock)
 		.Text(FText::FromString("Content"))
 	];
+}
+
+void SDigumWindow::AddWindowContentToSlot(TSharedPtr<SVerticalBox>& SlotContainer)
+{
+	if(SlotContainer)
+	{
+		SlotContainer->AddSlot()
+		.VAlign(VAlign_Center)
+		.HAlign(HAlign_Center)
+		.FillHeight(1.0)
+		[
+			OnCreateContent().ToSharedRef()
+		];
+	}
+}
+
+void SDigumWindow::AddHeaderContentToSlot(TSharedPtr<SVerticalBox>& SlotContainer)
+{
+	if(SlotContainer)
+	{
+		SlotContainer->AddSlot()
+		.VAlign(VAlign_Center)
+		.AutoHeight()
+		[
+			OnCreateHeader().ToSharedRef()
+		];
+	}
 }
 
 TSharedPtr<SWidget> SDigumWindow::OnCreateHeader()

@@ -17,4 +17,6 @@ public:
 	ADigumGamePlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
 	virtual APlayerController* GetPlayerController() const override;
+	virtual float GetVisibilityRadius() const override;
+	
 };

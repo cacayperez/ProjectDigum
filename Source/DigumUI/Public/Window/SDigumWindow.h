@@ -50,6 +50,8 @@ protected:
 	virtual TSharedPtr<SWidget> OnCreateWindow();
 	virtual TSharedPtr<SWidget> OnCreateContent();
 	virtual TSharedPtr<SWidget> OnCreateHeader();
+	virtual void AddWindowContentToSlot(TSharedPtr<SVerticalBox>& SlotContainer);
+	virtual void AddHeaderContentToSlot(TSharedPtr<SVerticalBox>& SlotContainer);
 
 	virtual void DrawWindow();
 public:

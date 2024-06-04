@@ -23,6 +23,7 @@ class DIGUMWORLD_API ADigumWorldActor : public ADigumActor
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;
 
+
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDigumWorldAsset> WorldAsset;

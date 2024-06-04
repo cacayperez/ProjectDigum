@@ -8,6 +8,7 @@
 #include "DigumWorldActorSection.generated.h"
 
 struct FDigumWorldProceduralSection;
+class UDigumVisibilityComponent;
 class ADigumWorldActorChild;
 class UDigumWorldProceduralAsset;
 struct FDigumWorldProceduralCoordinateArray;
@@ -20,6 +21,8 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 	
+	UPROPERTY()
+	TObjectPtr<UDigumVisibilityComponent> VisibilityComponent;
 	/*UPROPERTY()
 	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;*/
 
@@ -46,6 +49,7 @@ public:
 	ADigumWorldActorSection();
 
 protected:
+	void OnSetWorldVisibility(bool bValue);
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

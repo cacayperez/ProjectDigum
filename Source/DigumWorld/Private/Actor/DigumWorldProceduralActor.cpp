@@ -6,6 +6,7 @@
 #include "Actor/DigumWorldActorChild.h"
 #include "Actor/DigumWorldActorSection.h"
 #include "Asset/DigumWorldSwatchAsset.h"
+#include "Functions/DigumWorldFunctionHelpers.h"
 #include "Settings/DigumWorldSettings.h"
 
 
@@ -14,6 +15,19 @@ ADigumWorldProceduralActor::ADigumWorldProceduralActor()
 {
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
+}
+
+void ADigumWorldProceduralActor::GenerateMap(const FName& InContentCategoryName)
+{
+	FName ContentCategoryName = InContentCategoryName;
+	if(const FDigumWorldContentCategory* ContentCategory = UDigumWorldSettings::Get()->GetWorldContentCategoryData(ContentCategoryName))
+	{
+		const FDigumWorldProceduralRules* Rules = &ContentCategory->ProceduralRules;
+		if(Rules == nullptr) return;
+
+		FDigumWorldProceduralMap ProceduralMap;
+		UDigumWorldGenerator::GenerateWorldMap(*Rules, ProceduralMap);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -32,9 +46,6 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, const float& InSectionHeight,
 	FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	/*const FDigumWorldProceduralCoordinateArray* CoordinateArray = InSection.GetCoordinateArray();
-	if(CoordinateArray == nullptr) return;;*/
-	
 	const float SX = InSection.GetX();
 	const float SY = InSection.GetY();
 	const float X = (SX * (InSectionWidth));
@@ -51,35 +62,29 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 		NewSection->SetActorLocation(SectionLocation);
 		// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
 		SectionActors.Add(NewSection);
+
+#if WITH_EDITOR
+		NewSection->bHiddenEd = true;
+#endif
 	}
 }
 
 void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
+	// Get Local Position
 	const FVector LocalPosition = InBlockLocation - GetActorLocation();
-	const int32 SectionX = FMath::FloorToInt(LocalPosition.X / SectionSize.X);
-	const int32 SectionY = -FMath::CeilToInt((LocalPosition.Z) / SectionSize.Y);
-	UE_LOG(LogTemp, Warning, TEXT("Place Section %d, %d"), SectionX, SectionY);
-	/*for(ADigumWorldActorSection* Section : SectionActors)
-	{
-		if(Section == nullptr) continue;
-
-		FDigumWorldProceduralSection SectionData = Section->GetSectionData();
-		if(SectionData.GetX() == FMath::Abs(SectionX) && SectionData.GetY() ==  FMath::Abs(SectionY))
-		{
-			const int32 XOffset = SectionX * LocalSectionWidth;
-			const int32 YOffset = SectionY * LocalSectionHeight;
-			Section->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
-			return;
-		}
-
-	}*/
 	
+	// Translate World Position to Section Coordinates
+	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, SectionSize, SectionCoordinate);
+
+	// Loop through all sections and add block
+	// TODO: Optimize this, currently looping through all sections...
     SectionActors.FindByPredicate([&](ADigumWorldActorSection*& Section)
     {
 		if(Section == nullptr) return false;
     	FDigumWorldProceduralSection SectionData = Section->GetSectionData();
-        if(SectionData.GetX() == FMath::Abs(SectionX) && SectionData.GetY() ==  FMath::Abs(SectionY))
+        if(SectionData.GetX() == FMath::Abs(SectionCoordinate.X) && SectionData.GetY() ==  FMath::Abs(SectionCoordinate.Y))
         {
         	Section->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
             return true;
@@ -87,8 +92,6 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
         
         return false;
     });
-
-	// TODO: Handle if section not found
 }
 
 void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
@@ -103,14 +106,13 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 		{
 			FDigumWorldProceduralMap ProceduralMap;
 			UDigumWorldGenerator::GenerateWorldMap(*Rules, ProceduralMap);	
-
+			
 			if(ProceduralMap.GetSectionCount() <= 0)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("No sections generated"));
-				return;
+				return; 
 			}
-			LocalSectionWidth = Rules->SectionWidth;
-			LocalSectionHeight = Rules->SectionHeight;
+			UDigumWorldFunctionHelpers::GetLocalSectionSize(ContentCategoryName, LocalSectionWidth, LocalSectionHeight);
 			const FVector GridSize = UDigumWorldSettings::GetGridSize();
 			const float SectionWidth = Rules->SectionWidth * GridSize.X;
 			const float SectionHeight = Rules->SectionHeight * GridSize.Z;

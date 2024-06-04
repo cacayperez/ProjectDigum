@@ -56,23 +56,6 @@ bool SDigumWidgetStack::DoesWidgetExist(const TSharedPtr<SDigumWidget>& Item) co
 	return StackItems.Contains(Item.ToSharedRef());
 }
 
-void SDigumWidgetStack::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
-{
-	SOverlay::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
-
-	
-
-	/*for(const TSharedRef<SDigumWidget>& Item : StackItems)
-	{
-		if(Item->GetWidgetGeometry().IsUnderLocation(MousePosition))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Mouse is over widget %s"), *Item->GetTypeAsString());
-		}
-		else
-			UE_LOG(LogTemp, Warning, TEXT("NOT"));
-	}*/
-}
-
 
 bool SDigumWidgetStack::DoesOverlapAnyChildren(const FVector2D& Position, TSharedPtr<SDigumWidget>& OutWidget) const
 {

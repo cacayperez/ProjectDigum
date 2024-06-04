@@ -43,7 +43,7 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 	TArray<FHitResult> OutHitResult;
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(GetItemInstigator());
-	bool bHit = UKismetSystemLibrary::BoxTraceMulti(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), true, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
+	bool bHit = UKismetSystemLibrary::BoxTraceMulti(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	if(bHit)
 	{

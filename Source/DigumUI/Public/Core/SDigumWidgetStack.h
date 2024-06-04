@@ -30,7 +30,6 @@ protected:
 	void ClearStack_Internal();
 	bool DoesWidgetExist(const TSharedPtr<SDigumWidget>& Item) const;
 
-	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 
 	TSharedPtr<SDigumDragWidget> DraggedWidget;
 	bool bHasDraggedWidget = false;

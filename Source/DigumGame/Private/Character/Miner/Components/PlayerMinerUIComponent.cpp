@@ -81,10 +81,10 @@ void UPlayerMinerUIComponent::InitializeUI()
 {
 	if(GEngine && GEngine->GameViewport)
 	{
-		FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
-		FVector2D ViewportCenter = ViewportSize / 2;
+		// FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+		// FVector2D ViewportCenter = ViewportSize / 2;
 		WidgetStack = SNew(SDigumWidgetStack);
-		WidgetStack->SetCanTick(true);
+		// WidgetStack->SetCanTick(true);
 	
 		
 		GEngine->GameViewport->AddViewportWidgetContent(SAssignNew(_Container, SWeakWidget).PossiblyNullContent(WidgetStack.ToSharedRef()));
