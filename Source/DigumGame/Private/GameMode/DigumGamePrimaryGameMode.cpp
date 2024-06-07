@@ -39,20 +39,13 @@ void ADigumGamePrimaryGameMode::StartPlay()
 	{
 		const FVector GridSize = GetGridSize();
 		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,10, 10, 4, 4, 2);
-		ProceduralActor->SetProceduralAsset(Asset);
+		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,10, 10, 10, 10, 2, Asset);
+		// ProceduralActor->SetProceduralAsset(Asset);
 		ProceduralActor->FinishSpawning(FTransform::Identity);
 		ProceduralActor->ApplyWorldOffsetPosition();
 
-		ProceduralActor->SpawnChunks(FVector::ZeroVector, 6);
-		
-		/*const FDigumWorldProceduralSectionCoordinate Coordinate = ProceduralActor->GetSectionCoordinate(FVector::ZeroVector);
-		
-		FDigumWorldProceduralSection Section;
-		if(ProceduralActor->GetSection(Coordinate.X, Coordinate.Y, Section))
-		{
-			ProceduralActor->CreateSection(Section);
-		}*/
+		ProceduralActor->SpawnChunks(FVector::ZeroVector, 3);
+
 	}
 }
 
@@ -63,11 +56,23 @@ void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerCo
 	// this function doesnt spawn the character yet
 }
 
+void ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged(const AActor* Actor,
+	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate,
+	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate1)
+{
+	if(Actor == nullptr)
+	{
+		return;
+	}
+	const FVector ActorLocation = Actor->GetActorLocation();	
+	ProceduralActor->SpawnChunks(ActorLocation, 4);
+}
+
 void ADigumGamePrimaryGameMode::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
 {
 	if(InComponent)
 	{
-		// InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged);
+		InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged);
 	}
 }
 

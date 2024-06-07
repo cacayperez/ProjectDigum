@@ -3,9 +3,7 @@
 
 #include "Actor/DigumWorldProceduralActor.h"
 #include "Procedural/DigumWorldGenerator.h"
-#include "Actor/DigumWorldActorChild.h"
 #include "Actor/DigumWorldActorSection.h"
-#include "Asset/DigumWorldSwatchAsset.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "Settings/DigumWorldSettings.h"
 
@@ -18,6 +16,126 @@ ADigumWorldProceduralActor::ADigumWorldProceduralActor()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 }
+
+void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSection* InSection, const int32& NumOfHierarchies, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection, int32 InLocalSectionWidth, int32 InLocalSectionHeight)
+{
+	if (InSection)
+    {
+		TMap<FName, FDigumWorldProceduralCoordinateArray> CoordinateMap;
+		InSection->GetCoordinateArray()->MakeMappedCoordinates(CoordinateMap);
+		TArray<FName> BlockIDs;
+		CoordinateMap.GetKeys(BlockIDs);
+
+		for (int32 i = 0; i < NumOfHierarchies; i++)
+		{
+			const int32 HierarchyIndex = i - (NumOfHierarchies - 1);
+
+			for (int32 j = 0; j < InSection->GetCoordinateArray()->CoordinateCount(); j++)
+			{
+				const int32 x = j % InLocalSectionWidth;
+				const int32 y = j / InLocalSectionWidth;
+
+				FDigumWorldProceduralCoordinate* Coordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y, HierarchyIndex);
+        	
+				if (!Coordinate)
+				{
+					continue;
+				}
+
+				// Reset neighbor flags
+				Coordinate->bHasLeftNeighbor = false;
+				Coordinate->bHasRightNeighbor = false;
+				Coordinate->bHasTopNeighbor = false;
+				Coordinate->bHasBottomNeighbor = false;
+
+				// Check left neighbor
+				/*if (x > 0)
+				{
+					FDigumWorldProceduralCoordinate* LeftCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x - 1, y);
+					if (LeftCoordinate)
+					{
+						Coordinate->bHasLeftNeighbor = true;
+					}
+				}
+				else if (InLeftSection)
+				{
+					FDigumWorldProceduralCoordinate* LeftCoordinate = InLeftSection->GetCoordinateArray()->GetCoordinate(InLocalSectionWidth - 1, y);
+					if (LeftCoordinate)
+					{
+						Coordinate->bHasLeftNeighbor = true;
+					}
+				}
+	
+				// Check right neighbor
+				if (x < InLocalSectionWidth - 1)
+				{
+					FDigumWorldProceduralCoordinate* RightCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x + 1, y);
+					if (RightCoordinate)
+					{
+						Coordinate->bHasRightNeighbor = true;
+					}
+				}
+				else if (InRightSection)
+				{
+					FDigumWorldProceduralCoordinate* RightCoordinate = InRightSection->GetCoordinateArray()->GetCoordinate(0, y);
+					if (RightCoordinate)
+					{
+						Coordinate->bHasRightNeighbor = true;
+					}
+				}*/
+
+				// Check top neighbor
+				if (y > 0)
+				{
+					FDigumWorldProceduralCoordinate* TopCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y - 1, HierarchyIndex);
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					{
+						Coordinate->bHasTopNeighbor = true;
+					}
+				}
+				else if (InTopSection)
+				{
+					FDigumWorldProceduralCoordinate* TopCoordinate = InTopSection->GetCoordinateArray()->GetCoordinate(x, InLocalSectionHeight - 1, HierarchyIndex);
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					{
+						Coordinate->bHasTopNeighbor = true;
+					}
+				}
+
+				// Check bottom neighbor
+				/*if (y < InLocalSectionHeight - 1)
+				{
+					FDigumWorldProceduralCoordinate* BottomCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y + 1);
+					if (BottomCoordinate)
+					{
+						Coordinate->bHasBottomNeighbor = true;
+					}
+				}
+				else if (InBottomSection)
+				{
+					FDigumWorldProceduralCoordinate* BottomCoordinate = InBottomSection->GetCoordinateArray()->GetCoordinate(x, 0);
+					if (BottomCoordinate)
+					{
+						Coordinate->bHasBottomNeighbor = true;
+					}
+				}*/
+			}
+		}
+    }
+}
+
+/*FDigumWorldProceduralSection& ADigumWorldProceduralActor::GetSectionData(const int32& InX, const int32& InY)
+{
+	/*for(auto& Section : SectionDataArray)
+	{
+		if(Section.GetX() == InX && Section.GetY() == InY )
+		{
+			return Section;
+		}
+	}#1#
+
+	/*return nullptr;#1#
+}*/
 
 // Called when the game starts or when spawned
 void ADigumWorldProceduralActor::BeginPlay()
@@ -34,7 +152,7 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 
 void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector InGridSize, const int32 InSectionWidth,
 	const int32 InSectionHeight, int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
-	const int32 InNumberOfHierarchies)
+	const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset)
 {
 	Map = FDigumWorldMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies);
 	LocalSectionWidth = InSectionWidth;
@@ -42,6 +160,66 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 	GridSize = InGridSize;
 	UnitSectionSize = Map.GetSectionUnitSize();
 	WorldOffset = Map.GetWorldOffset();
+	ProceduralAsset = InProceduralAsset;
+	const int32 SectionCount = Map.SectionCount_HorizontalAxis * Map.SectionCount_VerticalAxis;
+
+	for(int32 i = 0; i < SectionCount; i++)
+	{
+		const int32 x = i % Map.SectionCount_HorizontalAxis;
+		const int32 y = i / Map.SectionCount_HorizontalAxis;
+
+		FDigumWorldProceduralSection OutSection;
+		
+		if(GetSection(x, y, OutSection))
+		{
+			SectionDataArray.Add(OutSection);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to generate section at %d, %d"), x, y);
+		}
+	}
+
+	for(int32 i = 0; i < SectionDataArray.Num(); i++)
+	{
+		const int32 x = i % Map.SectionCount_HorizontalAxis;
+		const int32 y = i / Map.SectionCount_HorizontalAxis;
+
+		FDigumWorldProceduralSection* Section = &SectionDataArray[i];
+		FDigumWorldProceduralSection* LeftSection = nullptr;
+		FDigumWorldProceduralSection* RightSection = nullptr;
+		FDigumWorldProceduralSection* TopSection = nullptr;
+		FDigumWorldProceduralSection* BottomSection = nullptr;
+
+		if(x > 0)
+		{
+			LeftSection = &SectionDataArray[i - 1];
+		}
+
+		if(x < Map.SectionCount_HorizontalAxis - 1)
+		{
+			RightSection = &SectionDataArray[i + 1];
+		}
+
+		if(y > 0)
+		{
+			TopSection = &SectionDataArray[i - Map.SectionCount_HorizontalAxis];
+		}
+
+		if(y < Map.SectionCount_VerticalAxis - 1)
+		{
+			BottomSection = &SectionDataArray[i + Map.SectionCount_HorizontalAxis];
+		}
+		UE_LOG(LogTemp, Log, TEXT("Section (%d, %d): Neighbors - Left: %s, Right: %s, Top: %s, Bottom: %s"), 
+			   x, y, 
+			   LeftSection ? TEXT("Yes") : TEXT("No"), 
+			   RightSection ? TEXT("Yes") : TEXT("No"), 
+			   TopSection ? TEXT("Yes") : TEXT("No"), 
+			   BottomSection ? TEXT("Yes") : TEXT("No"));
+		
+		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
+	
+	}
 }
 
 bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32& InSectionY,
@@ -60,14 +238,12 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 	const int32 SY = InSection.GetY();
 
 	if(SX < 0 || SY < 0) return;
-	if(GetSectionActor(SX, SY) != nullptr) return;
 	
 	const float X = (SX * (InSectionWidth));
 	const float Z = -(SY * (InSectionHeight));
 	const FVector SectionLocation = FVector(X, 0, Z) + InWorldOffset;
 
-	ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity);
-	if(NewSection)
+	if(ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity))
 	{
 		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		NewSection->SetFolderPath(GetFolderPath());
@@ -95,13 +271,13 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
 	UE_LOG(LogTemp, Warning, TEXT("Section Coordinate %s"), *SectionCoordinate.ToString());
 	// Loop through all sections and add block
 	// TODO: Optimize this, currently looping through all sections...
-    SectionActors.FindByPredicate([&](ADigumWorldActorSection*& Section)
+    SectionActors.FindByPredicate([&](ADigumWorldActorSection*& SectionActor)
     {
-		if(Section == nullptr) return false;
-    	FDigumWorldProceduralSection SectionData = Section->GetSectionData();
+		if(SectionActor == nullptr) return false;
+    	FDigumWorldProceduralSection SectionData = SectionActor->GetSectionData();
         if(SectionData.GetX() == FMath::Abs(SectionCoordinate.X) && SectionData.GetY() ==  FMath::Abs(SectionCoordinate.Y))
         {
-        	Section->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
+        	SectionActor->AddBlock(InBlockID, LocalPosition, LocalSectionWidth, LocalSectionHeight);
             return true;
         }
         

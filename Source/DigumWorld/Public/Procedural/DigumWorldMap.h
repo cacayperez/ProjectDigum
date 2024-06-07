@@ -58,6 +58,7 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	int32 NumberOfHierarchies = 3;
+	
 	UPROPERTY()
 	FVector GridSize = FVector::ZeroVector;
 
@@ -89,7 +90,6 @@ public:
 	int32 GetLocalSectionWidth() const { return SectionWidth; }
 	int32 GetLocalSectionHeight() const { return SectionHeight; }
 	
-
 	bool IsInitialized() const { return bIsInitialized; }
 };
 

@@ -122,10 +122,22 @@ TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, co
 	return GroundCurve;
 }
 
+bool UDigumWorldGenerator::IsSurfacePoint(const int32& PositionX, const int32& PositionY,
+	const TArray<float>& GroundCurve, const int32& InWidth, const int32& InSectionX)
+{
+	const int32 LocalX = PositionX - (InSectionX * InWidth);
+	if (LocalX >= 0 && LocalX < InWidth)
+	{
+		return PositionY == static_cast<int32>(GroundCurve[LocalX]);
+	}
+	
+	return false;
+}
+
 
 bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const int32& InSectionX,
-	const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset,
-	FDigumWorldProceduralSection& OutSection)
+                                           const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset,
+                                           FDigumWorldProceduralSection& OutSection)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Generating Section %i, %i"), InSectionX, InSectionY);
 	const FName SeedName = InMap.Seed;
@@ -201,38 +213,40 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 	if(InCumulativeWeights.IsEmpty()) return false;
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
-	
 	for(int32 i = 0; i < NumOfHierarchies; i++)
 	{
-		int32 HierchyIndex = i - (NumOfHierarchies -1);
+		const int32 HierarchyIndex = i - (NumOfHierarchies -1);
 		
 		for(int32 x = 0; x < InWidth; x++)
 		{
 			for(int32 y = 0; y < InHeight; y++)
 			{
-				float NoiseValue = 0.0f;
 				const int32 PositionX = InSectionX * InWidth + x;
 				const int32 PositionY = InSectionY * InHeight + y;
+				
+				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, InRandomStream);
+				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
+				const FName BlockID = GetBlockIDFromNoiseValue(NormalizedNoise, InCumulativeWeights, InBlocks);
+				FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
+				Coordinate.BlockID = BlockID;
+				Coordinate.NoiseValue = NoiseValue;
+				Coordinate.Hierarchy = HierarchyIndex;
 
 				
-				
-				if(PositionY > GroundCurve[x])
+				if(PositionY < GroundCurve[x])
 				{
-					NoiseValue = GetPerlinNoiseValue3D(PositionX, PositionY, HierchyIndex, InRandomStream);
-					const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
-
-					FName BlockID = GetBlockIDFromNoiseValue(NormalizedNoise, InCumulativeWeights, InBlocks);
-					OutSection.AddCoordinate(BlockID, x, y, HierchyIndex, NoiseValue);
+					// Above ground, surface
 				}
-				else
+				else // Below ground
 				{
-					// TODO Do the above ground parts
-					//NoiseValue = GetPerlinNoiseValue2D(PositionX, PositionY, InRandomStream);
+					OutSection.AddCoordinate(Coordinate);
+					// OutSection.AddCoordinate(Coordinate);
 				}
 				
 			}
 		}
 	}
+	
 	return true;
 }
 

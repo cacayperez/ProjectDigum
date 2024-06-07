@@ -41,15 +41,22 @@ struct FDigumWorldProceduralCoordinate
 {
 	GENERATED_BODY()
 public:
-	FDigumWorldProceduralCoordinate() : X(0), Y(0) { }
+	FDigumWorldProceduralCoordinate() : X(0), Y(0), GlobalX(0), GlobalY(0) { }
 	FDigumWorldProceduralCoordinate(const int32& InX, const int32& InY) { X = InX; Y = InY; }
+	FDigumWorldProceduralCoordinate(const int32& InX, const int32& InY, const int32& InGlobalX, const int32& InGlobalY) { X = InX; Y = InY;  GlobalX = InGlobalX; GlobalY = InGlobalY; }
 	FDigumWorldProceduralCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const float InNoiseValue) { BlockID = InBlockID; X = InX; Y = InY; NoiseValue = InNoiseValue;}
 	
 	UPROPERTY()
-	int32 X;
+	int32 X = -1;
 
 	UPROPERTY()
-	int32 Y;
+	int32 Y = -1;
+
+	UPROPERTY()
+	int32 GlobalX = -1;
+
+	UPROPERTY()
+	int32 GlobalY = -1;
 
 	UPROPERTY()
 	int32 Hierarchy = 0;
@@ -64,6 +71,18 @@ public:
 	bool bIsSurfaceBlock = false;
 
 	bool IsSurfaceBlock() const { return bIsSurfaceBlock; }
+
+	UPROPERTY()
+	bool bHasTopNeighbor = false;
+
+	UPROPERTY()
+	bool bHasLeftNeighbor = false;
+
+	UPROPERTY()
+	bool bHasRightNeighbor = false;
+
+	UPROPERTY()
+	bool bHasBottomNeighbor = false;
 };
 
 USTRUCT()
@@ -80,9 +99,9 @@ public:
 		Coordinates.Add(Coordinate);
 	}
 
-	void AddCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const int32& InHierarchy, const float& InNoiseValue)
+	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{
-		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InX, InY);
+		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InLocalX, InLocalY, InGlobalX, InGlobalY);
 		Coordinate.BlockID = InBlockID;
 		Coordinate.Hierarchy = InHierarchy;
 		Coordinate.NoiseValue = InNoiseValue;
@@ -102,6 +121,18 @@ public:
 		return &Coordinates[InIndex];
 	}
 
+	FDigumWorldProceduralCoordinate* GetCoordinate(const int32& InX, const int32& InY, const int32& InHierarchy)
+	{
+		for(FDigumWorldProceduralCoordinate& Coordinate : Coordinates)
+		{
+			if(Coordinate.X == InX && Coordinate.Y == InY && Coordinate.Hierarchy == InHierarchy)
+			{
+				return &Coordinate;
+			}
+		}
+		return nullptr;
+	}
+
 	void MakeMappedCoordinates(TMap<FName, FDigumWorldProceduralCoordinateArray>& OutMappedCoordinates)
 	{
 		for(FDigumWorldProceduralCoordinate& Coordinate : Coordinates)
@@ -110,6 +141,12 @@ public:
 		}
 	}
 
+	void Append(const FDigumWorldProceduralCoordinateArray* CoordinateArray)
+	{
+		Coordinates.Append(CoordinateArray->Coordinates);
+	}
+
+	const TArray<FDigumWorldProceduralCoordinate>& GetCoordinates() const { return Coordinates; }
 };
 
 // TMap Wrapper for CoordinateArray
@@ -144,11 +181,16 @@ public:
 	FDigumWorldProceduralCoordinateArray CoordinateArrayData;
 
 
-	void AddCoordinate(const FName& InBlockID, const int32& InX, const int32& InY, const int32& InHierarchy, const float& InNoiseValue)
+	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{
-		CoordinateArrayData.AddCoordinate(InBlockID, InX, InY, InHierarchy, InNoiseValue);
+		CoordinateArrayData.AddCoordinate(InBlockID, InLocalX, InLocalY, InGlobalX, InGlobalY, InHierarchy, InNoiseValue);
 	}
-
+	
+	void AddCoordinate(FDigumWorldProceduralCoordinate& InCoordinate)
+	{
+		CoordinateArrayData.AddCoordinate(InCoordinate);
+	}
+	
 	FDigumWorldProceduralCoordinateArray* GetCoordinateArray()
 	{
 		return &CoordinateArrayData;
@@ -156,7 +198,9 @@ public:
 
 	int32 GetX() const { return SectionCoordinate.X; }
 	int32 GetY() const { return SectionCoordinate.Y; }
+	
 	FDigumWorldProceduralSectionCoordinate GetSectionCoordinate() const { return SectionCoordinate; }
+	bool IsInitialized() const { return SectionCoordinate.X != -1 && SectionCoordinate.Y != -1; }
 };
 
 USTRUCT()
@@ -255,6 +299,7 @@ private:
 	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks);
 	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);
 	static TArray<float> GenerateGroundCurve(const int32& InWidth, const int32& InHeight, const int32& SectionX, const FRandomStream& InRandomStream);
+	static bool IsSurfacePoint(const int32& PositionX, const int32& PositionY, const TArray<float>& GroundCurve, const int32& InWidth, const int32& InSectionX);
 	// static void GenerateSection(const )
 public:
 	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);

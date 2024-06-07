@@ -41,6 +41,7 @@ public:
 	virtual void InitGameState() override;
 	virtual void StartPlay() override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	void HandleCharacterCoordinateChanged(const AActor* Actor, const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate, const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate1);
 	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
 
 protected:

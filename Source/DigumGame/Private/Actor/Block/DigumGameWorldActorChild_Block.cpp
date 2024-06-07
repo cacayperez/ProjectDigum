@@ -19,7 +19,7 @@ ADigumGameWorldActorChild_Block::ADigumGameWorldActorChild_Block(const FObjectIn
 void ADigumGameWorldActorChild_Block::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
 {
 	Super::OnDestroyChildInstance(InIndex, InLocation);
-	TSubclassOf<ADigumPickupActor> PickupActorClass = GetPickupActorClass();
+	/*TSubclassOf<ADigumPickupActor> PickupActorClass = GetPickupActorClass();
 	if(BlockAsset)
 	{
 		ADigumPickupActor* PickupActor = GetWorld()->SpawnActorDeferred<ADigumPickupActor>(PickupActorClass, FTransform(InLocation));
@@ -32,7 +32,7 @@ void ADigumGameWorldActorChild_Block::OnDestroyChildInstance(const int32& InInde
 			PickupActor->SetItemProperties(ItemProperties);
 			PickupActor->FinishSpawning(FTransform(InLocation));
 		}
-	}
+	}*/
 }
 
 void ADigumGameWorldActorChild_Block::BuildChildProperties(UDigumWorldSwatchAsset* InSwatchAsset)
