@@ -26,14 +26,14 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 
 void ADigumWorldActorSection::OnSetWorldVisibility(bool bValue)
 {
-	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	/*for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
 			/*ChildActor->SetActorHiddenInGame(bValue);
-			ChildActor->SetWorldCollision(bValue);*/
+			ChildActor->SetWorldCollision(bValue);#1#
 		}
-	}
+	}*/
 
 }
 

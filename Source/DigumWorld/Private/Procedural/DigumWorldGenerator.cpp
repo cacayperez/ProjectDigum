@@ -139,7 +139,7 @@ bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const in
                                            const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset,
                                            FDigumWorldProceduralSection& OutSection)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Generating Section %i, %i"), InSectionX, InSectionY);
+	// UE_LOG(LogTemp, Warning, TEXT("Generating Section %i, %i"), InSectionX, InSectionY);
 	const FName SeedName = InMap.Seed;
 	const int32 SectionWidth = InMap.SectionWidth;
 	const int32 SectionHeight = InMap.SectionHeight;
@@ -162,7 +162,7 @@ bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const in
 	const int32 MapWidth = InMap.GetTotalSectionWidth();
 	const int32 MapHeight = InMap.GetTotalSectionHeight();
 
-	UE_LOG(LogTemp, Warning, TEXT("Map Width: %d, Map Height: %d"), MapWidth, MapHeight);
+	// UE_LOG(LogTemp, Warning, TEXT("Map Width: %d, Map Height: %d"), MapWidth, MapHeight);
 	FDigumWorldProceduralSection TempSection;
 
 	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream, Blocks, CumulativeWeights, NumberOfHierarchies, TempSection);

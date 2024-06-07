@@ -36,6 +36,9 @@ class DIGUMWORLD_API UDigumWorldPositioningComponent : public UActorComponent
 	UPROPERTY()
 	FVector WorldOffset;
 
+	UPROPERTY()
+	bool bInitialized = false;
+	
 public:
 	// Sets default values for this component's properties
 	UDigumWorldPositioningComponent();
@@ -57,4 +60,5 @@ public:
 	FDigumWorldProceduralSectionCoordinate GetCurrentCoordinate() const;
 
 	FOnSectionCoordinateChanged& GetOnCoordinateChangedDelegate() { return OnSectionCoordinateChanged; }
+	void InitializePositioningComponent(const FVector& InGridSize, const int32& InSectionWidth, const int32& InSectionHeight, const FVector& InWorldOffset);
 };

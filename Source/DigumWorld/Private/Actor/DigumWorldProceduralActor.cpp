@@ -210,12 +210,12 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 		{
 			BottomSection = &SectionDataArray[i + Map.SectionCount_HorizontalAxis];
 		}
-		UE_LOG(LogTemp, Log, TEXT("Section (%d, %d): Neighbors - Left: %s, Right: %s, Top: %s, Bottom: %s"), 
+		/*UE_LOG(LogTemp, Log, TEXT("Section (%d, %d): Neighbors - Left: %s, Right: %s, Top: %s, Bottom: %s"), 
 			   x, y, 
 			   LeftSection ? TEXT("Yes") : TEXT("No"), 
 			   RightSection ? TEXT("Yes") : TEXT("No"), 
 			   TopSection ? TEXT("Yes") : TEXT("No"), 
-			   BottomSection ? TEXT("Yes") : TEXT("No"));
+			   BottomSection ? TEXT("Yes") : TEXT("No"));*/
 		
 		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
 	
@@ -238,6 +238,7 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 	const int32 SY = InSection.GetY();
 
 	if(SX < 0 || SY < 0) return;
+	if(GetSectionActor(SX, SY)) return;
 	
 	const float X = (SX * (InSectionWidth));
 	const float Z = -(SY * (InSectionHeight));
@@ -254,7 +255,7 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 	}
 }
 
-void ADigumWorldProceduralActor::CreateSection(FDigumWorldProceduralSection& InSection)
+void ADigumWorldProceduralActor::CreateSection(FDigumWorldProceduralSection InSection)
 {
 	CreateSection(UnitSectionSize.X, UnitSectionSize.Y, WorldOffset, InSection, ProceduralAsset);
 }
@@ -312,7 +313,7 @@ FDigumWorldProceduralSectionCoordinate ADigumWorldProceduralActor::GetSectionCoo
 	const FVector OffsetedLocation = InWorldLocation - WorldOffset;
 	const int32 X = FMath::FloorToInt(OffsetedLocation.X / UnitSectionSize.X);
 	const int32 Y = -FMath::CeilToInt((OffsetedLocation.Z) / UnitSectionSize.Y);
-	const int32 AbsX = FMath::Abs(X);
+	const int32 AbsX = FMath::Abs(X-1);
 	const int32 AbsY = FMath::Abs(Y);
 	return FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);
 }

@@ -31,6 +31,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRect(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize, const int32& XMin, const int32& XMax, const int32& YMin, const int32 YMax) const;
 	void SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize);
+	void SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InCoordinate, const int32& HalfSize);
 	void PurgeChunks();
 
 };

@@ -71,7 +71,7 @@ public:
 	// void Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight, const FVector& InGridSize);
 	bool GetSection(const int32& InSectionX, const int32& InSectionY, FDigumWorldProceduralSection& OutSection) const;
 	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* InProceduralAsset);
-	virtual void CreateSection(FDigumWorldProceduralSection& InSection);
+	virtual void CreateSection(FDigumWorldProceduralSection InSection);
 	virtual void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 	void ApplyWorldOffsetPosition();
 	ADigumWorldActorSection* GetSectionActor(const int32& InX, const int32& InY) const;

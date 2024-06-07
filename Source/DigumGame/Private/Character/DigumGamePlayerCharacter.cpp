@@ -17,6 +17,7 @@ void ADigumGamePlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	UE_LOG(LogTemp, Warning, TEXT("Character Begin Play"));
 	// Register positioning component to gamemode
 	if(PositioningComponent)
 	{
@@ -25,6 +26,7 @@ void ADigumGamePlayerCharacter::BeginPlay()
 		{
 			if(ADigumGamePrimaryGameMode* DigumGameMode = Cast<ADigumGamePrimaryGameMode>(GameMode))
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
 				DigumGameMode->RegisterPositioningComponent(PositioningComponent);
 			}
 			

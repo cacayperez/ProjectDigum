@@ -20,12 +20,15 @@ UDigumWorldPositioningComponent::UDigumWorldPositioningComponent()
 
 void UDigumWorldPositioningComponent::CheckCoordinateChange()
 {
-	
 	FDigumWorldProceduralSectionCoordinate NewCoordinate;
-	const FVector Location = GetOwner()->GetActorLocation() - WorldOffset;
+	FVector ActorLoc = GetOwner()->GetActorLocation();
+	const FVector Location = FVector(ActorLoc.X, 0, ActorLoc.Z) - WorldOffset;
 	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(Location , UnitSectionSize, NewCoordinate);
 	NewCoordinate.X  = NewCoordinate.X <= 0 ? 0 : NewCoordinate.X - 1;
-	if(NewCoordinate != CurrentCoordinate)
+	NewCoordinate.Y  = NewCoordinate.Y <= 0 ? 0 : NewCoordinate.Y - 1;
+
+	// UE_LOG(LogTemp , Warning , TEXT("New Coordinate: %s") , *NewCoordinate.ToString());	
+	if(NewCoordinate.X != CurrentCoordinate.X || NewCoordinate.Y != CurrentCoordinate.Y)
 	{
 		PreviousCoordinate = CurrentCoordinate;
 		CurrentCoordinate = NewCoordinate;
@@ -40,7 +43,7 @@ void UDigumWorldPositioningComponent::CheckCoordinateChange()
 void UDigumWorldPositioningComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if(GetWorld())
+	/*if(GetWorld())
 	{
 		// TODO Get Current Content Category from Game Mode
 		const FName CategoryName = TEXT("Primary");
@@ -49,9 +52,9 @@ void UDigumWorldPositioningComponent::BeginPlay()
 			const FDigumWorldContentCategory* Category = Settings->GetWorldContentCategoryData(CategoryName);
 			if(Category)
 			{
-				GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
+				/*GridSize = GetDefault<UDigumWorldSettings>()->GetGridSize();
 				SectionWidth = Category->ProceduralRules.SectionWidth;
-				SectionHeight = Category->ProceduralRules.SectionHeight;
+				SectionHeight = Category->ProceduralRules.SectionHeight;#1#
 				
 				const float UnitSectionWidth = SectionWidth * GridSize.X;
 				const float UnitSectionHeight = SectionHeight * GridSize.Z;
@@ -64,7 +67,7 @@ void UDigumWorldPositioningComponent::BeginPlay()
 				WorldOffset = Offset;
 			}
 		}
-	}
+	}*/
 }
 
 void UDigumWorldPositioningComponent::TickComponent(float DeltaTime, ELevelTick TickType,
@@ -72,12 +75,25 @@ void UDigumWorldPositioningComponent::TickComponent(float DeltaTime, ELevelTick 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	CheckCoordinateChange();
+	if(bInitialized == true)
+		CheckCoordinateChange();
 	// UE_LOG(LogTemp, Warning, TEXT("Current Coordinate: %i, %i"), CurrentCoordinate.X, CurrentCoordinate.Y);
 }
 
 FDigumWorldProceduralSectionCoordinate UDigumWorldPositioningComponent::GetCurrentCoordinate() const
 {
 	return CurrentCoordinate;
+}
+
+void UDigumWorldPositioningComponent::InitializePositioningComponent(const FVector& InGridSize,
+	const int32& InSectionWidth, const int32& InSectionHeight, const FVector& InWorldOffset)
+{
+	UE_LOG(LogTemp, Warning, TEXT("InitializePositioningComponent"));
+	GridSize = InGridSize;
+	SectionWidth = InSectionWidth;
+	SectionHeight = InSectionHeight;
+	UnitSectionSize = FVector2D(InSectionWidth * InGridSize.X, InSectionHeight * InGridSize.Z);
+	WorldOffset = InWorldOffset;
+	bInitialized = true;
 }
 

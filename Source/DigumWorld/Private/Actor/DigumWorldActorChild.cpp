@@ -185,7 +185,7 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 			
 		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
-		UE_LOG(LogTemp, Warning, TEXT("HasTopNeighbor %s, %i, %i, %s"), Coordinate->bHasTopNeighbor ? TEXT("True") : TEXT("False") , Coordinate->X, Coordinate->Y, *Coordinate->BlockID.ToString());
+		// UE_LOG(LogTemp, Warning, TEXT("HasTopNeighbor %s, %i, %i, %s"), Coordinate->bHasTopNeighbor ? TEXT("True") : TEXT("False") , Coordinate->X, Coordinate->Y, *Coordinate->BlockID.ToString());
 		InstancedMeshComponent->SetSurfacePoint(InstanceIndex, Coordinate->bHasTopNeighbor);
 		/*if(Coordinate->bHasTopNeighbor)
 		{

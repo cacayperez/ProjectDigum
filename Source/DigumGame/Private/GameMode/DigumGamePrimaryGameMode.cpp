@@ -31,22 +31,27 @@ void ADigumGamePrimaryGameMode::InitGameState()
 	
 }
 
-void ADigumGamePrimaryGameMode::StartPlay()
+void ADigumGamePrimaryGameMode::PostInitializeComponents()
 {
-	Super::StartPlay();
+	Super::PostInitializeComponents();
 	UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
 	if(Asset)
 	{
 		const FVector GridSize = GetGridSize();
 		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,10, 10, 10, 10, 2, Asset);
+		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 16, 16, 2, Asset);
 		// ProceduralActor->SetProceduralAsset(Asset);
 		ProceduralActor->FinishSpawning(FTransform::Identity);
 		ProceduralActor->ApplyWorldOffsetPosition();
 
-		ProceduralActor->SpawnChunks(FVector::ZeroVector, 3);
-
+		ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
 	}
+}
+
+void ADigumGamePrimaryGameMode::StartPlay()
+{
+	Super::StartPlay();
+
 }
 
 void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
@@ -57,21 +62,34 @@ void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerCo
 }
 
 void ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged(const AActor* Actor,
-	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate,
-	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate1)
+	const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate,
+	const FDigumWorldProceduralSectionCoordinate& InPreviusCoordinate)
 {
 	if(Actor == nullptr)
 	{
 		return;
 	}
-	const FVector ActorLocation = Actor->GetActorLocation();	
-	ProceduralActor->SpawnChunks(ActorLocation, 4);
+	ProceduralActor->SpawnChunks(InCurrentCoordinate, 4);
 }
 
 void ADigumGamePrimaryGameMode::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
 {
+	if(ProceduralActor == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Procedural Actor is null"));
+		return;
+	}
+	const FDigumWorldMap* Map = ProceduralActor->GetMap();
+
+	if(Map == nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Map is null"));
+		return;
+	}
+	
 	if(InComponent)
 	{
+		InComponent->InitializePositioningComponent(Map->GridSize, Map->SectionWidth, Map->SectionHeight, Map->GetWorldOffset());
 		InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged);
 	}
 }

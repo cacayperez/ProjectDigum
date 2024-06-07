@@ -37,9 +37,9 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor
 	const int32 EndX = InStartCoordinate.X + HalfSize;
 	const int32 EndY = InStartCoordinate.Y + HalfSize;
 	
-	for(int32 x = StartX; x <= EndX; x++)
+	for(int32 x = StartX; x < EndX; x++)
 	{
-		for(int32 y = StartY; y <= EndY; y++)
+		for(int32 y = StartY; y < EndY; y++)
 		{
 			if(x >= XMin && x <= XMax && y >= YMin && y <= YMax)
 			{
@@ -54,18 +54,23 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor
 void ADigumWorldDynamicProceduralActor::SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize)
 {
 	FDigumWorldProceduralSectionCoordinate StartCoordinate = GetSectionCoordinate(InWorldLocation);
+	SpawnChunks(StartCoordinate, HalfSize);
+	
+}
 
-	const int32 MaxX = GetMap()->SectionCount_HorizontalAxis -1;
-	const int32 MaxY = GetMap()->SectionCount_VerticalAxis -1;
-	const TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRect(StartCoordinate, HalfSize, 0, MaxX, 0, MaxY);
+void ADigumWorldDynamicProceduralActor::SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InCoordinate,
+	const int32& HalfSize)
+{
+	ActiveCoordinates.Empty();
+	const int32 MaxX = GetMap()->SectionCount_HorizontalAxis;
+	const int32 MaxY = GetMap()->SectionCount_VerticalAxis;
+	const TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRect(InCoordinate, HalfSize, 0, MaxX, 0, MaxY);
 	ActiveCoordinates = Coordinates;
 
 	UE_LOG(LogTemp, Warning, TEXT("=== Sections Array: %d"), SectionDataArray.Num());
 	
 	for(const FDigumWorldProceduralSectionCoordinate& Coordinate : ActiveCoordinates)
 	{
-		// FDigumWorldProceduralSection Section;
-		if(GetSectionActor(Coordinate.X, Coordinate.Y)) continue;
 		FDigumWorldProceduralSection Section;
 		for(auto& SectionItem: SectionDataArray)
 		{
@@ -87,7 +92,7 @@ void ADigumWorldDynamicProceduralActor::SpawnChunks(const FVector& InWorldLocati
 		}*/
 	}
 
-	PurgeChunks();
+	// PurgeChunks();
 }
 
 void ADigumWorldDynamicProceduralActor::PurgeChunks()
