@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DigumWorldProceduralActor.h"
+#include "Procedural/DigumWorldMap.h"
 #include "DigumWorldDynamicProceduralActor.generated.h"
 
 struct FDigumWorldProceduralSectionCoordinate;
@@ -13,6 +14,7 @@ class DIGUMWORLD_API ADigumWorldDynamicProceduralActor : public ADigumWorldProce
 {
 	GENERATED_BODY()
 
+	
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldDynamicProceduralActor();
@@ -26,5 +28,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRadius(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& Radius, const int32& XMin, const int32& XMax, const int32& YMin, const int32 YMax) const;
-	void SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize);
+	void SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize);
+
 };

@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Procedural/DigumWorldMap.h"
 #include "DigumWorldProceduralActor.generated.h"
 
+struct FDigumWorldProceduralSectionCoordinate;
 struct FDigumWorldProceduralSection;
 struct FDigumWorldAssetCoordinateArray;
 struct FDigumWorldProceduralCoordinateArray;
@@ -27,10 +29,17 @@ public:
 	ADigumWorldProceduralActor();
 	
 private:
-	void GenerateMap(const FName& InContentCategoryName);
+	/*void GenerateMap(const FName& InContentCategoryName);*/
+	
 protected:
 	UPROPERTY()
-	FVector2D SectionSize;
+	FDigumWorldMap Map;
+
+	UPROPERTY()
+	TObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
+	
+	UPROPERTY()
+	FVector2D UnitSectionSize;
 	
 	UPROPERTY()
 	int32 LocalSectionWidth;
@@ -40,6 +49,9 @@ protected:
 
 	UPROPERTY()
 	FVector GridSize;
+
+	UPROPERTY()
+	FVector WorldOffset;
 	
 	UPROPERTY()
 	TArray<ADigumWorldActorSection*> SectionActors;
@@ -50,13 +62,19 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	
-	void Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight, const FVector& InGridSize);
-	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
-	virtual void CreateSection(FDigumWorldProceduralSection& InSection, const FVector& InWorldOffset, UDigumWorldProceduralAsset* ProceduralAsset);
+	void GenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth, const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies);
+	void SetProceduralAsset(UDigumWorldProceduralAsset* InProceduralAsset) { ProceduralAsset = InProceduralAsset; }
+	// void Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight, const FVector& InGridSize);
+	bool GetSection(const int32& InSectionX, const int32& InSectionY, FDigumWorldProceduralSection& OutSection) const;
+	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* InProceduralAsset);
+	virtual void CreateSection(FDigumWorldProceduralSection& InSection);
 	virtual void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
-
+	void ApplyWorldOffsetPosition();
 	ADigumWorldActorSection* GetSectionActor(const int32& InX, const int32& InY) const;
+
+	const FDigumWorldMap* GetMap() const { return &Map;}
+	FDigumWorldProceduralSectionCoordinate GetSectionCoordinate(const FVector& InWorldLocation) const;
+	
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Generate World"))
 	void Editor_GenerateProceduralWorld();

@@ -45,10 +45,6 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor
 				const int32 dx = InStartCoordinate.X - x;
 				const int32 dy = InStartCoordinate.Y - y;
 				SectionCoordinates.Add(FDigumWorldProceduralSectionCoordinate(x, y));
-				/*if(FMath::Sqrt(static_cast<float>(dx * dx + dy * dy)) <= Radius)
-				{
-					
-				}*/
 			}
 		}
 	}
@@ -56,11 +52,24 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor
 	return SectionCoordinates;
 }
 
-void ADigumWorldDynamicProceduralActor::SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate,
-	const int32& HalfSize)
+void ADigumWorldDynamicProceduralActor::SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize)
 {
-	TArray<FDigumWorldProceduralSectionCoordinate> SectionCoordinates;
+	FDigumWorldProceduralSectionCoordinate StartCoordinate = GetSectionCoordinate(InWorldLocation);
+
+	const int32 MaxX = GetMap()->SectionCount_HorizontalAxis - 1;
+	const int32 MaxY = GetMap()->SectionCount_VerticalAxis - 1;
+	TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRadius(StartCoordinate, HalfSize, 0, MaxX, 0, MaxY);
+
+	for(const FDigumWorldProceduralSectionCoordinate& Coordinate : Coordinates)
+	{
+		FDigumWorldProceduralSection Section;
+		if(GetSection(Coordinate.X, Coordinate.Y, Section))
+		{
+			CreateSection(Section);
+		}
+	}
 }
+
 
 
 // Called every frame

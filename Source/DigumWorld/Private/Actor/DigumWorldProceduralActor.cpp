@@ -19,19 +19,6 @@ ADigumWorldProceduralActor::ADigumWorldProceduralActor()
 	RootComponent = Root;
 }
 
-void ADigumWorldProceduralActor::GenerateMap(const FName& InContentCategoryName)
-{
-	FName ContentCategoryName = InContentCategoryName;
-	if(const FDigumWorldContentCategory* ContentCategory = UDigumWorldSettings::Get()->GetWorldContentCategoryData(ContentCategoryName))
-	{
-		const FDigumWorldProceduralRules* Rules = &ContentCategory->ProceduralRules;
-		if(Rules == nullptr) return;
-
-		FDigumWorldProceduralMap ProceduralMap;
-		UDigumWorldGenerator::GenerateWorldMap(*Rules, ProceduralMap);
-	}
-}
-
 // Called when the game starts or when spawned
 void ADigumWorldProceduralActor::BeginPlay()
 {
@@ -45,23 +32,34 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADigumWorldProceduralActor::Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight,
-	const FVector& InGridSize)
+void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector InGridSize, const int32 InSectionWidth,
+	const int32 InSectionHeight, int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
+	const int32 InNumberOfHierarchies)
 {
-	LocalSectionWidth = InLocalSectionWidth;
-	LocalSectionHeight = InLocalSectionHeight;
+	Map = FDigumWorldMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies);
+	LocalSectionWidth = InSectionWidth;
+	LocalSectionHeight = InSectionHeight;
 	GridSize = InGridSize;
-	SectionSize = FVector2D(InLocalSectionWidth * InGridSize.X, InLocalSectionHeight * InGridSize.Z);
+	UnitSectionSize = Map.GetSectionUnitSize();
+	WorldOffset = Map.GetWorldOffset();
+}
+
+bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32& InSectionY,
+	FDigumWorldProceduralSection& OutSection) const
+{
+	if(ProceduralAsset == nullptr) return false;
+
+	return UDigumWorldGenerator::GenerateSection(Map, InSectionX, InSectionY, ProceduralAsset, OutSection);
 }
 
 
 void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, 
-                                               FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
+                                               FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* InProceduralAsset)
 {
-	
-	const float SX = InSection.GetX();
-	const float SY = InSection.GetY();
+	const int32 SX = InSection.GetX();
+	const int32 SY = InSection.GetY();
 
+	if(SX < 0 || SY < 0) return;
 	if(GetSectionActor(SX, SY) != nullptr) return;
 	
 	const float X = (SX * (InSectionWidth));
@@ -73,18 +71,16 @@ void ADigumWorldProceduralActor::CreateSection(const float& InSectionWidth, cons
 	{
 		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		NewSection->SetFolderPath(GetFolderPath());
-		NewSection->InitializeSection(FVector2D(InSectionWidth, InSectionHeight),InSection, ProceduralAsset);
+		NewSection->InitializeSection(FVector2D(InSectionWidth, InSectionHeight),InSection, InProceduralAsset);
 		NewSection->FinishSpawning(FTransform::Identity);
 		NewSection->SetActorLocation(SectionLocation);
-		// UE_LOG(LogTemp, Warning, TEXT("Section spawned %s"), *SectionLocation.ToString());
 		SectionActors.Add(NewSection);
 	}
 }
 
-void ADigumWorldProceduralActor::CreateSection(FDigumWorldProceduralSection& InSection, const FVector& InWorldOffset, 
-	UDigumWorldProceduralAsset* ProceduralAsset)
+void ADigumWorldProceduralActor::CreateSection(FDigumWorldProceduralSection& InSection)
 {
-	CreateSection(SectionSize.X, SectionSize.Y, InWorldOffset, InSection, ProceduralAsset);
+	CreateSection(UnitSectionSize.X, UnitSectionSize.Y, WorldOffset, InSection, ProceduralAsset);
 }
 
 void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
@@ -94,7 +90,7 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
 	
 	// Translate World Position to Section Coordinates
 	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
-	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, SectionSize, SectionCoordinate);
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, UnitSectionSize, SectionCoordinate);
 
 	UE_LOG(LogTemp, Warning, TEXT("Section Coordinate %s"), *SectionCoordinate.ToString());
 	// Loop through all sections and add block
@@ -113,6 +109,11 @@ void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector&
     });
 }
 
+void ADigumWorldProceduralActor::ApplyWorldOffsetPosition()
+{
+	SetActorLocation(WorldOffset);
+}
+
 ADigumWorldActorSection* ADigumWorldProceduralActor::GetSectionActor(const int32& InX, const int32& InY) const
 {
 	for(auto& Child : SectionActors)
@@ -129,6 +130,17 @@ ADigumWorldActorSection* ADigumWorldProceduralActor::GetSectionActor(const int32
 	return nullptr;
 }
 
+FDigumWorldProceduralSectionCoordinate ADigumWorldProceduralActor::GetSectionCoordinate(
+	const FVector& InWorldLocation) const
+{
+	const FVector OffsetedLocation = InWorldLocation - WorldOffset;
+	const int32 X = FMath::FloorToInt(OffsetedLocation.X / UnitSectionSize.X);
+	const int32 Y = -FMath::CeilToInt((OffsetedLocation.Z) / UnitSectionSize.Y);
+	const int32 AbsX = FMath::Abs(X);
+	const int32 AbsY = FMath::Abs(Y);
+	return FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);
+}
+
 void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 {
 	FName ContentCategoryName = TEXT("Primary");
@@ -137,7 +149,7 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 		const FDigumWorldProceduralRules* Rules = &ContentCategory->ProceduralRules;
 		if(Rules == nullptr) return;
 
-		if(UDigumWorldProceduralAsset* ProceduralAsset = Rules->GetProceduralAsset())
+		if(UDigumWorldProceduralAsset* Asset = Rules->GetProceduralAsset())
 		{
 			FDigumWorldProceduralMap ProceduralMap;
 			UDigumWorldGenerator::GenerateWorldMap(*Rules, ProceduralMap);	
@@ -154,7 +166,7 @@ void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()
 
 			SetActorLocation(FVector(0, 0, 0));
 
-			SectionSize = FVector2D(SectionWidth, SectionHeight);
+			UnitSectionSize = FVector2D(SectionWidth, SectionHeight);
 			
 			
 			for(auto& Section : ProceduralMap.GetSections())
