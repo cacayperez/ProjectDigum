@@ -6,6 +6,8 @@
 #include "DigumWorldProceduralActor.h"
 #include "DigumWorldDynamicProceduralActor.generated.h"
 
+struct FDigumWorldProceduralSectionCoordinate;
+
 UCLASS()
 class DIGUMWORLD_API ADigumWorldDynamicProceduralActor : public ADigumWorldProceduralActor
 {
@@ -19,7 +21,10 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void InitializeDefaultSections();
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRadius(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& Radius, const int32& XMin, const int32& XMax, const int32& YMin, const int32 YMax) const;
+	void SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize);
 };

@@ -4,19 +4,28 @@
 
 #include "CoreMinimal.h"
 #include "Interface/IDigumPlayerCharacterInterface.h"
+#include "Interface/IDigumWorldPawnInterface.h"
 #include "Miner/DigumMinerCharacter.h"
 #include "DigumGamePlayerCharacter.generated.h"
 
 UCLASS()
-class DIGUMGAME_API ADigumGamePlayerCharacter : public ADigumMinerCharacter, public IIDigumPlayerCharacterInterface
+class DIGUMGAME_API ADigumGamePlayerCharacter : public ADigumMinerCharacter, public IIDigumPlayerCharacterInterface, public IIDigumWorldPawnInterface
 {
 	GENERATED_BODY()
 
+	UPROPERTY()
+	TObjectPtr<UDigumWorldPositioningComponent> PositioningComponent;
+	
 public:
 	// Sets default values for this character's properties
 	ADigumGamePlayerCharacter(const FObjectInitializer& ObjectInitializer);
 
+protected:
+	virtual void BeginPlay() override;
+public:
 	virtual APlayerController* GetPlayerController() const override;
 	virtual float GetVisibilityRadius() const override;
+	virtual UDigumWorldPositioningComponent* GetPositioningComponent() const override;
+	
 	
 };

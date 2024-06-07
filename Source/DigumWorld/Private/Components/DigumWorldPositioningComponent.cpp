@@ -14,8 +14,25 @@ UDigumWorldPositioningComponent::UDigumWorldPositioningComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	SetComponentTickInterval(0.2f);
+	// SetComponentTickInterval(0.2f);
 	// ...
+}
+
+void UDigumWorldPositioningComponent::CheckCoordinateChange()
+{
+	
+	FDigumWorldProceduralSectionCoordinate NewCoordinate;
+	const FVector Location = GetOwner()->GetActorLocation() - WorldOffset;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(Location , UnitSectionSize, NewCoordinate);
+	NewCoordinate.X  = NewCoordinate.X <= 0 ? 0 : NewCoordinate.X - 1;
+	if(NewCoordinate != CurrentCoordinate)
+	{
+		PreviousCoordinate = CurrentCoordinate;
+		CurrentCoordinate = NewCoordinate;
+		OnSectionCoordinateChanged.Broadcast(GetOwner(), CurrentCoordinate, PreviousCoordinate);
+		UE_LOG(LogTemp, Warning, TEXT("Current %s"), *CurrentCoordinate.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Previous %s"), *PreviousCoordinate.ToString());
+	}
 }
 
 
@@ -43,7 +60,7 @@ void UDigumWorldPositioningComponent::BeginPlay()
 				const float TotalWidth = Category->ProceduralRules.SectionCount_HorizontalAxis * UnitSectionWidth;
 				const float TotalHeight = Category->ProceduralRules.SectionCount_VerticalAxis * UnitSectionHeight;
 
-				FVector Offset = (FVector(-TotalWidth / 2, 0, TotalHeight / 2));
+				const FVector Offset = (FVector(-TotalWidth / 2, 0, TotalHeight / 2));
 				WorldOffset = Offset;
 			}
 		}
@@ -55,8 +72,12 @@ void UDigumWorldPositioningComponent::TickComponent(float DeltaTime, ELevelTick 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	const FVector Location = GetOwner()->GetActorLocation() - WorldOffset;
-	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(Location , UnitSectionSize, CurrentCoordinate);
+	CheckCoordinateChange();
 	// UE_LOG(LogTemp, Warning, TEXT("Current Coordinate: %i, %i"), CurrentCoordinate.X, CurrentCoordinate.Y);
+}
+
+FDigumWorldProceduralSectionCoordinate UDigumWorldPositioningComponent::GetCurrentCoordinate() const
+{
+	return CurrentCoordinate;
 }
 

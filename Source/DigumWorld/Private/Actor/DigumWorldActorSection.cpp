@@ -15,6 +15,7 @@
 // Sets default values
 ADigumWorldActorSection::ADigumWorldActorSection()
 {
+	PrimaryActorTick.bCanEverTick = false;
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
@@ -29,8 +30,8 @@ void ADigumWorldActorSection::OnSetWorldVisibility(bool bValue)
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
-			ChildActor->SetActorHiddenInGame(bValue);
-			ChildActor->SetWorldCollision(bValue);
+			/*ChildActor->SetActorHiddenInGame(bValue);
+			ChildActor->SetWorldCollision(bValue);*/
 		}
 	}
 
@@ -65,6 +66,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	
 	if(!Array)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Coordinate Array is null"));
 		return;
 	}
 
@@ -96,6 +98,10 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 #endif*/
 				}
 			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Child Actor Class not found for BlockID: %s"), *BlockID.ToString());
+			}
 		}
 		else
 		{
@@ -121,11 +127,13 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 
 	const int32 X = InLocation.X / GridSize.X;
 	const int32 Y = -(InLocation.Z / GridSize.Z);
+
+	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), X, Y);
 	
 	Coordinate.X = FMath::Abs(X % WidthOffset);
 	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
 	Coordinate.Hierarchy = 0;
-
+	
 	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), Coordinate.X, Coordinate.Y);
 
 	CoordinateArray.AddCoordinate(Coordinate);
@@ -156,7 +164,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 		}
 
 	}
-
+	
 	// create block if it doesnt exist
 }
 

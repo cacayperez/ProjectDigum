@@ -50,7 +50,6 @@ void UDigumVisibilityComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	{
 		const float Distance = FMath::Abs(FVector::Dist(GetOwner()->GetActorLocation(), PlayerPawn->GetActorLocation()));
 		
-		
 		const bool bIsVisible = Distance >= VisibilityRadius;
 
 		OnSetVisibilityDelegate.Broadcast(bIsVisible);

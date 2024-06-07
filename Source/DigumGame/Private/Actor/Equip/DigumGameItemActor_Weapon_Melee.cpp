@@ -16,6 +16,9 @@ ADigumGameItemActor_Weapon_Melee::ADigumGameItemActor_Weapon_Melee(const FObject
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(RootComponent);
 	BoxComponent->SetupAttachment(GetMesh());
+	// We only use box component as guide
+	
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ADigumGameItemActor_Weapon_Melee::BeginPlay()
@@ -40,19 +43,22 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 	const FVector BoxSize = GetBoxComponent()->GetScaledBoxExtent();
 	const FRotator Rotation = GetBoxComponent()->GetComponentRotation();
 	
-	TArray<FHitResult> OutHitResult;
+	// TArray<FHitResult> OutHitResult;
+	FHitResult OutHitResult;
 	TArray<AActor*> IgnoredActors;
 	IgnoredActors.Add(GetItemInstigator());
-	bool bHit = UKismetSystemLibrary::BoxTraceMulti(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
+	//bool bHit = UKismetSystemLibrary::BoxTraceMulti(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
+	// bool bHit = UKismetSystemLibrary::BoxTraceSingle(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::ForDuration, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	if(bHit)
 	{
-		for(auto& HitResult: OutHitResult)
-		{
-			AActor* HitActor = HitResult.GetActor();
-			FVector ImpactLocation = HitResult.ImpactPoint;
-			const int32 Index = HitResult.Item;
-			if(ImpactLocation == FVector::ZeroVector) continue;
+		/*for(auto& HitResult: OutHitResult)
+		{*/
+			AActor* HitActor = OutHitResult.GetActor();
+			FVector ImpactLocation = OutHitResult.ImpactPoint;
+			const int32 Index = OutHitResult.Item;
+			// if(ImpactLocation == FVector::ZeroVector) continue;
 			// Check if we already hit this instance
 			if(!HitItems.Contains(Index))
 			{
@@ -67,7 +73,7 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 					HitItems.Add(Index);
 				}
 			}
-		}
+		// }
 	}
 }
 
@@ -76,7 +82,7 @@ void ADigumGameItemActor_Weapon_Melee::OnActionBegin(AActor* InInstigator, const
 	Super::OnActionBegin(InInstigator, ActionKey);
 
 	HitItems.Empty();
-	GetWorld()->GetTimerManager().SetTimer(CollisionTimerHandle, this, &ADigumGameItemActor_Weapon_Melee::OnTraceCollision, 0.01f, true);
+	GetWorld()->GetTimerManager().SetTimer(CollisionTimerHandle, this, &ADigumGameItemActor_Weapon_Melee::OnTraceCollision, 0.025f, true);
 	
 }
 

@@ -142,7 +142,7 @@ void UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(const FVector& InWo
 	const int32 X = FMath::FloorToInt(InWorldLocation.X / InSectionUnitSize.X);
 	const int32 Y = -FMath::CeilToInt((InWorldLocation.Z) / InSectionUnitSize.Y);
 
-	const int32 AbsX = FMath::Abs(X);
+	const int32 AbsX = FMath::Abs(X) ;
 	const int32 AbsY = FMath::Abs(Y);
 	
 	const FDigumWorldProceduralSectionCoordinate SectionCoordinate = FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);

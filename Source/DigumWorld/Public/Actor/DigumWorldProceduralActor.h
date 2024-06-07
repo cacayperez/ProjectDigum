@@ -19,10 +19,16 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
-	
-	UPROPERTY()
-	TArray<ADigumWorldActorSection*> SectionActors;
 
+
+	
+public:
+	// Sets default values for this actor's properties
+	ADigumWorldProceduralActor();
+	
+private:
+	void GenerateMap(const FName& InContentCategoryName);
+protected:
 	UPROPERTY()
 	FVector2D SectionSize;
 	
@@ -31,24 +37,26 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 
 	UPROPERTY()
 	int32 LocalSectionHeight;
-public:
-	// Sets default values for this actor's properties
-	ADigumWorldProceduralActor();
+
+	UPROPERTY()
+	FVector GridSize;
 	
-private:
-	void GenerateMap(const FName& InContentCategoryName);
-protected:
+	UPROPERTY()
+	TArray<ADigumWorldActorSection*> SectionActors;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	
+	void Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight, const FVector& InGridSize);
+	virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
+	virtual void CreateSection(FDigumWorldProceduralSection& InSection, const FVector& InWorldOffset, UDigumWorldProceduralAsset* ProceduralAsset);
 	virtual void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 
-
+	ADigumWorldActorSection* GetSectionActor(const int32& InX, const int32& InY) const;
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Generate World"))
 	void Editor_GenerateProceduralWorld();

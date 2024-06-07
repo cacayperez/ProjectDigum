@@ -9,6 +9,7 @@
 #include "DigumWorldGenerator.generated.h"
 
 
+struct FDigumWorldMap;
 class UDigumWorldProceduralAsset;
 
 USTRUCT()
@@ -16,13 +17,23 @@ struct FDigumWorldProceduralSectionCoordinate
 {
 	GENERATED_BODY()
 public:
-	FDigumWorldProceduralSectionCoordinate() : X(0), Y(0) { }
+	FDigumWorldProceduralSectionCoordinate() : X(-1), Y(-1) { }
 	FDigumWorldProceduralSectionCoordinate(const int32 InX, const int32 InY) { X = InX; Y = InY; }
 	UPROPERTY(VisibleAnywhere)
 	int32 X;
 
 	UPROPERTY(VisibleAnywhere)
 	int32 Y;
+
+	bool operator==(const FDigumWorldProceduralSectionCoordinate& InCoordinate) const
+	{
+		return X == InCoordinate.X && Y == InCoordinate.Y;
+	}
+
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("X: %d, Y: %d"), X, Y);
+	}
 };
 
 USTRUCT()
@@ -217,31 +228,7 @@ public:
 	TSoftObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
 
 	UDigumWorldProceduralAsset* GetProceduralAsset() const { return UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);}
-	bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights) const
-	{
-		const TArray<FDigumWorldProceduralBlock>& Blocks = GetProceduralAsset()->GetBlocks();
-		if(Blocks.IsEmpty()) return false;
-		FName ResultID = NAME_None;
-		int32 BlockCount = Blocks.Num();
-	
-		float TotalWeight = 0.0f;
-		float CumulativeSum = 0.0f;
-		for(const auto&	[BlockID, Weight] : Blocks)
-		{
-			// Weight Total
-			TotalWeight += Weight;
-		}
-	
-		for(const auto&	[BlockID, Weight] : Blocks)
-		{
-			float StartRange = CumulativeSum;
-			CumulativeSum += Weight;
-			float EndRange = CumulativeSum;
-			OutCumulativeWeights.Add(TPair<float, float>(StartRange / TotalWeight, EndRange / TotalWeight));
-		}
 
-		return true;
-	}
 };
 
 /**
@@ -270,9 +257,33 @@ private:
 	static TArray<float> GenerateGroundCurve(const int32& InWidth, const int32& InHeight, const int32& SectionX, const FRandomStream& InRandomStream);
 	// static void GenerateSection(const )
 public:
+	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, const TArray<FDigumWorldProceduralBlock>& InBlocks, const TArray<TPair<float, float>>& InCumulativeWeights,
 	                           const int32& NumOfHierarchies, FDigumWorldProceduralSection& OutSection);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
+	
+	static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)
+	{
+		if(Blocks.IsEmpty()) return false;
+		
+		float TotalWeight = 0.0f;
+		float CumulativeSum = 0.0f;
+		for(const auto&	[BlockID, Weight] : Blocks)
+		{
+			// Weight Total
+			TotalWeight += Weight;
+		}
+	
+		for(const auto&	[BlockID, Weight] : Blocks)
+		{
+			float StartRange = CumulativeSum;
+			CumulativeSum += Weight;
+			float EndRange = CumulativeSum;
+			OutCumulativeWeights.Add(TPair<float, float>(StartRange / TotalWeight, EndRange / TotalWeight));
+		}
+
+		return true;
+	}
 };
 	

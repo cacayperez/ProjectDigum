@@ -28,6 +28,9 @@ class DIGUMWORLD_API UDigumWorldPositioningComponent : public UActorComponent
 	FVector2D UnitSectionSize;
 
 	UPROPERTY()
+	FDigumWorldProceduralSectionCoordinate PreviousCoordinate;
+	
+	UPROPERTY()
 	FDigumWorldProceduralSectionCoordinate CurrentCoordinate;
 
 	UPROPERTY()
@@ -36,13 +39,22 @@ class DIGUMWORLD_API UDigumWorldPositioningComponent : public UActorComponent
 public:
 	// Sets default values for this component's properties
 	UDigumWorldPositioningComponent();
+	void CheckCoordinateChange();
 
 protected:
+	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnSectionCoordinateChanged, const AActor*, const FDigumWorldProceduralSectionCoordinate&, const FDigumWorldProceduralSectionCoordinate&);
+
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	FOnSectionCoordinateChanged OnSectionCoordinateChanged;
 
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+
+	FDigumWorldProceduralSectionCoordinate GetCurrentCoordinate() const;
+
+	FOnSectionCoordinateChanged& GetOnCoordinateChangedDelegate() { return OnSectionCoordinateChanged; }
 };

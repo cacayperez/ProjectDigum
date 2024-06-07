@@ -6,6 +6,7 @@
 #include "Asset/DigumWorldProceduralAsset.h"
 #include "Algo/MinElement.h"
 #include "Algo/MaxElement.h"
+#include "Procedural/DigumWorldMap.h"
 
 
 float UDigumWorldGenerator::NormalizeNoiseValue(const float InNoiseValue)
@@ -121,6 +122,44 @@ TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, co
 	return GroundCurve;
 }
 
+
+bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const int32& InSectionX,
+	const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset,
+	FDigumWorldProceduralSection& OutSection)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Generating Section %i, %i"), InSectionX, InSectionY);
+	const FName SeedName = InMap.Seed;
+	const int32 SectionWidth = InMap.SectionWidth;
+	const int32 SectionHeight = InMap.SectionHeight;
+	const int32 NumberOfHierarchies = InMap.NumberOfHierarchies;
+	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
+	TArray<TPair<float, float>> CumulativeWeights;
+	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
+
+	if(!bHasCumulativeWeights)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
+		return false;
+	}
+	if(ProceduralAsset == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Procedural Asset is null"));
+		return false;
+	}
+	const FRandomStream RandomStream(SeedName);
+	const int32 MapWidth = InMap.GetTotalSectionWidth();
+	const int32 MapHeight = InMap.GetTotalSectionHeight();
+
+	UE_LOG(LogTemp, Warning, TEXT("Map Width: %d, Map Height: %d"), MapWidth, MapHeight);
+	FDigumWorldProceduralSection TempSection;
+
+	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream, Blocks, CumulativeWeights, NumberOfHierarchies, TempSection);
+	OutSection =  TempSection;
+	return bResult;
+}
+
+
+
 bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection)
 {
 	const int32 Seed = InSeed;
@@ -131,7 +170,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InS
 	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
 	
-	const bool bHasCumulativeWeights = InRules.GetCumulativeWeights(CumulativeWeights);
+	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
 	if(!bHasCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
@@ -160,7 +199,9 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 {
 	if(InBlocks.IsEmpty()) return false;
 	if(InCumulativeWeights.IsEmpty()) return false;
+	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
+	
 	for(int32 i = 0; i < NumOfHierarchies; i++)
 	{
 		int32 HierchyIndex = i - (NumOfHierarchies -1);
@@ -173,6 +214,8 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 				const int32 PositionX = InSectionX * InWidth + x;
 				const int32 PositionY = InSectionY * InHeight + y;
 
+				
+				
 				if(PositionY > GroundCurve[x])
 				{
 					NoiseValue = GetPerlinNoiseValue3D(PositionX, PositionY, HierchyIndex, InRandomStream);
@@ -183,6 +226,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 				}
 				else
 				{
+					// TODO Do the above ground parts
 					//NoiseValue = GetPerlinNoiseValue2D(PositionX, PositionY, InRandomStream);
 				}
 				
@@ -202,7 +246,7 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
 	
-	const bool bHasCumulativeWeights = InRules.GetCumulativeWeights(CumulativeWeights);
+	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
 	if(!bHasCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
