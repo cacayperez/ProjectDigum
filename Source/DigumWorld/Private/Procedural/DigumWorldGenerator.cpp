@@ -144,15 +144,16 @@ bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const in
 	const int32 SectionWidth = InMap.SectionWidth;
 	const int32 SectionHeight = InMap.SectionHeight;
 	const int32 NumberOfHierarchies = InMap.NumberOfHierarchies;
-	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
-	TArray<TPair<float, float>> CumulativeWeights;
-	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
+	/*const TArray<FDigumWorldProceduralBlock> TerrainBlocks = ProceduralAsset->GetTerrainBlocks();
+	TArray<TPair<float, float>> TerrainCumulativeWeights;
+	TArray<TPair<float, float>> GrassCumulativeWeights;
+	const bool bHasTerrainCumulativeWeights = GetCumulativeWeights(TerrainBlocks, TerrainCumulativeWeights);*/
 
-	if(!bHasCumulativeWeights)
+	/*if(!bHasTerrainCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
 		return false;
-	}
+	}*/
 	if(ProceduralAsset == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Procedural Asset is null"));
@@ -165,7 +166,7 @@ bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const in
 	// UE_LOG(LogTemp, Warning, TEXT("Map Width: %d, Map Height: %d"), MapWidth, MapHeight);
 	FDigumWorldProceduralSection TempSection;
 
-	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream, Blocks, CumulativeWeights, NumberOfHierarchies, TempSection);
+	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream,  NumberOfHierarchies, ProceduralAsset, TempSection);
 	OutSection =  TempSection;
 	return bResult;
 }
@@ -179,7 +180,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InS
 	const int32 SectionHeight = InRules.SectionHeight;
 	const int32 NumberOfHierarchies = InRules.NumberOfHierarchies;
 	const UDigumWorldProceduralAsset* ProceduralAsset = InRules.GetProceduralAsset();
-	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
+	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetTerrainBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
 	
 	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
@@ -200,17 +201,27 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InS
 
 	FDigumWorldProceduralSection TempSection;
 
-	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream, Blocks, CumulativeWeights, NumberOfHierarchies, TempSection);
+	const bool bResult = GenerateSection(MapWidth, MapHeight, InSectionX, InSectionY, SectionWidth, SectionHeight, RandomStream, NumberOfHierarchies, ProceduralAsset, TempSection);
 	OutSection =  TempSection;
 	return bResult;
 }
 
 bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream,
-                                           const TArray<FDigumWorldProceduralBlock>& InBlocks, const TArray<TPair<float, float>>& InCumulativeWeights,
-                                           const int32& NumOfHierarchies, FDigumWorldProceduralSection& OutSection)
+                                           const int32& NumOfHierarchies, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection)
 {
-	if(InBlocks.IsEmpty()) return false;
-	if(InCumulativeWeights.IsEmpty()) return false;
+	if(ProceduralAsset == nullptr) return false;
+	
+	const TArray<FDigumWorldProceduralBlock> TerrainBlocks = ProceduralAsset->GetTerrainBlocks();
+	const TArray<FDigumWorldProceduralBlock> GrassBlocks = ProceduralAsset->GetGrassBlocks();
+	
+	TArray<TPair<float, float>> TerrainCumulativeWeights;
+	TArray<TPair<float, float>> GrassCumulativeWeights;
+
+	const bool bHasTerrainCumulativeWeights = GetCumulativeWeights(TerrainBlocks, TerrainCumulativeWeights);
+	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
+
+
+	
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
 	for(int32 i = 0; i < NumOfHierarchies; i++)
@@ -223,23 +234,41 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 			{
 				const int32 PositionX = InSectionX * InWidth + x;
 				const int32 PositionY = InSectionY * InHeight + y;
-				
 				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, InRandomStream);
 				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
-				const FName BlockID = GetBlockIDFromNoiseValue(NormalizedNoise, InCumulativeWeights, InBlocks);
-				FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
-				Coordinate.BlockID = BlockID;
-				Coordinate.NoiseValue = NoiseValue;
-				Coordinate.Hierarchy = HierarchyIndex;
-
 				
 				if(PositionY < GroundCurve[x])
 				{
 					// Above ground, surface
+					//TODO Grass
+
+					if(IsSurfacePoint(PositionX, PositionY, GroundCurve, InWidth, InSectionX) && HierarchyIndex == 0)
+					{
+						if(bHasGrassCumulativeWeights)
+						{
+							const FName GrassBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, GrassBlocks);
+							FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
+							Coordinate.BlockID = GrassBlockID;
+							Coordinate.NoiseValue = NoiseValue;
+							Coordinate.Hierarchy = HierarchyIndex;
+							Coordinate.bBlocksPlacement = false;
+							OutSection.AddCoordinate(Coordinate);
+						}
+					}
+					
 				}
 				else // Below ground
 				{
-					OutSection.AddCoordinate(Coordinate);
+					if(bHasTerrainCumulativeWeights)
+					{
+						const FName TerrainBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, TerrainCumulativeWeights, TerrainBlocks);
+						FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
+						Coordinate.BlockID = TerrainBlockID;
+						Coordinate.NoiseValue = NoiseValue;
+						Coordinate.Hierarchy = HierarchyIndex;
+						OutSection.AddCoordinate(Coordinate);
+					}
+
 					// OutSection.AddCoordinate(Coordinate);
 				}
 				
@@ -257,7 +286,7 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 	const int32 SectionHeight = InRules.SectionHeight;
 	const int32 NumberOfHierarchies = InRules.NumberOfHierarchies;
 	const UDigumWorldProceduralAsset* ProceduralAsset = InRules.GetProceduralAsset();
-	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetBlocks();
+	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetTerrainBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
 	
 	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
@@ -282,7 +311,7 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 		for(int32 v = 0; v < InRules.SectionCount_VerticalAxis; v++)
 		{
 			FDigumWorldProceduralSection OutSection = FDigumWorldProceduralSection(h, v);
-			if(GenerateSection(MapWidth,MapHeight, h, v, SectionWidth, SectionHeight, RandomStream, Blocks, CumulativeWeights, NumberOfHierarchies, OutSection))
+			if(GenerateSection(MapWidth,MapHeight, h, v, SectionWidth, SectionHeight, RandomStream, NumberOfHierarchies, ProceduralAsset, OutSection))
 			{
 				TempMap.AddSection(OutSection);
 			}

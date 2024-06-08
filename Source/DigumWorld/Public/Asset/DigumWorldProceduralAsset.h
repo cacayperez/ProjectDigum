@@ -32,9 +32,15 @@ class DIGUMWORLD_API UDigumWorldProceduralAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere)
-	TArray<FDigumWorldProceduralBlock> Blocks;
+	TArray<FDigumWorldProceduralBlock> TerrainBlocks;
 
-	int32 GetBlockCount() const { return Blocks.Num(); }
-	TArray<FDigumWorldProceduralBlock> GetBlocks() const { return Blocks;}
+	UPROPERTY(EditAnywhere)
+	TArray<FDigumWorldProceduralBlock> GrassFoliage;
+
+	int32 GetTerrainBlockCount() const { return TerrainBlocks.Num(); }
+	int32 GetGrassBlockCount() const { return GrassFoliage.Num(); }
+	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
+	TArray<FDigumWorldProceduralBlock> GetGrassBlocks() const { return GrassFoliage;}
+	
 	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

@@ -70,6 +70,9 @@ public:
 	UPROPERTY()
 	bool bIsSurfaceBlock = false;
 
+	UPROPERTY()
+	bool bBlocksPlacement = true;
+
 	bool IsSurfaceBlock() const { return bIsSurfaceBlock; }
 
 	UPROPERTY()
@@ -275,6 +278,7 @@ public:
 
 };
 
+
 /**
  * 
  */
@@ -304,8 +308,8 @@ private:
 public:
 	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
-	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, const TArray<FDigumWorldProceduralBlock>& InBlocks, const TArray<TPair<float, float>>& InCumulativeWeights,
-	                           const int32& NumOfHierarchies, FDigumWorldProceduralSection& OutSection);
+	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, 
+	                           const int32& NumOfHierarchies,  const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
 	
 	static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)

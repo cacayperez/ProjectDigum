@@ -39,7 +39,7 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 	{
 		const FVector GridSize = GetGridSize();
 		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 16, 16, 2, Asset);
+		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 4, 4, 2, Asset);
 		// ProceduralActor->SetProceduralAsset(Asset);
 		ProceduralActor->FinishSpawning(FTransform::Identity);
 		ProceduralActor->ApplyWorldOffsetPosition();

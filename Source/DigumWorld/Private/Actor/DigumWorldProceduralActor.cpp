@@ -43,10 +43,10 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				}
 
 				// Reset neighbor flags
-				Coordinate->bHasLeftNeighbor = false;
+				/*Coordinate->bHasLeftNeighbor = false;
 				Coordinate->bHasRightNeighbor = false;
 				Coordinate->bHasTopNeighbor = false;
-				Coordinate->bHasBottomNeighbor = false;
+				Coordinate->bHasBottomNeighbor = false;*/
 
 				// Check left neighbor
 				/*if (x > 0)
@@ -88,7 +88,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				if (y > 0)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None && TopCoordinate->bBlocksPlacement == true)
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
@@ -96,7 +96,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				else if (InTopSection)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InTopSection->GetCoordinateArray()->GetCoordinate(x, InLocalSectionHeight - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None && TopCoordinate->bBlocksPlacement == true)
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
@@ -263,7 +263,7 @@ void ADigumWorldProceduralActor::CreateSection(FDigumWorldProceduralSection InSe
 void ADigumWorldProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
 	// Get Local Position
-	const FVector LocalPosition = InBlockLocation - GetActorLocation();
+	const FVector LocalPosition = InBlockLocation - WorldOffset;
 	
 	// Translate World Position to Section Coordinates
 	FDigumWorldProceduralSectionCoordinate SectionCoordinate;

@@ -60,4 +60,6 @@ public:
 	virtual void DestroyInstance(const int32& InIndex = INDEX_NONE);
 	virtual void OnInteract_Implementation(const AActor* InInstigator, const FDigumWorldRequestParams& InParams) override;
 	// void DestroyInstance(const FVector& InLocation, const int32& InIndex = INDEX_NONE);
+
+	FORCEINLINE UDigumWorldISMComponent* GetInstancedMeshComponent() const { return InstancedMeshComponent; }
 };

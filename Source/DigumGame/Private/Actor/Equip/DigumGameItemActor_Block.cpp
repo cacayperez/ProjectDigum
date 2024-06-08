@@ -127,7 +127,7 @@ void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigu
 			{
 				FName BlockID = GetItemProperties()->GetItemID();
 				ProceduralActor->AddBlock(BlockID, TargetLocation);
-
+				UE_LOG(LogTemp, Warning, TEXT("BlockID: %s"), *BlockID.ToString());
 				// TODO: Subtract the cost of the block from the player's inventory
 			}
 			
