@@ -168,7 +168,7 @@ void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
 
 void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AddBlock %i"), InCoordinates.CoordinateCount());
+	UE_LOG(LogTemp, Warning, TEXT("AddBlock %i,"), InCoordinates.CoordinateCount());
 	const float GridX = GridSize.X;
 	const float GridY = GridSize.Y;
 	const float GridZ = GridSize.Z;

@@ -34,18 +34,23 @@ void ADigumGamePrimaryGameMode::InitGameState()
 void ADigumGamePrimaryGameMode::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
-	if(Asset)
-	{
-		const FVector GridSize = GetGridSize();
-		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 4, 4, 2, Asset);
-		// ProceduralActor->SetProceduralAsset(Asset);
-		ProceduralActor->FinishSpawning(FTransform::Identity);
-		ProceduralActor->ApplyWorldOffsetPosition();
 
-		ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
+	if(HasAuthority())
+	{
+		UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
+		if(Asset)
+		{
+			const FVector GridSize = GetGridSize();
+			ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
+			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 4, 4, 2, Asset);
+			// ProceduralActor->SetProceduralAsset(Asset);
+			ProceduralActor->FinishSpawning(FTransform::Identity);
+			ProceduralActor->ApplyWorldOffsetPosition();
+
+			ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
+		}
 	}
+
 }
 
 void ADigumGamePrimaryGameMode::StartPlay()

@@ -49,7 +49,7 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 	IgnoredActors.Add(GetItemInstigator());
 	//bool bHit = UKismetSystemLibrary::BoxTraceMulti(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 	// bool bHit = UKismetSystemLibrary::BoxTraceSingle(GetWorld(), Start, End, BoxSize, Rotation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::None, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
-	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, IgnoredActors, EDrawDebugTrace::ForDuration, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f, UEngineTypes::ConvertToTraceType(ECC_Camera), false, IgnoredActors, EDrawDebugTrace::ForDuration, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	if(bHit)
 	{

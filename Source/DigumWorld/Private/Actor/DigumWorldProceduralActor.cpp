@@ -5,6 +5,7 @@
 #include "Procedural/DigumWorldGenerator.h"
 #include "Actor/DigumWorldActorSection.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
+#include "Net/UnrealNetwork.h"
 #include "Settings/DigumWorldSettings.h"
 
 
@@ -21,10 +22,11 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 {
 	if (InSection)
     {
-		TMap<FName, FDigumWorldProceduralCoordinateArray> CoordinateMap;
+		/*TMap<FName, FDigumWorldProceduralCoordinateArray> CoordinateMap;
 		InSection->GetCoordinateArray()->MakeMappedCoordinates(CoordinateMap);
 		TArray<FName> BlockIDs;
-		CoordinateMap.GetKeys(BlockIDs);
+		CoordinateMap.GetKeys(BlockIDs);*/
+		
 
 		for (int32 i = 0; i < NumOfHierarchies; i++)
 		{
@@ -36,17 +38,17 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				const int32 y = j / InLocalSectionWidth;
 
 				FDigumWorldProceduralCoordinate* Coordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y, HierarchyIndex);
-        	
+				
 				if (!Coordinate)
 				{
 					continue;
 				}
-
+				UE_LOG(LogTemp, Warning, TEXT("Coordinate Hierarchy %i, "), Coordinate->Hierarchy);
 				// Reset neighbor flags
-				/*Coordinate->bHasLeftNeighbor = false;
+				Coordinate->bHasLeftNeighbor = false;
 				Coordinate->bHasRightNeighbor = false;
 				Coordinate->bHasTopNeighbor = false;
-				Coordinate->bHasBottomNeighbor = false;*/
+				Coordinate->bHasBottomNeighbor = false;
 
 				// Check left neighbor
 				/*if (x > 0)
@@ -88,7 +90,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				if (y > 0)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None && TopCoordinate->bBlocksPlacement == true)
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
@@ -96,32 +98,47 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				else if (InTopSection)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InTopSection->GetCoordinateArray()->GetCoordinate(x, InLocalSectionHeight - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None && TopCoordinate->bBlocksPlacement == true)
+					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
+					
 				}
 
 				// Check bottom neighbor
-				/*if (y < InLocalSectionHeight - 1)
+				if (y < InLocalSectionHeight - 1)
 				{
-					FDigumWorldProceduralCoordinate* BottomCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y + 1);
-					if (BottomCoordinate)
+					FDigumWorldProceduralCoordinate* BottomCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y + 1, HierarchyIndex);
+					if (BottomCoordinate && BottomCoordinate->BlockID != NAME_None)
 					{
 						Coordinate->bHasBottomNeighbor = true;
 					}
 				}
 				else if (InBottomSection)
 				{
-					FDigumWorldProceduralCoordinate* BottomCoordinate = InBottomSection->GetCoordinateArray()->GetCoordinate(x, 0);
-					if (BottomCoordinate)
+					FDigumWorldProceduralCoordinate* BottomCoordinate = InBottomSection->GetCoordinateArray()->GetCoordinate(x, 0, HierarchyIndex);
+					if (BottomCoordinate && BottomCoordinate->BlockID != NAME_None)
 					{
 						Coordinate->bHasBottomNeighbor = true;
 					}
-				}*/
+				}
+
+				if(!Coordinate->bHasTopNeighbor && Coordinate->bHasBottomNeighbor && Coordinate->BlockID == NAME_None)
+				{
+					MarkForFoliage(Coordinate);
+				}
 			}
 		}
     }
+}
+
+void ADigumWorldProceduralActor::MarkForFoliage(FDigumWorldProceduralCoordinate* InCoordinate)
+{
+	if(InCoordinate)
+	{
+		 UE_LOG(LogTemp, Log, TEXT("Coordinate (%d, %d, %d) marked for foliage"), InCoordinate->X, InCoordinate->Y, InCoordinate->Hierarchy);
+		InCoordinate->bIsDirectSurfaceBlock = true;
+	}
 }
 
 /*FDigumWorldProceduralSection& ADigumWorldProceduralActor::GetSectionData(const int32& InX, const int32& InY)
@@ -210,16 +227,13 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 		{
 			BottomSection = &SectionDataArray[i + Map.SectionCount_HorizontalAxis];
 		}
-		/*UE_LOG(LogTemp, Log, TEXT("Section (%d, %d): Neighbors - Left: %s, Right: %s, Top: %s, Bottom: %s"), 
-			   x, y, 
-			   LeftSection ? TEXT("Yes") : TEXT("No"), 
-			   RightSection ? TEXT("Yes") : TEXT("No"), 
-			   TopSection ? TEXT("Yes") : TEXT("No"), 
-			   BottomSection ? TEXT("Yes") : TEXT("No"));*/
 		
 		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
-	
+		
 	}
+	TArray<FDigumWorldProceduralPlacedBlocks> PlacedSurfaceBlocks;
+	// Foliage
+	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset);
 }
 
 bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32& InSectionY,
@@ -316,6 +330,12 @@ FDigumWorldProceduralSectionCoordinate ADigumWorldProceduralActor::GetSectionCoo
 	const int32 AbsX = FMath::Abs(X-1);
 	const int32 AbsY = FMath::Abs(Y);
 	return FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);
+}
+
+void ADigumWorldProceduralActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADigumWorldProceduralActor, Map);
 }
 
 void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()

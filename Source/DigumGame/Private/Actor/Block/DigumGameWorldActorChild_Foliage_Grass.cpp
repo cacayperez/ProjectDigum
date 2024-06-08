@@ -21,7 +21,8 @@ void ADigumGameWorldActorChild_Foliage_Grass::BeginPlay()
 
 	if(GetInstancedMeshComponent())
 	{
-		GetInstancedMeshComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		// GetInstancedMeshComponent()->SetCollisionEnabled(ECollisionEnabled::No);
+		// GetInstancedMeshComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 	
 }

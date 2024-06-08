@@ -7,6 +7,7 @@
 #include "Procedural/DigumWorldMap.h"
 #include "DigumWorldProceduralActor.generated.h"
 
+struct FDigumWorldProceduralCoordinate;
 struct FDigumWorldProceduralSectionCoordinate;
 struct FDigumWorldProceduralSection;
 struct FDigumWorldAssetCoordinateArray;
@@ -32,10 +33,10 @@ private:
 	/*void GenerateMap(const FName& InContentCategoryName);*/
 
 protected:
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FDigumWorldMap Map;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<FDigumWorldProceduralSection> SectionDataArray;
 	
 	UPROPERTY()
@@ -62,6 +63,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	void CheckAndSetNeighbors(FDigumWorldProceduralSection* InSection, const int32& NumOfHierarchies, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection, int32 InLocalSectionWidth, int32 InLocalSectionHeight);
+	void MarkForFoliage(FDigumWorldProceduralCoordinate* InCoordinate);
 	// FDigumWorldProceduralSection& GetSectionData(const int32& InX, const int32& InY);
 public:
 	// Called every frame
@@ -78,6 +80,8 @@ public:
 
 	const FDigumWorldMap* GetMap() const { return &Map;}
 	FDigumWorldProceduralSectionCoordinate GetSectionCoordinate(const FVector& InWorldLocation) const;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Actor", CallInEditor, meta = (DisplayName = "Generate World"))

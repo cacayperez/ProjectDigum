@@ -15,13 +15,25 @@ struct FDigumWorldProceduralBlock
 public:
 	UPROPERTY(EditAnywhere)
 	FName BlockID = NAME_None;
-	
-	/*UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;*/
 
 	UPROPERTY(EditAnywhere)
 	float Weight = 1.0f;
+
 };
+
+USTRUCT()
+struct FDigumWorldProceduralBlock_Sized : public FDigumWorldProceduralBlock
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	int32 Width;
+
+	UPROPERTY()
+	int32 Height;
+};
+
 
 /**
  * 
@@ -35,12 +47,12 @@ public:
 	TArray<FDigumWorldProceduralBlock> TerrainBlocks;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FDigumWorldProceduralBlock> GrassFoliage;
+	TArray<FDigumWorldProceduralBlock_Sized> GrassFoliage;
 
 	int32 GetTerrainBlockCount() const { return TerrainBlocks.Num(); }
 	int32 GetGrassBlockCount() const { return GrassFoliage.Num(); }
 	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
-	TArray<FDigumWorldProceduralBlock> GetGrassBlocks() const { return GrassFoliage;}
+	TArray<FDigumWorldProceduralBlock_Sized> GetGrassBlocks() const { return GrassFoliage;}
 	
 	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

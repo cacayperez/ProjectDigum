@@ -31,6 +31,18 @@ FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue, c
 	return ResultID;
 }
 
+FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue,
+	const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock_Sized>& Blocks)
+{
+	TArray<FDigumWorldProceduralBlock> BlockArray;
+	for(const auto& Block : Blocks)
+	{
+		BlockArray.Add(Block);
+	}
+
+	return GetBlockIDFromNoiseValue(InNoiseValue, OutCumulativeWeights, BlockArray);
+}
+
 bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights)
 {
 	if(Blocks.IsEmpty()) return false;
@@ -56,10 +68,21 @@ bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProcedur
 	return true;
 }
 
+bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock_Sized>& Blocks,
+	TArray<TPair<float, float>>& OutCumulativeWeights)
+{
+	TArray<FDigumWorldProceduralBlock> BlockArray;
+	for(const auto& Block : Blocks)
+	{
+		BlockArray.Add(Block);
+	}
+
+	return GetCumulativeWeights(BlockArray, OutCumulativeWeights);
+}
 
 
 TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, const int32& InHeight,
-	const int32& SectionX, const FRandomStream& InRandomStream)
+                                                        const int32& SectionX, const FRandomStream& InRandomStream)
 {
 	TArray<float> GroundCurve;
 	GroundCurve.SetNum(InWidth);
@@ -212,15 +235,13 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 	if(ProceduralAsset == nullptr) return false;
 	
 	const TArray<FDigumWorldProceduralBlock> TerrainBlocks = ProceduralAsset->GetTerrainBlocks();
-	const TArray<FDigumWorldProceduralBlock> GrassBlocks = ProceduralAsset->GetGrassBlocks();
+	// const TArray<FDigumWorldProceduralBlock> GrassBlocks = ProceduralAsset->GetGrassBlocks();
 	
 	TArray<TPair<float, float>> TerrainCumulativeWeights;
-	TArray<TPair<float, float>> GrassCumulativeWeights;
-
 	const bool bHasTerrainCumulativeWeights = GetCumulativeWeights(TerrainBlocks, TerrainCumulativeWeights);
-	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
 
-
+	// TArray<TPair<float, float>> GrassCumulativeWeights;
+	// const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
 	
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
@@ -236,25 +257,13 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 				const int32 PositionY = InSectionY * InHeight + y;
 				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, InRandomStream);
 				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
+				FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
+				Coordinate.Hierarchy = HierarchyIndex;
+				Coordinate.NoiseValue = NoiseValue;
 				
 				if(PositionY < GroundCurve[x])
 				{
 					// Above ground, surface
-					//TODO Grass
-
-					if(IsSurfacePoint(PositionX, PositionY, GroundCurve, InWidth, InSectionX) && HierarchyIndex == 0)
-					{
-						if(bHasGrassCumulativeWeights)
-						{
-							const FName GrassBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, GrassBlocks);
-							FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
-							Coordinate.BlockID = GrassBlockID;
-							Coordinate.NoiseValue = NoiseValue;
-							Coordinate.Hierarchy = HierarchyIndex;
-							Coordinate.bBlocksPlacement = false;
-							OutSection.AddCoordinate(Coordinate);
-						}
-					}
 					
 				}
 				else // Below ground
@@ -262,20 +271,53 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 					if(bHasTerrainCumulativeWeights)
 					{
 						const FName TerrainBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, TerrainCumulativeWeights, TerrainBlocks);
-						FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(x, y, PositionX, PositionY);
 						Coordinate.BlockID = TerrainBlockID;
-						Coordinate.NoiseValue = NoiseValue;
-						Coordinate.Hierarchy = HierarchyIndex;
-						OutSection.AddCoordinate(Coordinate);
 					}
-
-					// OutSection.AddCoordinate(Coordinate);
 				}
+
+				OutSection.AddCoordinate(Coordinate);
 				
 			}
 		}
 	}
 	
+	return true;
+}
+
+bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,
+	const UDigumWorldProceduralAsset* ProceduralAsset)
+{
+	const TArray<FDigumWorldProceduralBlock_Sized> GrassBlocks = ProceduralAsset->GetGrassBlocks();
+	TArray<TPair<float, float>> GrassCumulativeWeights;
+	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
+	if(!bHasGrassCumulativeWeights)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
+		return false;
+	}
+	
+	FRandomStream RandomStream(InSeedName);
+	for(int32 i = 0; i < InSectionArray.Num(); i++)
+	{
+		FDigumWorldProceduralCoordinateArray* Coordinates = InSectionArray[i].GetCoordinateArray();
+		for(int32 j = 0; j < Coordinates->CoordinateCount(); j++)
+		{
+			FDigumWorldProceduralCoordinate* Coordinate = Coordinates->GetCoordinate(j);
+			if(Coordinate != nullptr && Coordinate->IsDirectSurfaceBlock())
+			{
+				const int32 PositionX = Coordinate->GlobalX;
+				const int32 PositionY = Coordinate->GlobalY;
+				const int32 HierarchyIndex = Coordinate->Hierarchy;
+				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, RandomStream);
+				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
+				if(bHasGrassCumulativeWeights)
+				{
+					const FName GrassBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, GrassBlocks);
+					Coordinate->BlockID = GrassBlockID;
+				}
+			}
+		}
+	}
 	return true;
 }
 

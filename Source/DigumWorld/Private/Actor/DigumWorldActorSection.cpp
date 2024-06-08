@@ -127,14 +127,15 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 
 	const int32 X = InLocation.X / GridSize.X;
 	const int32 Y = -(InLocation.Z / GridSize.Z);
+	const int32 Hierarchy = -InLocation.Y / GridSize.Y;
 
 	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), X, Y);
 	
 	Coordinate.X = FMath::Abs(X % WidthOffset);
 	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
-	Coordinate.Hierarchy = 0;
+	Coordinate.Hierarchy = Hierarchy;
 	
-	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), Coordinate.X, Coordinate.Y);
+	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d %d"), *InBlockID.ToString(), Coordinate.X, Coordinate.Y, Coordinate.Hierarchy);
 
 	CoordinateArray.AddCoordinate(Coordinate);
 	
@@ -149,6 +150,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 		{
 			if(TSubclassOf<ADigumWorldActorChild> ChildClass = Asset->GetChildActorClass())
 			{
+				FVector HierarchyOffset = FVector(0, Hierarchy * GridSize.Y, 0);
 				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
 				if(NewActor)
 				{
@@ -156,7 +158,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 					// NewActor->SetFolderPath(GetFolderPath());
 					NewActor->InitializeSwatchAsset(InBlockID, Asset, CoordinateArray);
 					NewActor->FinishSpawning(FTransform::Identity);
-					NewActor->SetActorLocation(GetActorLocation());
+					NewActor->SetActorLocation(GetActorLocation() + HierarchyOffset);
 					
 					WorldChildActors.FindOrAdd(InBlockID, NewActor);
 				}
