@@ -27,9 +27,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSoftClassPtr<ADigumWorldActorChild> ChildActorClass;
 
+	UPROPERTY(EditAnywhere)
+	FVector PositionOffset = FVector::ZeroVector;
+
 	UMaterialInstance* GetEditorMaterial() const;
 	TSubclassOf<ADigumWorldActorChild> GetChildActorClass() const;
 	UMaterialInstance* GetWorldMaterial() const;
 	UStaticMesh* GetSwatchMesh() const;
-
+	FVector GetPositionOffset() const;
 };

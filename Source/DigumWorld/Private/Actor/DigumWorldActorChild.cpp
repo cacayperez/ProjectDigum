@@ -168,10 +168,14 @@ void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
 
 void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AddBlock %i,"), InCoordinates.CoordinateCount());
+	/*if(!SwatchAsset)
+		UE_LOG(LogTemp, Warning, TEXT("AddBlock %i,"), InCoordinates.CoordinateCount());*/
+	
 	const float GridX = GridSize.X;
 	const float GridY = GridSize.Y;
 	const float GridZ = GridSize.Z;
+
+	const FVector PositionOffset = SwatchAsset->GetPositionOffset(); 
 		
 	for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
 	{
@@ -181,7 +185,7 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 		const float Y = Coordinate->Hierarchy * GridY;
 		const float Z = -(Coordinate->Y * GridZ);
 		FVector Location = FVector(X, Y, Z);
-		FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
+		FTransform Transform = FTransform(FRotator::ZeroRotator, Location + PositionOffset, FVector(1.0f));
 			
 		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);

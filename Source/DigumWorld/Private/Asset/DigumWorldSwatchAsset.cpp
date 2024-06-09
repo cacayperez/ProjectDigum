@@ -24,3 +24,8 @@ UStaticMesh* UDigumWorldSwatchAsset::GetSwatchMesh() const
 {
 	return UDigumAssetManager::GetAsset<UStaticMesh>(SwatchMesh);
 }
+
+FVector UDigumWorldSwatchAsset::GetPositionOffset() const
+{
+	return PositionOffset;
+}

@@ -35,21 +35,20 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	if(HasAuthority())
-	{
+
 		UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
 		if(Asset)
 		{
 			const FVector GridSize = GetGridSize();
 			ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 4, 4, 2, Asset);
+			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 20, 20, 2, Asset);
 			// ProceduralActor->SetProceduralAsset(Asset);
 			ProceduralActor->FinishSpawning(FTransform::Identity);
 			ProceduralActor->ApplyWorldOffsetPosition();
 
 			ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
 		}
-	}
+	
 
 }
 

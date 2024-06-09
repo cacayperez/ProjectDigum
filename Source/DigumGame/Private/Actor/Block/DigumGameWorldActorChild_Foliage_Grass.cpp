@@ -11,7 +11,7 @@ ADigumGameWorldActorChild_Foliage_Grass::ADigumGameWorldActorChild_Foliage_Grass
 	: Super(ObjectInitializer)
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 }
 
 // Called when the game starts or when spawned
@@ -19,11 +19,7 @@ void ADigumGameWorldActorChild_Foliage_Grass::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(GetInstancedMeshComponent())
-	{
-		// GetInstancedMeshComponent()->SetCollisionEnabled(ECollisionEnabled::No);
-		// GetInstancedMeshComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
-	}
+
 	
 }
 
