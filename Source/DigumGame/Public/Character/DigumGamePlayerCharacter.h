@@ -9,12 +9,10 @@
 #include "DigumGamePlayerCharacter.generated.h"
 
 UCLASS()
-class DIGUMGAME_API ADigumGamePlayerCharacter : public ADigumMinerCharacter, public IIDigumPlayerCharacterInterface, public IIDigumWorldPawnInterface
+class DIGUMGAME_API ADigumGamePlayerCharacter : public ADigumMinerCharacter, public IIDigumPlayerCharacterInterface
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TObjectPtr<UDigumWorldPositioningComponent> PositioningComponent;
 	
 public:
 	// Sets default values for this character's properties
@@ -25,7 +23,6 @@ protected:
 public:
 	virtual APlayerController* GetPlayerController() const override;
 	virtual float GetVisibilityRadius() const override;
-	virtual UDigumWorldPositioningComponent* GetPositioningComponent() const override;
 	
 	
 };

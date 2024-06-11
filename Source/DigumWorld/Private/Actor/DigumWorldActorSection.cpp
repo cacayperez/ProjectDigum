@@ -7,7 +7,10 @@
 #include "Asset/DigumWorldAsset.h"
 #include "Asset/DigumWorldSwatchAsset.h"
 #include "Component/DigumVisibilityComponent.h"
+#include "Components/BoxComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
+#include "Interface/IDigumPawnInterface.h"
+#include "Interface/IDigumWorldPawnInterface.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Settings/DigumWorldSettings.h"
 
@@ -19,7 +22,8 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
-	
+	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+	BoxComponent->SetupAttachment(Root);*/
 	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
 	
 }
@@ -37,6 +41,7 @@ void ADigumWorldActorSection::OnSetWorldVisibility(bool bValue)
 
 }
 
+
 // Called when the game starts or when spawned
 void ADigumWorldActorSection::BeginPlay()
 {
@@ -46,6 +51,13 @@ void ADigumWorldActorSection::BeginPlay()
 	{
 		VisibilityComponent->GetOnSetVisibilityDelegate().AddUObject(this, &ADigumWorldActorSection::OnSetWorldVisibility);
 	}
+
+	/*if(BoxComponent)
+	{
+		GetWorld()->GetTimerManager().SetTimer(ReuseTimerHandle, this, &ADigumWorldActorSection::FlagForReuse, 3.0f, false);
+		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ADigumWorldActorSection::OnBeginOverlap);
+		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &ADigumWorldActorSection::OnEndOverlap);
+	}*/
 }
 
 // Called every frame
@@ -61,8 +73,10 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	SectionY = InSection.GetY();
 	SectionSize = InSectionSize;
 	GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+
 	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
 	FDigumWorldProceduralCoordinateArray* Array = InSection.GetCoordinateArray();
+	UE_LOG(LogTemp, Warning, TEXT("Initialize Section, %s"), *InSection.GetSectionCoordinate().ToString());
 	
 	if(!Array)
 	{
@@ -78,7 +92,17 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 		FDigumWorldProceduralCoordinateArray BlockCoordinates = It->Value;
 		
 		UDigumWorldSwatchAsset* SwatchAsset = UDigumWorldFunctionHelpers::GetSwatchAsset(BlockID, TEXT("Primary"));
-
+		
+		/*if(WorldChildActors.Contains(BlockID) && SwatchAsset)
+		{
+			ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(BlockID);
+			if(ChildActor)
+			{
+				ChildActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
+				return;
+			}
+		}*/
+		
 		if(SwatchAsset)
 		{
 			if(TSubclassOf<ADigumWorldActorChild> ChildClass = SwatchAsset->GetChildActorClass())
@@ -87,7 +111,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
 				if(NewActor)
 				{
-					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 					// NewActor->SetFolderPath(GetFolderPath());
 					NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
 					NewActor->FinishSpawning(FTransform::Identity);
@@ -118,8 +142,6 @@ void ADigumWorldActorSection::CreateChildActor(FDigumWorldProceduralCoordinateAr
 void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset,
 	const int32& HeightOffset)
 {
-	// Check if block exists
-	// const FVector LocalPos
 	ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(InBlockID);
 	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
 	FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate();
@@ -183,6 +205,20 @@ void ADigumWorldActorSection::DestroySection()
 	Destroy();
 }
 
+void ADigumWorldActorSection::ResetSection()
+{
+	SectionData = FDigumWorldProceduralSection(-1,-1);
+	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	{
+		if(ADigumWorldActorChild* ChildActor = It->Value)
+		{
+			ChildActor->Destroy();
+		}
+	}
+	
+}
+
+/*
 int32 ADigumWorldActorSection::GetX() const
 {
 	return FMath::FloorToInt(GetActorLocation().X / SectionSize.X);
@@ -192,4 +228,4 @@ int32 ADigumWorldActorSection::GetY() const
 {
 	return FMath::FloorToInt(GetActorLocation().Z / SectionSize.Y);
 }
-
+*/

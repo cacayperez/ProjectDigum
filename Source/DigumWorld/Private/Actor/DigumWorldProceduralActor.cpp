@@ -43,7 +43,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				{
 					continue;
 				}
-				UE_LOG(LogTemp, Warning, TEXT("Coordinate Hierarchy %i, "), Coordinate->Hierarchy);
+				// UE_LOG(LogTemp, Warning, TEXT("Coordinate Hierarchy %i, "), Coordinate->Hierarchy);
 				// Reset neighbor flags
 				Coordinate->bHasLeftNeighbor = false;
 				Coordinate->bHasRightNeighbor = false;
@@ -141,6 +141,12 @@ void ADigumWorldProceduralActor::MarkForFoliage(FDigumWorldProceduralCoordinate*
 	}
 }
 
+void ADigumWorldProceduralActor::OnGenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth,
+	const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
+	const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset)
+{
+}
+
 /*FDigumWorldProceduralSection& ADigumWorldProceduralActor::GetSectionData(const int32& InX, const int32& InY)
 {
 	/*for(auto& Section : SectionDataArray)
@@ -234,6 +240,7 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 	TArray<FDigumWorldProceduralPlacedBlocks> PlacedSurfaceBlocks;
 	// Foliage
 	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset);
+	OnGenerateMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies, InProceduralAsset);
 }
 
 bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32& InSectionY,
@@ -324,10 +331,10 @@ ADigumWorldActorSection* ADigumWorldProceduralActor::GetSectionActor(const int32
 FDigumWorldProceduralSectionCoordinate ADigumWorldProceduralActor::GetSectionCoordinate(
 	const FVector& InWorldLocation) const
 {
-	const FVector OffsetedLocation = InWorldLocation - WorldOffset;
-	const int32 X = FMath::FloorToInt(OffsetedLocation.X / UnitSectionSize.X);
-	const int32 Y = -FMath::CeilToInt((OffsetedLocation.Z) / UnitSectionSize.Y);
-	const int32 AbsX = FMath::Abs(X-1);
+	const FVector OffsettedLocation = InWorldLocation - WorldOffset;
+	const int32 X = FMath::FloorToInt(OffsettedLocation.X / UnitSectionSize.X);
+	const int32 Y = -FMath::CeilToInt((OffsettedLocation.Z) / UnitSectionSize.Y);
+	const int32 AbsX = FMath::Abs(X);
 	const int32 AbsY = FMath::Abs(Y);
 	return FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);
 }

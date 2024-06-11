@@ -88,20 +88,20 @@ TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, co
 	GroundCurve.SetNum(InWidth);
 
 	const int32 VerticalCenter = InHeight / 2;
-	const float AmplitudeScale = 0.2f; // Adjustable amplitude scale
-	const float FrequencyScale = 0.3f; // Adjustable frequency
-    const float Amplitude = InHeight / 4 * AmplitudeScale; // Adjustable amplitude
+	const float AmplitudeScale = 0.1f; // Adjustable amplitude scale
+	const float FrequencyScale = 0.007f; // Adjustable frequency
+    const float Amplitude = InHeight / 2 * AmplitudeScale; // Adjustable amplitude
     const float NoiseScale = FrequencyScale; // Adjustable frequency
 
     // Generate Perlin noise values for the base heights
     for (int32 x = 0; x < InWidth; x++)
     {
         float NoiseValue = GetPerlinNoiseValue1D(static_cast<float>(SectionX * InWidth + x) * NoiseScale, InRandomStream);
-        GroundCurve[x] = VerticalCenter + NoiseValue * Amplitude;
+        GroundCurve[x] = VerticalCenter + NoiseValue;
     }
 
     // Determine terrain types
-    for (int32 x = 0; x < InWidth; x += 20) // Divide terrain into segments of 10 units
+    for (int32 x = 0; x < InWidth; x += 10) // Divide terrain into segments of 10 units
     {
     	float TerrainTypeNoiseValue = GetPerlinNoiseValue1D(static_cast<float>(SectionX * InWidth + x), InRandomStream);
 
@@ -119,7 +119,7 @@ TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, co
     		for (int32 i = 0; i < 10 && x + i < InWidth; i++)
     		{
     			float NoiseValue = GetPerlinNoiseValue1D(static_cast<float>(SectionX * InWidth + x + i) * NoiseScale, InRandomStream);
-    			GroundCurve[x + i] = VerticalCenter + NoiseValue * (Amplitude / 4); // Smaller amplitude
+    			GroundCurve[x + i] = VerticalCenter + NoiseValue * Amplitude / 10;// Smaller amplitude
     		}
     	}
         // Otherwise, keep the original hill shape
@@ -242,7 +242,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 
 	// TArray<TPair<float, float>> GrassCumulativeWeights;
 	// const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
-	
+	bool bResult = false;
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
 	for(int32 i = 0; i < NumOfHierarchies; i++)
@@ -276,12 +276,12 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 				}
 
 				OutSection.AddCoordinate(Coordinate);
-				
+				bResult = true; // Set to true if we have at least one coordinate
 			}
 		}
 	}
 	
-	return true;
+	return bResult;
 }
 
 bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,

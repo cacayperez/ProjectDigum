@@ -10,7 +10,7 @@
 ADigumGamePlayerCharacter::ADigumGamePlayerCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PositioningComponent = CreateDefaultSubobject<UDigumWorldPositioningComponent>(TEXT("PositioningComponent"));
+	// PositioningComponent = CreateDefaultSubobject<UDigumWorldPositioningComponent>(TEXT("PositioningComponent"));
 }
 
 void ADigumGamePlayerCharacter::BeginPlay()
@@ -19,19 +19,7 @@ void ADigumGamePlayerCharacter::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("Character Begin Play"));
 	// Register positioning component to gamemode
-	if(PositioningComponent)
-	{
-		AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
-		if(GameMode)
-		{
-			if(ADigumGamePrimaryGameMode* DigumGameMode = Cast<ADigumGamePrimaryGameMode>(GameMode))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
-				DigumGameMode->RegisterPositioningComponent(PositioningComponent);
-			}
-			
-		}
-	}
+
 }
 
 APlayerController* ADigumGamePlayerCharacter::GetPlayerController() const
@@ -48,7 +36,3 @@ float ADigumGamePlayerCharacter::GetVisibilityRadius() const
 	return 3000.0f;
 }
 
-UDigumWorldPositioningComponent* ADigumGamePlayerCharacter::GetPositioningComponent() const
-{
-	return PositioningComponent;
-}

@@ -15,8 +15,10 @@
 #include "Components/DigumActionComponent.h"
 #include "Components/DigumInventorySlot.h"
 #include "Components/DigumPickupHandlerComponent.h"
+#include "Components/DigumWorldPositioningComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameMode/DigumGamePrimaryGameMode.h"
 #include "Input/DigumInputSettingsAsset.h"
 #include "Item/DigumGameItem.h"
 #include "Net/UnrealNetwork.h"
@@ -108,6 +110,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	ActionBarComponent = CreateDefaultSubobject<UDigumGameActionBarComponent>(TEXT("ActionBarComponent"));
 	ActionComponent = CreateDefaultSubobject<UDigumActionComponent>(TEXT("ActionComponent"));
 	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
+	PositioningComponent = CreateDefaultSubobject<UDigumWorldPositioningComponent>(TEXT("PositioningComponent"));
 
 }
 
@@ -189,6 +192,19 @@ void ADigumMinerCharacter::BeginPlay()
 
 	// Pickup Handler
 
+	if(PositioningComponent)
+	{
+		AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
+		if(GameMode)
+		{
+			if(ADigumGamePrimaryGameMode* DigumGameMode = Cast<ADigumGamePrimaryGameMode>(GameMode))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
+				DigumGameMode->RegisterPositioningComponent(PositioningComponent);
+			}
+			
+		}
+	}
 }
 
 void ADigumMinerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -300,6 +316,11 @@ FVector ADigumMinerCharacter::GetForwardDirection() const
 UDigumInventoryComponent* ADigumMinerCharacter::GetInventoryComponent() const
 {
 	return InventoryComponent;
+}
+
+UDigumWorldPositioningComponent* ADigumMinerCharacter::GetPositioningComponent() const
+{
+	return PositioningComponent;
 }
 
 UDigumActionComponent* ADigumMinerCharacter::GetActionComponent() const

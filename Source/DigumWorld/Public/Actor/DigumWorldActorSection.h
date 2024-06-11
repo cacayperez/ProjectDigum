@@ -11,6 +11,7 @@ struct FDigumWorldProceduralSection;
 class UDigumVisibilityComponent;
 class ADigumWorldActorChild;
 class UDigumWorldProceduralAsset;
+class UBoxComponent;
 struct FDigumWorldProceduralCoordinateArray;
 
 UCLASS()
@@ -20,6 +21,9 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
+
+	/*UPROPERTY()
+	TObjectPtr<UBoxComponent> BoxComponent;*/
 	
 	UPROPERTY()
 	TObjectPtr<UDigumVisibilityComponent> VisibilityComponent;
@@ -44,14 +48,19 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY()
 	int32 SectionY;
 
+
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorSection();
 
+	FTimerHandle ReuseTimerHandle;
+
 protected:
 	void OnSetWorldVisibility(bool bValue);
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
 
 public:
 	// Called every frame
@@ -62,8 +71,11 @@ public:
 	void AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset = 0, const int32& HeightOffset = 0);
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
+	void ResetSection();
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
 
-	int32 GetX() const;
-	int32 GetY() const;
+	/*int32 GetX() const;
+	int32 GetY() const;*/
+	// void SetBoxExtent(const FVector& InExtent) const;
+	// bool IsFlaggedForReuse() const { return bFlaggedForReuse; }
 };

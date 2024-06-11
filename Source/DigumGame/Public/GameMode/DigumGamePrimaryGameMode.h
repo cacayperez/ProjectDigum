@@ -6,6 +6,7 @@
 #include "Character/DigumGamePlayerCharacter.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "GameFramework/GameMode.h"
+#include "GameMode/DigumGameMode.h"
 #include "DigumGamePrimaryGameMode.generated.h"
 
 struct FDigumWorldProceduralSectionCoordinate;
@@ -16,7 +17,7 @@ class ADigumWorldDynamicProceduralActor;
  * 
  */
 UCLASS()
-class DIGUMGAME_API ADigumGamePrimaryGameMode : public AGameMode
+class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 {
 	GENERATED_BODY()
 	// We will only use positive seeds
@@ -34,6 +35,9 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public AGameMode
 
 	UPROPERTY()
 	TObjectPtr<ADigumWorldDynamicProceduralActor> ProceduralActor;
+
+	UPROPERTY()
+	bool bInPlayMode = false;
 
 public:
 	ADigumGamePrimaryGameMode();

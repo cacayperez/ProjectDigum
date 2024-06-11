@@ -30,6 +30,7 @@ public:
 		return X == InCoordinate.X && Y == InCoordinate.Y;
 	}
 
+	bool IsValid() const { return X >= 0 && Y >= 0; }
 	FString ToString() const
 	{
 		return FString::Printf(TEXT("X: %d, Y: %d"), X, Y);

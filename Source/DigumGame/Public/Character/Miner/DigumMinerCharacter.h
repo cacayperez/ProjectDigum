@@ -7,6 +7,8 @@
 #include "Character/DigumCharacter.h"
 #include "Interface/IDigumActionComponentInterface.h"
 #include "Interface/IDigumInventoryInterface.h"
+#include "Interface/IDigumPawnInterface.h"
+#include "Interface/IDigumWorldPawnInterface.h"
 #include "DigumMinerCharacter.generated.h"
 
 
@@ -34,7 +36,7 @@ enum EDigumMinerState : uint8
 };
 
 UCLASS()
-class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigumActionComponentInterface, public IIDigumInventoryInterface
+class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigumActionComponentInterface, public IIDigumInventoryInterface, public IIDigumWorldPawnInterface
 {
 	GENERATED_BODY()
 	
@@ -58,7 +60,9 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigu
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UDigumGameEquipComponent> EquipComponent;
-
+	
+	UPROPERTY()
+	TObjectPtr<UDigumWorldPositioningComponent> PositioningComponent;
 	UPROPERTY(Replicated)
 	float FacedDirection = 1.0f;
 
@@ -142,6 +146,7 @@ public:
 	FORCEINLINE FOnToggleCharacterMenu& OnToggleCharacterMenuDelegate() { return OnToggleCharacterMenu; }
 	FORCEINLINE FOnCancelAction& OnCancelActionDelegate() { return OnCancelAction; }
 
+	virtual UDigumWorldPositioningComponent* GetPositioningComponent() const override;
 	virtual UDigumActionComponent* GetActionComponent() const override;
 	virtual UDigumActionComponent* GetActionComponentBP_Implementation() const override;
 	

@@ -41,21 +41,20 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 		{
 			const FVector GridSize = GetGridSize();
 			ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 20, 20, 2, Asset);
+			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 128, 128, 2, Asset);
 			// ProceduralActor->SetProceduralAsset(Asset);
 			ProceduralActor->FinishSpawning(FTransform::Identity);
 			ProceduralActor->ApplyWorldOffsetPosition();
-
-			ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
+			
 		}
-	
-
 }
 
 void ADigumGamePrimaryGameMode::StartPlay()
 {
 	Super::StartPlay();
 
+	// bInPlayMode = true;
+	ProceduralActor->SpawnChunks(FVector::ZeroVector, 4);
 }
 
 void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
@@ -69,11 +68,10 @@ void ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged(const AActor* A
 	const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate,
 	const FDigumWorldProceduralSectionCoordinate& InPreviusCoordinate)
 {
-	if(Actor == nullptr)
+	if(Actor)
 	{
-		return;
+		ProceduralActor->SpawnChunks(InCurrentCoordinate, 4);
 	}
-	ProceduralActor->SpawnChunks(InCurrentCoordinate, 4);
 }
 
 void ADigumGamePrimaryGameMode::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
