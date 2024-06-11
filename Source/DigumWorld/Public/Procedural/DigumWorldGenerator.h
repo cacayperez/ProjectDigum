@@ -307,8 +307,8 @@ private:
 	static float GetPerlinNoiseValue3D(const float InX, const int32 InY, const int32 InZ, const FRandomStream& InRandomStream);
 	
 	static void GenerateUndergroundVeins(FDigumWorldProceduralMap& OutMap);
-	static void GenerateTrees(FDigumWorldProceduralMap& OutMap);
-	static void GenerateFoliage(FDigumWorldProceduralMap& OutMap);
+	// static void GenerateTrees(FDigumWorldProceduralMap& OutMap);
+	// static void GenerateFoliage(FDigumWorldProceduralMap& OutMap);
 	static float GetGroundNoise(const float& X, const FRandomStream& InRandomStream);
 	static float QuadraticBezier(float t, float P0, float P1, float P2);
 	static float CubicBezier(float t, float P0, float P1, float P2, float P3);
@@ -321,13 +321,15 @@ private:
 	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock_Sized>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);
 	static TArray<float> GenerateGroundCurve(const int32& InWidth, const int32& InHeight, const int32& SectionX, const FRandomStream& InRandomStream);
 	static bool IsSurfacePoint(const int32& PositionX, const int32& PositionY, const TArray<float>& GroundCurve, const int32& InWidth, const int32& InSectionX);
+	static bool IsAreaAvailable(TArray<FDigumWorldProceduralBlock_Sized> InPlacedBlocks, const int32& InStartX, const int32& InStartY, const int32& InOriginX, const int32& InOriginY, const int32& InWidth, const int32& InHeight);
 	// static void GenerateSection(const )
 public:
 	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, 
 	                           const int32& NumOfHierarchies,  const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
-	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset);
+	static bool GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks);
+	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
 	
 	static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)

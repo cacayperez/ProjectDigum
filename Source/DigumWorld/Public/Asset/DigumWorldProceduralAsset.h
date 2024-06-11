@@ -30,7 +30,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 Width;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	int32 Height;
 };
 
@@ -49,10 +49,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	TArray<FDigumWorldProceduralBlock_Sized> GrassFoliage;
 
+	UPROPERTY(EditAnywhere)
+	TArray<FDigumWorldProceduralBlock_Sized> TreesFoliage;
+
 	int32 GetTerrainBlockCount() const { return TerrainBlocks.Num(); }
 	int32 GetGrassBlockCount() const { return GrassFoliage.Num(); }
+	int32 GetTreesBlockCount() const { return TreesFoliage.Num(); }
 	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
 	TArray<FDigumWorldProceduralBlock_Sized> GetGrassBlocks() const { return GrassFoliage;}
+	TArray<FDigumWorldProceduralBlock_Sized> GetTreesBlock() const { return TreesFoliage;}
 	
 	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

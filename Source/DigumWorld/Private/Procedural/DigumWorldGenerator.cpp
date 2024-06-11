@@ -158,6 +158,22 @@ bool UDigumWorldGenerator::IsSurfacePoint(const int32& PositionX, const int32& P
 }
 
 
+bool UDigumWorldGenerator::IsAreaAvailable(TArray<FDigumWorldProceduralBlock_Sized> InPlacedBlocks, const int32& InStartX, const int32& InStartY,
+	const int32& InOriginX, const int32& InOriginY, const int32& InWidth, const int32& InHeight)
+{
+
+	for (const auto& Block : InPlacedBlocks)
+	{
+		if (InStartX < InOriginX + Block.Width && InStartX + InWidth > InOriginX &&
+			InStartY < InOriginY + Block.Height && InStartY + InHeight > InOriginY)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+
 bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const int32& InSectionX,
                                            const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset,
                                            FDigumWorldProceduralSection& OutSection)
@@ -284,8 +300,66 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 	return bResult;
 }
 
-bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,
-	const UDigumWorldProceduralAsset* ProceduralAsset)
+
+
+bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,
+	const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks)
+{
+	const TArray<FDigumWorldProceduralBlock_Sized> TreesBlocks = ProceduralAsset->GetTreesBlock();
+	TArray<TPair<float, float>> GrassCumulativeWeights;
+	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(TreesBlocks, GrassCumulativeWeights);
+	if(!bHasGrassCumulativeWeights)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
+		return false;
+	}
+	
+	FRandomStream RandomStream(InSeedName);
+	for(int32 i = 0; i < InSectionArray.Num(); i++)
+	{
+		FDigumWorldProceduralCoordinateArray* Coordinates = InSectionArray[i].GetCoordinateArray();
+		for(int32 j = 0; j < Coordinates->CoordinateCount(); j++)
+		{
+			FDigumWorldProceduralCoordinate* Coordinate = Coordinates->GetCoordinate(j);
+			if(Coordinate != nullptr && Coordinate->IsDirectSurfaceBlock())
+			{
+				const int32 PositionX = Coordinate->GlobalX;
+				const int32 PositionY = Coordinate->GlobalY;
+				const int32 HierarchyIndex = Coordinate->Hierarchy;
+				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, RandomStream);
+				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
+				if(bHasGrassCumulativeWeights)
+				{
+					FDigumWorldProceduralBlock_Sized* SizedBlock = nullptr;
+					const FName TreeBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, TreesBlocks);
+					TreesBlocks.FindByPredicate([TreeBlockID, &SizedBlock](FDigumWorldProceduralBlock_Sized& Block)
+					{
+						if(TreeBlockID == Block.BlockID)
+							SizedBlock = &Block;
+
+						return true;
+					});
+
+					if(SizedBlock)
+					{
+						if(IsAreaAvailable(InPlacedBlocks, i, j, 2, 2,SizedBlock->Width, SizedBlock->Height))
+						{
+							Coordinate->BlockID = TreeBlockID;
+						}
+					}
+					
+					
+				}
+			}
+		}
+	}
+	return true;
+}
+
+
+bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName,
+	TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset,
+	TArray<FDigumWorldProceduralBlock_Sized>& PlaceBlocks)
 {
 	const TArray<FDigumWorldProceduralBlock_Sized> GrassBlocks = ProceduralAsset->GetGrassBlocks();
 	TArray<TPair<float, float>> GrassCumulativeWeights;
@@ -366,14 +440,6 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 void UDigumWorldGenerator::GenerateUndergroundVeins(FDigumWorldProceduralMap& OutMap)
 {
 	
-}
-
-void UDigumWorldGenerator::GenerateTrees(FDigumWorldProceduralMap& OutMap)
-{
-}
-
-void UDigumWorldGenerator::GenerateFoliage(FDigumWorldProceduralMap& OutMap)
-{
 }
 
 float UDigumWorldGenerator::GetGroundNoise(const float& X, const FRandomStream& InRandomStream)

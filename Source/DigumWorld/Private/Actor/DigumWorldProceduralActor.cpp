@@ -237,9 +237,12 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
 		
 	}
-	TArray<FDigumWorldProceduralPlacedBlocks> PlacedSurfaceBlocks;
+	TArray<FDigumWorldProceduralBlock_Sized> PlacedGrassBlocks;
+	TArray<FDigumWorldProceduralBlock_Sized> PlacedTreesBlocks;
+	
 	// Foliage
-	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset);
+	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset, PlacedGrassBlocks);
+	UDigumWorldGenerator::GenerateTrees(Map.Seed, SectionDataArray, ProceduralAsset, PlacedTreesBlocks);
 	OnGenerateMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies, InProceduralAsset);
 }
 
