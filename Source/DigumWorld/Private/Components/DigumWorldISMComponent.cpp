@@ -19,7 +19,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 
 	// important to set this to true to avoid the performance hit of the old RemoveAt() behavior
 	bSupportRemoveAtSwap = true;
-	NumCustomDataFloats = 2;
+	NumCustomDataFloats = 3;
 	//SetCastShadow(true);
 	bCastDynamicShadow = false;
 }
@@ -197,5 +197,10 @@ void UDigumWorldISMComponent::SetSurfacePoint(const int32& InstanceIndex, const 
 	const int32 Value = bValue ? 0 : 1;
 	SetCustomDataValue(InstanceIndex, 1, Value, true);
 
+}
+
+void UDigumWorldISMComponent::SetVariant(const int32& InstanceIndex,const int32& Variant)
+{
+	SetCustomDataValue(InstanceIndex, 2, Variant, true);
 }
 

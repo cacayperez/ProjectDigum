@@ -71,7 +71,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void GenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth, const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset);
-		void SetProceduralAsset(UDigumWorldProceduralAsset* InProceduralAsset) { ProceduralAsset = InProceduralAsset; }
+	void SetProceduralAsset(UDigumWorldProceduralAsset* InProceduralAsset) { ProceduralAsset = InProceduralAsset; }
 	// void Initialize(const int32& InLocalSectionWidth, const int32& InLocalSectionHeight, const FVector& InGridSize);
 	bool GetSection(const int32& InSectionX, const int32& InSectionY, FDigumWorldProceduralSection& OutSection) const;
 

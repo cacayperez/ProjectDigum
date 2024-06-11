@@ -72,6 +72,7 @@ public:
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	void ResetSection();
+	void EnableSection();
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
 
 	/*int32 GetX() const;

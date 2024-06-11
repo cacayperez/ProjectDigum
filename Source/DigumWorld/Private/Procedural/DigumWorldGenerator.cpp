@@ -14,25 +14,22 @@ float UDigumWorldGenerator::NormalizeNoiseValue(const float InNoiseValue)
 	return (InNoiseValue + 1.0f) * 0.5f;
 }
 
-FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> CumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)
+FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>>& CumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)
 {
-	FName ResultID = NAME_None;
-	
 	for(int32 i = 0; i < Blocks.Num(); i++)
 	{
-		const auto& [StartRange, EndRange] = CumulativeWeights[i];
-		if(InNoiseValue >= StartRange && InNoiseValue < EndRange)
+		const TPair<float, float>& Range = CumulativeWeights[i];
+		if (InNoiseValue >= Range.Key && InNoiseValue < Range.Value)
 		{
-			ResultID = Blocks[i].BlockID;
-			break;
+			return Blocks[i].BlockID;
 		}
 	}
 	
-	return ResultID;
+	return NAME_None;
 }
 
 FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue,
-	const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock_Sized>& Blocks)
+	const TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock_Sized>& Blocks)
 {
 	TArray<FDigumWorldProceduralBlock> BlockArray;
 	for(const auto& Block : Blocks)
@@ -43,33 +40,89 @@ FName UDigumWorldGenerator::GetBlockIDFromNoiseValue(const float InNoiseValue,
 	return GetBlockIDFromNoiseValue(InNoiseValue, OutCumulativeWeights, BlockArray);
 }
 
-bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights)
+bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights, const FVector2D& Seed)
 {
-	if(Blocks.IsEmpty()) return false;
-	FName ResultID = NAME_None;
-	int32 BlockCount = Blocks.Num();
-	
+	if (Blocks.IsEmpty()) return false;
+
 	float TotalWeight = 0.0f;
 	float CumulativeSum = 0.0f;
-	for(const auto&	[BlockID, Weight] : Blocks)
+
+	for (const auto& Block : Blocks)
 	{
-		// Weight Total
-		TotalWeight += Weight;
+		// UE_LOG(LogTemp, Warning, TEXT("Cumulative Weight %s"), *Block.BlockID.ToString())
+		TotalWeight += Block.Weight;
 	}
-	
-	for(const auto&	[BlockID, Weight] : Blocks)
+
+	for (int32 Index = 0; Index < Blocks.Num(); ++Index)
 	{
+		const auto& Block = Blocks[Index];
 		float StartRange = CumulativeSum;
-		CumulativeSum += Weight;
+		CumulativeSum += Block.Weight;
 		float EndRange = CumulativeSum;
-		OutCumulativeWeights.Add(TPair<float, float>(StartRange / TotalWeight, EndRange / TotalWeight));
+
+		// Normalize the ranges
+		StartRange /= TotalWeight;
+		EndRange /= TotalWeight;
+
+		// Apply a small Perlin noise-based perturbation to the EndRange
+		float Perturbation = FMath::PerlinNoise2D(FVector2D(Seed.X + Index, Seed.Y)) * 0.001f;
+		EndRange += Perturbation;
+
+		OutCumulativeWeights.Add(TPair<float, float>(StartRange, EndRange));
 	}
 
 	return true;
 }
 
+
+bool UDigumWorldGenerator::GetWeightedBlockID(const float InNoiseValue,
+	const TArray<FDigumWorldProceduralBlock>& Blocks, FName& OutBlockIDName, int32& OutVariant)
+{
+	// UE_LOG(LogTemp, Warning, TEXT("Noise Value: %f"), InNoiseValue);
+	float BlockWeight = 0;
+	for(auto& Block : Blocks)
+	{
+		BlockWeight += Block.Weight;
+	}
+
+	float WeightedBlockNoise = InNoiseValue * BlockWeight;
+	
+	for(const auto& Block : Blocks)
+	{
+		WeightedBlockNoise -= Block.Weight;
+		
+		if(WeightedBlockNoise <= 0)
+		{
+			float VariantWeight = 0;
+
+			for(const auto& Variant : Block.Variants)
+			{
+				VariantWeight += Variant.Weight;
+			}
+
+			float WeightedVariantNoise = InNoiseValue * VariantWeight;
+			int32 VariantIndex = 0;
+			for(int32 i = 0; i < Block.Variants.Num(); i++)
+			{
+				const auto& Variant = Block.Variants[i];
+				WeightedVariantNoise -= Variant.Weight;
+				if(WeightedVariantNoise <= 0)
+				{
+					VariantIndex = i;
+					break;
+				}
+			}
+			OutVariant = VariantIndex;
+			OutBlockIDName = Block.BlockID;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock_Sized>& Blocks,
-	TArray<TPair<float, float>>& OutCumulativeWeights)
+                                                TArray<TPair<float, float>>& OutCumulativeWeights, const FVector2D& Seed)
 {
 	TArray<FDigumWorldProceduralBlock> BlockArray;
 	for(const auto& Block : Blocks)
@@ -77,7 +130,7 @@ bool UDigumWorldGenerator::GetCumulativeWeights(const TArray<FDigumWorldProcedur
 		BlockArray.Add(Block);
 	}
 
-	return GetCumulativeWeights(BlockArray, OutCumulativeWeights);
+	return GetCumulativeWeights(BlockArray, OutCumulativeWeights, Seed);
 }
 
 
@@ -214,6 +267,7 @@ bool UDigumWorldGenerator::GenerateSection(const FDigumWorldMap& InMap, const in
 
 bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection)
 {
+	const FVector2D CumulativeSeed = FVector2D(InSectionX, InSectionY);
 	const int32 Seed = InSeed;
 	const int32 SectionWidth = InRules.SectionWidth;
 	const int32 SectionHeight = InRules.SectionHeight;
@@ -222,7 +276,7 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InSeed, const int32& InS
 	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetTerrainBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
 	
-	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
+	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights, CumulativeSeed);
 	if(!bHasCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
@@ -251,13 +305,17 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 	if(ProceduralAsset == nullptr) return false;
 	
 	const TArray<FDigumWorldProceduralBlock> TerrainBlocks = ProceduralAsset->GetTerrainBlocks();
-	// const TArray<FDigumWorldProceduralBlock> GrassBlocks = ProceduralAsset->GetGrassBlocks();
-	
-	TArray<TPair<float, float>> TerrainCumulativeWeights;
-	const bool bHasTerrainCumulativeWeights = GetCumulativeWeights(TerrainBlocks, TerrainCumulativeWeights);
+	FVector2D CumulativeSeed(InSectionX, InSectionY);
 
-	// TArray<TPair<float, float>> GrassCumulativeWeights;
-	// const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
+	TArray<float> NormalizedWeights;
+	NormalizeWeights(TerrainBlocks, NormalizedWeights);
+
+	TArray<TPair<float, float>> TerrainCumulativeWeights;
+	GetCumulativeWeights(NormalizedWeights, TerrainCumulativeWeights);
+	
+	/*TArray<TPair<float, float>> TerrainCumulativeWeights;
+	const bool bHasTerrainCumulativeWeights = GetCumulativeWeights(TerrainBlocks, TerrainCumulativeWeights, CumulativeSeed);*/
+
 	bool bResult = false;
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
 	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
@@ -279,16 +337,13 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 				
 				if(PositionY < GroundCurve[x])
 				{
-					// Above ground, surface
+					// Above ground, surfaces
 					
 				}
 				else // Below ground
 				{
-					if(bHasTerrainCumulativeWeights)
-					{
-						const FName TerrainBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, TerrainCumulativeWeights, TerrainBlocks);
-						Coordinate.BlockID = TerrainBlockID;
-					}
+					const FName TerrainBlockID = GetWeightedBlockID(NormalizedNoise, TerrainCumulativeWeights, TerrainBlocks);
+					Coordinate.AddBlockID(TerrainBlockID);
 				}
 
 				OutSection.AddCoordinate(Coordinate);
@@ -303,20 +358,20 @@ bool UDigumWorldGenerator::GenerateSection(const int32& InMapWidth, const int32&
 
 
 bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,
-	const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks)
+	const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks)
 {
-	const TArray<FDigumWorldProceduralBlock_Sized> TreesBlocks = ProceduralAsset->GetTreesBlock();
-	TArray<TPair<float, float>> GrassCumulativeWeights;
-	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(TreesBlocks, GrassCumulativeWeights);
-	if(!bHasGrassCumulativeWeights)
-	{
-		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
-		return false;
-	}
+	const TArray<FDigumWorldProceduralBlock> TreesBlocks = ProceduralAsset->GetTreesBlock();
 	
+	TArray<float> NormalizedWeights;
+	NormalizeWeights(TreesBlocks, NormalizedWeights);
+
+	TArray<TPair<float, float>> CumulativeWeights;
+	GetCumulativeWeights(NormalizedWeights, CumulativeWeights);
 	FRandomStream RandomStream(InSeedName);
 	for(int32 i = 0; i < InSectionArray.Num(); i++)
 	{
+		FDigumWorldProceduralSection& Section = InSectionArray[i];
+	
 		FDigumWorldProceduralCoordinateArray* Coordinates = InSectionArray[i].GetCoordinateArray();
 		for(int32 j = 0; j < Coordinates->CoordinateCount(); j++)
 		{
@@ -328,28 +383,11 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, TArray<FDigumW
 				const int32 HierarchyIndex = Coordinate->Hierarchy;
 				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, RandomStream);
 				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
-				if(bHasGrassCumulativeWeights)
-				{
-					FDigumWorldProceduralBlock_Sized* SizedBlock = nullptr;
-					const FName TreeBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, TreesBlocks);
-					TreesBlocks.FindByPredicate([TreeBlockID, &SizedBlock](FDigumWorldProceduralBlock_Sized& Block)
-					{
-						if(TreeBlockID == Block.BlockID)
-							SizedBlock = &Block;
-
-						return true;
-					});
-
-					if(SizedBlock)
-					{
-						if(IsAreaAvailable(InPlacedBlocks, i, j, 2, 2,SizedBlock->Width, SizedBlock->Height))
-						{
-							Coordinate->BlockID = TreeBlockID;
-						}
-					}
-					
-					
-				}
+				FName TreeBlockID = NAME_None;
+				int32 TreeVariant = 0;
+				GetWeightedBlockID(NormalizedNoise, TreesBlocks, TreeBlockID, TreeVariant);
+				
+				Coordinate->AddBlockID(TreeBlockID, TreeVariant);
 			}
 		}
 	}
@@ -359,20 +397,24 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, TArray<FDigumW
 
 bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName,
 	TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset,
-	TArray<FDigumWorldProceduralBlock_Sized>& PlaceBlocks)
+	TArray<FDigumWorldProceduralBlock>& PlaceBlocks)
 {
-	const TArray<FDigumWorldProceduralBlock_Sized> GrassBlocks = ProceduralAsset->GetGrassBlocks();
-	TArray<TPair<float, float>> GrassCumulativeWeights;
+	const TArray<FDigumWorldProceduralBlock> GrassBlocks = ProceduralAsset->GetGrassBlocks();
+	/*TArray<TPair<float, float>> GrassCumulativeWeights;
 	const bool bHasGrassCumulativeWeights = GetCumulativeWeights(GrassBlocks, GrassCumulativeWeights);
 	if(!bHasGrassCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));
 		return false;
-	}
+	}*/
 	
 	FRandomStream RandomStream(InSeedName);
 	for(int32 i = 0; i < InSectionArray.Num(); i++)
 	{
+		FDigumWorldProceduralSection& Section = InSectionArray[i];
+		FVector2D CumulativeSeed = FVector2D(Section.GetX(), Section.GetY());
+		TArray<TPair<float, float>> CumulativeWeights;
+		const bool bHasCumulativeWeights = GetCumulativeWeights(GrassBlocks, CumulativeWeights, CumulativeSeed);
 		FDigumWorldProceduralCoordinateArray* Coordinates = InSectionArray[i].GetCoordinateArray();
 		for(int32 j = 0; j < Coordinates->CoordinateCount(); j++)
 		{
@@ -384,11 +426,13 @@ bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName,
 				const int32 HierarchyIndex = Coordinate->Hierarchy;
 				const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, RandomStream);
 				const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
-				if(bHasGrassCumulativeWeights)
-				{
-					const FName GrassBlockID = GetBlockIDFromNoiseValue(NormalizedNoise, GrassCumulativeWeights, GrassBlocks);
-					Coordinate->BlockID = GrassBlockID;
-				}
+				
+				FName OutBlockID = NAME_None;
+				int32 OutVariant = 0;
+				
+				GetWeightedBlockID(NormalizedNoise, GrassBlocks, OutBlockID, OutVariant);
+				UE_LOG(LogTemp, Warning, TEXT("ID: %s Variant Value: %i"),*OutBlockID.ToString(), OutVariant);
+				Coordinate->AddBlockID(OutBlockID, OutVariant);
 			}
 		}
 	}
@@ -404,8 +448,8 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 	const UDigumWorldProceduralAsset* ProceduralAsset = InRules.GetProceduralAsset();
 	const TArray<FDigumWorldProceduralBlock> Blocks = ProceduralAsset->GetTerrainBlocks();
 	TArray<TPair<float, float>> CumulativeWeights;
-	
-	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights);
+	// TODO change 0 cumulative seed
+	const bool bHasCumulativeWeights = GetCumulativeWeights(Blocks, CumulativeWeights, FVector2D(0,0));
 	if(!bHasCumulativeWeights)
 	{
 		UE_LOG(LogTemp, Error, TEXT("No Cumulative Weights"));

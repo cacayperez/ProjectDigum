@@ -13,8 +13,9 @@ UDigumWorldPositioningComponent::UDigumWorldPositioningComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	
 
-	// SetComponentTickInterval(0.2f);
+	SetComponentTickInterval(0.5f);
 	// ...
 }
 
@@ -33,8 +34,6 @@ void UDigumWorldPositioningComponent::CheckCoordinateChange()
 		PreviousCoordinate = CurrentCoordinate;
 		CurrentCoordinate = NewCoordinate;
 		OnSectionCoordinateChanged.Broadcast(GetOwner(), CurrentCoordinate, PreviousCoordinate);
-		UE_LOG(LogTemp, Warning, TEXT("Current %s"), *CurrentCoordinate.ToString());
-		UE_LOG(LogTemp, Warning, TEXT("Previous %s"), *PreviousCoordinate.ToString());
 	}
 }
 

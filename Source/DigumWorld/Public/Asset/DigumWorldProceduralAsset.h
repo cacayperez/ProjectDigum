@@ -9,6 +9,19 @@
 class UDigumWorldSwatchAsset;
 
 USTRUCT()
+struct FDigumWorldProceduralBlockVariant
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+	FName VariantName;
+
+	UPROPERTY(EditAnywhere)
+	float Weight = 1.0f;
+
+};
+
+USTRUCT()
 struct FDigumWorldProceduralBlock
 {
 	GENERATED_BODY()
@@ -18,6 +31,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float Weight = 1.0f;
+
+	UPROPERTY(EditAnywhere)
+	TArray<FDigumWorldProceduralBlockVariant> Variants;
+
+	TArray<FDigumWorldProceduralBlockVariant> GetVariants() const { return Variants; }
 
 };
 
@@ -47,17 +65,17 @@ public:
 	TArray<FDigumWorldProceduralBlock> TerrainBlocks;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FDigumWorldProceduralBlock_Sized> GrassFoliage;
+	TArray<FDigumWorldProceduralBlock> GrassFoliage;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FDigumWorldProceduralBlock_Sized> TreesFoliage;
+	TArray<FDigumWorldProceduralBlock> TreesFoliage;
 
 	int32 GetTerrainBlockCount() const { return TerrainBlocks.Num(); }
 	int32 GetGrassBlockCount() const { return GrassFoliage.Num(); }
 	int32 GetTreesBlockCount() const { return TreesFoliage.Num(); }
 	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
-	TArray<FDigumWorldProceduralBlock_Sized> GetGrassBlocks() const { return GrassFoliage;}
-	TArray<FDigumWorldProceduralBlock_Sized> GetTreesBlock() const { return TreesFoliage;}
+	TArray<FDigumWorldProceduralBlock> GetGrassBlocks() const { return GrassFoliage;}
+	TArray<FDigumWorldProceduralBlock> GetTreesBlock() const { return TreesFoliage;}
 	
 	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

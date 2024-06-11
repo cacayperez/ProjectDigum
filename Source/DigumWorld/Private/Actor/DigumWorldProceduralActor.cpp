@@ -90,7 +90,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				if (y > 0)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					if (TopCoordinate && !TopCoordinate->BlockIDs.IsEmpty())
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
@@ -98,7 +98,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				else if (InTopSection)
 				{
 					FDigumWorldProceduralCoordinate* TopCoordinate = InTopSection->GetCoordinateArray()->GetCoordinate(x, InLocalSectionHeight - 1, HierarchyIndex);
-					if (TopCoordinate && TopCoordinate->BlockID != NAME_None)
+					if (TopCoordinate && !TopCoordinate->BlockIDs.IsEmpty())
 					{
 						Coordinate->bHasTopNeighbor = true;
 					}
@@ -109,7 +109,7 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				if (y < InLocalSectionHeight - 1)
 				{
 					FDigumWorldProceduralCoordinate* BottomCoordinate = InSection->GetCoordinateArray()->GetCoordinate(x, y + 1, HierarchyIndex);
-					if (BottomCoordinate && BottomCoordinate->BlockID != NAME_None)
+					if (BottomCoordinate && !BottomCoordinate->BlockIDs.IsEmpty())
 					{
 						Coordinate->bHasBottomNeighbor = true;
 					}
@@ -117,13 +117,13 @@ void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSecti
 				else if (InBottomSection)
 				{
 					FDigumWorldProceduralCoordinate* BottomCoordinate = InBottomSection->GetCoordinateArray()->GetCoordinate(x, 0, HierarchyIndex);
-					if (BottomCoordinate && BottomCoordinate->BlockID != NAME_None)
+					if (BottomCoordinate && !BottomCoordinate->BlockIDs.IsEmpty())
 					{
 						Coordinate->bHasBottomNeighbor = true;
 					}
 				}
 
-				if(!Coordinate->bHasTopNeighbor && Coordinate->bHasBottomNeighbor && Coordinate->BlockID == NAME_None)
+				if(!Coordinate->bHasTopNeighbor && Coordinate->bHasBottomNeighbor && Coordinate->BlockIDs.IsEmpty())
 				{
 					MarkForFoliage(Coordinate);
 				}
@@ -237,12 +237,13 @@ void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector 
 		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
 		
 	}
-	TArray<FDigumWorldProceduralBlock_Sized> PlacedGrassBlocks;
-	TArray<FDigumWorldProceduralBlock_Sized> PlacedTreesBlocks;
+	
+	TArray<FDigumWorldProceduralBlock> PlacedGrassBlocks;
+	TArray<FDigumWorldProceduralBlock> PlacedTreesBlocks;
 	
 	// Foliage
 	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset, PlacedGrassBlocks);
-	UDigumWorldGenerator::GenerateTrees(Map.Seed, SectionDataArray, ProceduralAsset, PlacedTreesBlocks);
+	// UDigumWorldGenerator::GenerateTrees(Map.Seed, SectionDataArray, ProceduralAsset, PlacedTreesBlocks);
 	OnGenerateMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies, InProceduralAsset);
 }
 

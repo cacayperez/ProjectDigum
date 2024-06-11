@@ -12,6 +12,21 @@
 struct FDigumWorldMap;
 class UDigumWorldProceduralAsset;
 
+USTRUCT ()
+struct FDigumWorldBlockID
+{
+	GENERATED_BODY()
+public:
+	FDigumWorldBlockID() : BlockID(NAME_None) { }
+	FDigumWorldBlockID(const FName& InBlockID, const int32 InVariant) { BlockID = InBlockID; Variant = InVariant;}
+
+	UPROPERTY(VisibleAnywhere)
+	FName BlockID;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 Variant = 0;
+};
+
 USTRUCT()
 struct FDigumWorldProceduralSectionCoordinate
 {
@@ -69,6 +84,9 @@ public:
 	FName BlockID = NAME_None;
 
 	UPROPERTY()
+	TArray<FDigumWorldBlockID> BlockIDs;
+
+	UPROPERTY()
 	bool bIsDirectSurfaceBlock = false;
 
 	UPROPERTY()
@@ -87,6 +105,34 @@ public:
 
 	UPROPERTY()
 	bool bHasBottomNeighbor = false;
+
+	int32 GetVariant(const FName& BlockIDName) const
+	{
+		for(const auto& Item : BlockIDs)
+		{
+			if(Item.BlockID == BlockIDName)
+			{
+				return Item.Variant;
+			}
+		}
+		return 0;
+	}
+
+	
+	bool AddBlockID(const FName& InBlockIDName, int32 InVariant = 0)
+	{
+		for(const auto& Item : BlockIDs)
+		{
+			if(Item.BlockID == InBlockIDName)
+			{
+				return false;
+			}
+		}
+		
+		BlockIDs.Add(FDigumWorldBlockID(InBlockIDName, InVariant));
+		return true;
+	}
+
 };
 
 USTRUCT()
@@ -141,7 +187,12 @@ public:
 	{
 		for(FDigumWorldProceduralCoordinate& Coordinate : Coordinates)
 		{
-			OutMappedCoordinates.FindOrAdd(Coordinate.BlockID).AddCoordinate(Coordinate);
+			for(auto& BlockID : Coordinate.BlockIDs)
+			{
+				const FName IDName = BlockID.BlockID;
+				OutMappedCoordinates.FindOrAdd(IDName).AddCoordinate(Coordinate);
+			}
+			// 
 		}
 	}
 
@@ -294,6 +345,8 @@ public:
 	int32 OriginY;
 };
 
+
+
 /**
  * 
  */
@@ -315,44 +368,95 @@ private:
 	static TArray<float> SmoothTerrain(const TArray<float>& GroundCurve, int32 SmoothingPasses);
 	
 	static float NormalizeNoiseValue(const float InNoiseValue);
-	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks);
-	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>> OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock_Sized>& Blocks);
-	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);
-	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock_Sized>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights);
+	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks);
+	static FName GetBlockIDFromNoiseValue(const float InNoiseValue, const TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock_Sized>& Blocks);
+	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights, const FVector2D& Seed);
+	static bool GetWeightedBlockID(const float InNoiseValue,const TArray<FDigumWorldProceduralBlock>& Blocks, FName& OutBlockIDName, int32& OutVariant);
+	static bool GetCumulativeWeights(const TArray<FDigumWorldProceduralBlock_Sized>& Blocks, TArray<TPair<float, float>>& OutCumulativeWeights, const FVector2D& Seed);
 	static TArray<float> GenerateGroundCurve(const int32& InWidth, const int32& InHeight, const int32& SectionX, const FRandomStream& InRandomStream);
 	static bool IsSurfacePoint(const int32& PositionX, const int32& PositionY, const TArray<float>& GroundCurve, const int32& InWidth, const int32& InSectionX);
 	static bool IsAreaAvailable(TArray<FDigumWorldProceduralBlock_Sized> InPlacedBlocks, const int32& InStartX, const int32& InStartY, const int32& InOriginX, const int32& InOriginY, const int32& InWidth, const int32& InHeight);
+	static FName GetWeightedBlockID(const float InNoiseValue, const TArray<TPair<float, float>>& CumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)
+	{
+		for (int32 i = 0; i < CumulativeWeights.Num(); ++i)
+		{
+			const TPair<float, float>& Range = CumulativeWeights[i];
+			if (InNoiseValue >= Range.Key && InNoiseValue < Range.Value)
+			{
+				return Blocks[i].BlockID;
+			}
+		}
+
+		return NAME_None; // Default case if no match found
+	}
+
+	static void GetCumulativeWeights(const TArray<float>& NormalizedWeights, TArray<TPair<float, float>>& OutCumulativeWeights)
+	{
+		float CumulativeSum = 0.0f;
+
+		for (const auto& Weight : NormalizedWeights)
+		{
+			float StartRange = CumulativeSum;
+			CumulativeSum += Weight;
+			float EndRange = CumulativeSum;
+
+			OutCumulativeWeights.Add(TPair<float, float>(StartRange, EndRange));
+		}
+	}
+	static void NormalizeWeights(const TArray<FDigumWorldProceduralBlock>& Blocks, TArray<float>& NormalizedWeights)
+	{
+		float TotalWeight = 0.0f;
+		for (const auto& Block : Blocks)
+		{
+			TotalWeight += Block.Weight;
+		}
+
+		for (const auto& Block : Blocks)
+		{
+			NormalizedWeights.Add(Block.Weight / TotalWeight);
+		}
+	}
 	// static void GenerateSection(const )
 public:
 	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, 
 	                           const int32& NumOfHierarchies,  const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
-	static bool GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks);
-	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock_Sized>& InPlacedBlocks);
+	static bool GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
+	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
 	
-	static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks)
+	/*static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks, const FVector2D& Seed)
 	{
-		if(Blocks.IsEmpty()) return false;
-		
+		if (Blocks.IsEmpty()) return false;
+
 		float TotalWeight = 0.0f;
 		float CumulativeSum = 0.0f;
-		for(const auto&	[BlockID, Weight] : Blocks)
+
+		for (const auto& Block : Blocks)
 		{
-			// Weight Total
-			TotalWeight += Weight;
+			TotalWeight += Block.Weight;
 		}
-	
-		for(const auto&	[BlockID, Weight] : Blocks)
+
+		for (const auto& Block : Blocks)
 		{
 			float StartRange = CumulativeSum;
-			CumulativeSum += Weight;
+			CumulativeSum += Block.Weight;
 			float EndRange = CumulativeSum;
-			OutCumulativeWeights.Add(TPair<float, float>(StartRange / TotalWeight, EndRange / TotalWeight));
+
+			// Normalize the ranges
+			StartRange /= TotalWeight;
+			EndRange /= TotalWeight;
+
+			// Apply a small Perlin noise-based perturbation if weights are equal to avoid always defaulting to the first item
+			float Perturbation = FMath::PerlinNoise2D(FVector2D(StartRange, Seed.Y)) * 0.001f;
+			StartRange += Perturbation;
+			EndRange += Perturbation;
+
+			OutCumulativeWeights.Add(TPair<float, float>(StartRange, EndRange));
 		}
 
 		return true;
-	}
+	}*/
 };
 	

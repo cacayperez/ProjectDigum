@@ -85,7 +85,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	}
 
 	Array->MakeMappedCoordinates(Blocks);
-
+	EnableSection();
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
 	{
 		FName BlockID = It->Key;
@@ -93,38 +93,41 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 		
 		UDigumWorldSwatchAsset* SwatchAsset = UDigumWorldFunctionHelpers::GetSwatchAsset(BlockID, TEXT("Primary"));
 		
-		/*if(WorldChildActors.Contains(BlockID) && SwatchAsset)
+			
+		if(SwatchAsset)
 		{
 			ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(BlockID);
 			if(ChildActor)
 			{
+				// TODO How to set variants?
 				ChildActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
-				return;
-			}
-		}*/
-		
-		if(SwatchAsset)
-		{
-			if(TSubclassOf<ADigumWorldActorChild> ChildClass = SwatchAsset->GetChildActorClass())
-			{
-				// FTransform ChildTransform(FRotator::ZeroRotator, GetActorLocation());
-				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
-				if(NewActor)
-				{
-					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
-					// NewActor->SetFolderPath(GetFolderPath());
-					NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
-					NewActor->FinishSpawning(FTransform::Identity);
-					
-					WorldChildActors.FindOrAdd(BlockID, NewActor);
-/*#if WITH_EDITOR
-					NewActor->SetIsHiddenEdLayer(true);
-#endif*/
-				}
+				
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Child Actor Class not found for BlockID: %s"), *BlockID.ToString());
+				if(TSubclassOf<ADigumWorldActorChild> ChildClass = SwatchAsset->GetChildActorClass())
+				{
+					// FTransform ChildTransform(FRotator::ZeroRotator, GetActorLocation());
+					ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
+					if(NewActor)
+					{
+						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+						// NewActor->SetFolderPath(GetFolderPath());
+						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
+						NewActor->FinishSpawning(FTransform::Identity);
+					
+						WorldChildActors.FindOrAdd(BlockID, NewActor);
+						/*#if WITH_EDITOR
+											NewActor->SetIsHiddenEdLayer(true);
+						#endif*/
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Child Actor Class not found for BlockID: %s"), *BlockID.ToString());
+					}
+			
+			
+				}
 			}
 		}
 		else
@@ -163,7 +166,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	
 	if(ChildActor)
 	{
-		ChildActor->AddBlock(CoordinateArray);
+		ChildActor->AddBlock(InBlockID,CoordinateArray);
 	}
 	else
 	{
@@ -177,7 +180,6 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 				if(NewActor)
 				{
 					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					// NewActor->SetFolderPath(GetFolderPath());
 					NewActor->InitializeSwatchAsset(InBlockID, Asset, CoordinateArray);
 					NewActor->FinishSpawning(FTransform::Identity);
 					NewActor->SetActorLocation(GetActorLocation() + HierarchyOffset);
@@ -198,11 +200,11 @@ void ADigumWorldActorSection::DestroySection()
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
-			ChildActor->Destroy();
+			ChildActor->ResetChildActor();
 		}
 	}
 
-	Destroy();
+	// Destroy();
 }
 
 void ADigumWorldActorSection::ResetSection()
@@ -212,10 +214,25 @@ void ADigumWorldActorSection::ResetSection()
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
-			ChildActor->Destroy();
+			ChildActor->ResetChildActor();
 		}
 	}
 	
+}
+
+void ADigumWorldActorSection::EnableSection()
+{
+	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	{
+		if(ADigumWorldActorChild* ChildActor = It->Value)
+		{
+			ChildActor->SetActorEnableCollision(true);
+			ChildActor->SetActorHiddenInGame(false);
+		}
+	}
+	
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
 }
 
 /*

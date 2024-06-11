@@ -147,11 +147,21 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
-
-		AddBlock(Coordinates);
+		
+		AddBlock(InBlockID,Coordinates);
+		
 	}
 	
 }
+
+void ADigumWorldActorChild::ResetChildActor()
+{
+	// SetActorEnableCollision(false);
+	SetActorHiddenInGame(true);
+	Health.Empty();
+	InstancedMeshComponent->ClearInstances();
+}
+
 
 void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
 {
@@ -166,7 +176,7 @@ void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
 	}
 }
 
-void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoordinates)
+void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProceduralCoordinateArray& InCoordinates)
 {
 	/*if(!SwatchAsset)
 		UE_LOG(LogTemp, Warning, TEXT("AddBlock %i,"), InCoordinates.CoordinateCount());*/
@@ -180,10 +190,13 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 	for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
 	{
 		FDigumWorldProceduralCoordinate* Coordinate = InCoordinates.GetCoordinate(i);
+		const int32 Variant = Coordinate->GetVariant(InBlockID);
+		UE_LOG(LogTemp, Warning, TEXT("AddBlock %s %i %i %i"), *InBlockID.ToString(), Coordinate->X, Coordinate->Y, Variant);
 		// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
 		const float X = Coordinate->X * GridX;
 		const float Y = Coordinate->Hierarchy * GridY;
 		const float Z = -(Coordinate->Y * GridZ);
+		// const int32 Variant = Coordinate->Variant;
 		FVector Location = FVector(X, Y, Z);
 		FTransform Transform = FTransform(FRotator::ZeroRotator, Location + PositionOffset, FVector(1.0f));
 			
@@ -191,7 +204,7 @@ void ADigumWorldActorChild::AddBlock(FDigumWorldProceduralCoordinateArray& InCoo
 		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
 		// UE_LOG(LogTemp, Warning, TEXT("HasTopNeighbor %s, %i, %i, %s"), Coordinate->bHasTopNeighbor ? TEXT("True") : TEXT("False") , Coordinate->X, Coordinate->Y, *Coordinate->BlockID.ToString());
 		InstancedMeshComponent->SetSurfacePoint(InstanceIndex, Coordinate->bHasTopNeighbor);
-
+		InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
 		Health.Add(1.0f);
 	}
 }
