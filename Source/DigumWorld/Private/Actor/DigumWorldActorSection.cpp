@@ -60,14 +60,29 @@ void ADigumWorldActorSection::BeginPlay()
 	}*/
 }
 
+void ADigumWorldActorSection::CleanupSection()
+{
+	OnSectionReadyForCleanup.Broadcast(this);
+}
+
 // Called every frame
 void ADigumWorldActorSection::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
+}
+
+void ADigumWorldActorSection::Reinitialize()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Reinitialize Section"));
+	GetWorld()->GetTimerManager().ClearTimer(CleanupTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 }
 
 void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
+	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 	SectionData = InSection;
 	SectionX = InSection.GetX();
 	SectionY = InSection.GetY();

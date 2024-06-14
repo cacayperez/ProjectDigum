@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DigumWorldProceduralActor.h"
+#include "Procedural/DigumWorldGenerator.h"
 #include "Procedural/DigumWorldMap.h"
 #include "DigumWorldDynamicProceduralActor.generated.h"
 
@@ -30,6 +31,9 @@ class DIGUMWORLD_API ADigumWorldDynamicProceduralActor : public ADigumWorldProce
 	UPROPERTY()
 	int32 PoolSize = 10;
 	
+	UPROPERTY()
+	FDigumWorldProceduralSectionCoordinate ActiveCoordinate;
+	
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldDynamicProceduralActor();
@@ -49,6 +53,7 @@ public:
 	// virtual void CreateSection(const float& InSectionWidth, const float& InSectionHeight, const FVector& InWorldOffset, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* InProceduralAsset) override;
 	virtual void AddBlock(const FName& InBlockID, const FVector& InBlockLocation) override;
 	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRect(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize, const int32& XMin, const int32& XMax, const int32& YMin, const int32& YMax) const;
+	void SetActiveLocation(const FVector& InLocation);
 	void SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize);
 	void SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InCoordinate, const int32& HalfSize);
 	void PurgeChunks();
@@ -62,5 +67,7 @@ public:
 	void InitializePool(int32 InPoolSize, const FName& InFolderPath = NAME_None);
 	bool SpawnSectionFromPool(const FVector& InLocation, const FRotator& InRotation, FDigumWorldProceduralSection& InSection);
 	void DespawnActorFromPool(ADigumWorldActorSection* InSection);
+
+	void RemoveSection(ADigumWorldActorSection* InSection);
 
 };

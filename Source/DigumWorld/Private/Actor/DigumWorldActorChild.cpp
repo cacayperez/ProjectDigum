@@ -21,6 +21,7 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	PrimaryActorTick.bCanEverTick = true;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
+	SetActorTickEnabled(false);
 
 }
 
@@ -107,33 +108,13 @@ void ADigumWorldActorChild::AsyncAddBlock()
 				InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
 				Health.Add(1.0f);
 			}
-
-			// TArray<int32> Indices = InstancedMeshComponent->AddInstances(GeneratedTransform, true);
-
-	
+			SetActorTickEnabled(false);
+			
 		}
+
+		ArrayResultPtr.Reset();
 	}
-	
-	/*TSharedPtr<FDigumWorldAsyncBlockResult> ResultPtr;
-	if(!AsyncBlockResultQueue.IsEmpty() && AsyncBlockResultQueue.Dequeue(ResultPtr))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AsyncAddBlock %s"), *ResultPtr->BlockID.ToString());
-		if(ResultPtr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Added %s"), *ResultPtr->BlockID.ToString());
-			const FTransform Transform = ResultPtr->Transform;
-			const int32 HierarchyIndex = ResultPtr->Coordinate.Hierarchy;
-			const int32 Variant = ResultPtr->Variant;
-			const bool bHasTopNeighbor = ResultPtr->Coordinate.bHasTopNeighbor;
-			const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
-			InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
-			InstancedMeshComponent->SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
-			InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
-			Health.Add(1.0f);
-			UE_LOG(LogTemp, Warning, TEXT("Async Added %s"), *ResultPtr->BlockID.ToString());
-		}
-		ResultPtr.Reset();
-	}*/
+
 }
 
 void ADigumWorldActorChild::Tick(float DeltaSeconds)
@@ -243,7 +224,8 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 	const float GridY = GridSize.Y;
 	const float GridZ = GridSize.Z;
 
-	const FVector PositionOffset = SwatchAsset->GetPositionOffset(); 
+	const FVector PositionOffset = SwatchAsset->GetPositionOffset();
+	SetActorTickEnabled(true);
 
 	AsyncTask(ENamedThreads::AnyThread, [this, InBlockID, PositionOffset, InCoordinates]
 	{

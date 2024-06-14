@@ -48,6 +48,8 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY()
 	int32 SectionY;
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FDigumWorldSectionReadyForCleanup, ADigumWorldActorSection*);
+
 
 public:
 	// Sets default values for this actor's properties
@@ -56,16 +58,26 @@ public:
 	FTimerHandle ReuseTimerHandle;
 
 protected:
+	UPROPERTY()
+	float CleanupTimer = 5.0f;
+
+	UPROPERTY()
+	FTimerHandle CleanupTimerHandle;
+	
 	void OnSetWorldVisibility(bool bValue);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
+	UFUNCTION()
+	void CleanupSection();
+
+	FDigumWorldSectionReadyForCleanup OnSectionReadyForCleanup;
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
+	void Reinitialize();
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset = 0, const int32& HeightOffset = 0);
@@ -74,7 +86,7 @@ public:
 	void ResetSection();
 	void EnableSection();
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
-
+	FDigumWorldSectionReadyForCleanup& GetDigumWorldSectionReadyForCleanupDelegate() { return OnSectionReadyForCleanup; }
 	/*int32 GetX() const;
 	int32 GetY() const;*/
 	// void SetBoxExtent(const FVector& InExtent) const;

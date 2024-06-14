@@ -13,7 +13,8 @@
 ADigumWorldDynamicProceduralActor::ADigumWorldDynamicProceduralActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
+	SetActorTickInterval(0.2f);
 	// bReplicates = true;
 	
 }
@@ -80,6 +81,13 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor
 	}
 	
 	return SectionCoordinates;
+}
+
+void ADigumWorldDynamicProceduralActor::SetActiveLocation(
+	const FVector& InLocation)
+{
+	ActiveCoordinate = GetSectionCoordinate(InLocation);
+	
 }
 
 void ADigumWorldDynamicProceduralActor::SpawnChunks(const FVector& InWorldLocation, const int32& HalfSize)
@@ -249,10 +257,21 @@ void ADigumWorldDynamicProceduralActor::DespawnActorFromPool(ADigumWorldActorSec
 	// InSection->DestroySection();
 }
 
+void ADigumWorldDynamicProceduralActor::RemoveSection(ADigumWorldActorSection* InSection)
+{
+	if(SectionActors.Contains(InSection))
+	{
+		InSection->DestroySection();
+		SectionActors.Remove(InSection);
+	}
+}
+
 // Called every frame
 void ADigumWorldDynamicProceduralActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	SpawnChunks(ActiveCoordinate, 1);
+
 }
 
 void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSection InSection)
@@ -263,7 +282,11 @@ void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSecti
 	const int32 SY = InSection.GetY();
 
 	if(SX < 0 || SY < 0) return;
-	if(GetSectionActor(SX, SY)) return;
+	if(ADigumWorldActorSection* Section = GetSectionActor(SX, SY))
+	{
+		Section->Reinitialize();
+		return;
+	}
 	
 	const float X = (SX * (UnitSectionSize.X));
 	const float Z = -(SY * (UnitSectionSize.Y));
@@ -277,6 +300,7 @@ void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSecti
 		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		NewSection->SetFolderPath(GetFolderPath());
 		NewSection->InitializeSection(UnitSectionSize, InSection, ProceduralAsset);
+		NewSection->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldDynamicProceduralActor::RemoveSection);
 		/*NewSection->SetActorHiddenInGame(true);
 		NewSection->SetActorEnableCollision(false);*/
 		NewSection->FinishSpawning(FTransform::Identity);
@@ -285,7 +309,6 @@ void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSecti
 		/*
 		Section = NewSection;*/
 	}
-
 }
 
 void ADigumWorldDynamicProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
@@ -300,7 +323,7 @@ void ADigumWorldDynamicProceduralActor::AddBlock(const FName& InBlockID, const F
 	UE_LOG(LogTemp, Warning, TEXT("Section Coordinate %s"), *SectionCoordinate.ToString());
 	// Loop through all sections and add block
 	// TODO: Optimize this, currently looping through all sections...
-	ActiveSectionPool.FindByPredicate([&](ADigumWorldActorSection*& SectionActor)
+	SectionActors.FindByPredicate([&](ADigumWorldActorSection*& SectionActor)
 	{
 		if(SectionActor == nullptr) return false;
 		const FDigumWorldProceduralSection SectionData = SectionActor->GetSectionData();
