@@ -6,6 +6,7 @@
 #include "Asset/DigumAssetManager.h"
 #include "Asset/DigumWorldAsset.h"
 #include "Asset/DigumWorldSwatchAsset.h"
+#include "Async/DigumWorldAsyncBlock.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Components/DigumWorldISMComponent.h"
 #include "Settings/DigumWorldSettings.h"
@@ -17,7 +18,7 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 	
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
 
@@ -82,6 +83,63 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 void ADigumWorldActorChild::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
 {
 	
+}
+
+void ADigumWorldActorChild::AsyncAddBlock()
+{
+	TSharedPtr<FDigumWorldAsyncBlockResultArray> ArrayResultPtr;
+
+	if(!AsyncBlockResultArrayQueue.IsEmpty() && AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr))
+	{
+		if(ArrayResultPtr)
+		{
+			TArray<FTransform> GeneratedTransform;
+			for(auto& Result : ArrayResultPtr->ResultArray)
+			{
+				const FTransform Transform = Result.Transform;
+				const int32 HierarchyIndex = Result.Coordinate.Hierarchy;
+				const int32 Variant = Result.Variant;
+				const bool bHasTopNeighbor = Result.Coordinate.bHasTopNeighbor;
+				GeneratedTransform.Add(Transform);
+				const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+				InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
+				InstancedMeshComponent->SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
+				InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
+				Health.Add(1.0f);
+			}
+
+			// TArray<int32> Indices = InstancedMeshComponent->AddInstances(GeneratedTransform, true);
+
+	
+		}
+	}
+	
+	/*TSharedPtr<FDigumWorldAsyncBlockResult> ResultPtr;
+	if(!AsyncBlockResultQueue.IsEmpty() && AsyncBlockResultQueue.Dequeue(ResultPtr))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AsyncAddBlock %s"), *ResultPtr->BlockID.ToString());
+		if(ResultPtr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Added %s"), *ResultPtr->BlockID.ToString());
+			const FTransform Transform = ResultPtr->Transform;
+			const int32 HierarchyIndex = ResultPtr->Coordinate.Hierarchy;
+			const int32 Variant = ResultPtr->Variant;
+			const bool bHasTopNeighbor = ResultPtr->Coordinate.bHasTopNeighbor;
+			const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+			InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
+			InstancedMeshComponent->SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
+			InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
+			Health.Add(1.0f);
+			UE_LOG(LogTemp, Warning, TEXT("Async Added %s"), *ResultPtr->BlockID.ToString());
+		}
+		ResultPtr.Reset();
+	}*/
+}
+
+void ADigumWorldActorChild::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	AsyncAddBlock();
 }
 
 void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
@@ -156,7 +214,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 
 void ADigumWorldActorChild::ResetChildActor()
 {
-	// SetActorEnableCollision(false);
+	SetActorEnableCollision(false);
 	SetActorHiddenInGame(true);
 	Health.Empty();
 	InstancedMeshComponent->ClearInstances();
@@ -186,8 +244,12 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 	const float GridZ = GridSize.Z;
 
 	const FVector PositionOffset = SwatchAsset->GetPositionOffset(); 
-		
-	for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
+
+	AsyncTask(ENamedThreads::AnyThread, [this, InBlockID, PositionOffset, InCoordinates]
+	{
+		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates))->StartBackgroundTask();
+	});
+	/*for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
 	{
 		FDigumWorldProceduralCoordinate* Coordinate = InCoordinates.GetCoordinate(i);
 		const int32 Variant = Coordinate->GetVariant(InBlockID);
@@ -202,11 +264,11 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 			
 		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
-		// UE_LOG(LogTemp, Warning, TEXT("HasTopNeighbor %s, %i, %i, %s"), Coordinate->bHasTopNeighbor ? TEXT("True") : TEXT("False") , Coordinate->X, Coordinate->Y, *Coordinate->BlockID.ToString());
+		
 		InstancedMeshComponent->SetSurfacePoint(InstanceIndex, Coordinate->bHasTopNeighbor);
 		InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
 		Health.Add(1.0f);
-	}
+	}*/
 }
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)

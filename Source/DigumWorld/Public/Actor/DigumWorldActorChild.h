@@ -15,6 +15,38 @@ struct FDigumWorldAssetCoordinateArray;
 class UDigumWorldSwatchAsset;
 class UDigumWorldISMComponent;
 
+USTRUCT()
+struct FDigumWorldAsyncBlockResult
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	FName BlockID;
+
+	UPROPERTY()
+	int32 Variant;
+	
+	UPROPERTY()
+	FTransform Transform;
+
+	UPROPERTY()
+	FDigumWorldProceduralCoordinate Coordinate;
+};
+
+USTRUCT()
+struct FDigumWorldAsyncBlockResultArray
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	TArray<FDigumWorldAsyncBlockResult> ResultArray;
+
+	void Add(const FDigumWorldAsyncBlockResult& InResult)
+	{
+		ResultArray.Add(InResult);
+	} 
+};
+
 UCLASS()
 class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumWorldInteractionInterface
 {
@@ -51,8 +83,14 @@ protected:
 
 	bool GetInstancedHitIndex(const FVector HitLocation, const float& InMaxRange, int32& OutIndex);
 	virtual void OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation);
+
+	void AsyncAddBlock();
 	
 public:
+	virtual void Tick(float DeltaSeconds) override;
+	TQueue<TSharedPtr<FDigumWorldAsyncBlockResult>> AsyncBlockResultQueue;
+	TQueue<TSharedPtr<FDigumWorldAsyncBlockResultArray>> AsyncBlockResultArrayQueue;
+	
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates);
 	

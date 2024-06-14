@@ -200,11 +200,13 @@ void ADigumWorldActorSection::DestroySection()
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
 		{
-			ChildActor->ResetChildActor();
+			ChildActor->Destroy();
 		}
 	}
 
-	// Destroy();
+	UE_LOG(LogTemp, Warning, TEXT("Destroy Section"));
+
+	Destroy();
 }
 
 void ADigumWorldActorSection::ResetSection()

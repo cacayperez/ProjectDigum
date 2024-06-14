@@ -41,7 +41,7 @@ protected:
 	void InitializeDefaultSections();
 	virtual void OnGenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth, const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset) override;
 public:
-	virtual ADigumWorldActorSection* GetSectionActor(const int32& InX, const int32& InY) const override;
+	// virtual ADigumWorldActorSection* GetSectionActor(const int32& InX, const int32& InY) const override;
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
