@@ -20,10 +20,11 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 	// important to set this to true to avoid the performance hit of the old RemoveAt() behavior
 	bSupportRemoveAtSwap = true;
 	NumCustomDataFloats = 3;
-	//SetCastShadow(true);
+	SetCastShadow(false);
 	bCastDynamicShadow = false;
 }
 
+/*
 bool UDigumWorldISMComponent::RemoveInstanceInternal_Custom(int32 InstanceIndex, bool InstanceAlreadyRemoved)
 {
 #if WITH_EDITOR
@@ -150,7 +151,7 @@ bool UDigumWorldISMComponent::RemoveInstanceInternal_Custom(int32 InstanceIndex,
 	DeletionState = EInstanceDeletionReason::NotDeleting;
 #endif
 	return true;
-}
+}*/
 
 // Called when the game starts
 void UDigumWorldISMComponent::BeginPlay()
@@ -167,10 +168,10 @@ void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	// ...
 }
 
-bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
+/*bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
 {
 	return RemoveInstanceInternal_Custom(InstanceIndex, false);
-}
+}*/
 
 void UDigumWorldISMComponent::SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex)
 {

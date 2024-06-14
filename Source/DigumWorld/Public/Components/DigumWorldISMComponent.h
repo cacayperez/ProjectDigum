@@ -18,7 +18,7 @@ public:
 	UDigumWorldISMComponent();
 	
 private:
-	bool RemoveInstanceInternal_Custom(int32 InstanceIndex, bool InstanceAlreadyRemoved);
+	/*bool RemoveInstanceInternal_Custom(int32 InstanceIndex, bool InstanceAlreadyRemoved);*/
 	
 protected:
 	// Called when the game starts
@@ -27,7 +27,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
-	virtual bool RemoveInstance(int32 InstanceIndex) override;
+	/*virtual bool RemoveInstance(int32 InstanceIndex) override;*/
 	void SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex);
 	void SetSurfacePoint(const int32& InstanceIndex, const bool& bValue = false);
 	void SetVariant(const int32& InstanceIndex, const int32& Variant);

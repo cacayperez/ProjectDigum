@@ -62,7 +62,8 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 		if(InstancedMeshComponent->GetInstanceTransform(i, InstanceTransform))
 		{
 			
-			float DistanceSquared = (ActorLocation + InstanceTransform.GetLocation() - HitLocation).SizeSquared();
+			float DistanceSquared = (InstanceTransform.GetLocation() - HitLocation).SizeSquared();
+			
 			if(DistanceSquared < MinDistanceSquared)
 			{
 				MinDistanceSquared = DistanceSquared;
@@ -73,12 +74,12 @@ bool ADigumWorldActorChild::GetInstancedHitIndex(const FVector HitLocation, cons
 	
 	OutIndex =  ClosestInstanceIndex;
 
-	if(ClosestInstanceIndex != -1)
+	if(ClosestInstanceIndex <= 0)
 	{
-		return true;
+		return false;
 	}
 	
-	return false;
+	return true;
 }
 
 void ADigumWorldActorChild::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
@@ -271,15 +272,18 @@ void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLoc
 
 void ADigumWorldActorChild::DestroyInstance(const FVector& InLocation, const float& InMaxRange)
 {
-	float Distance = FVector::Distance(InLocation, GetActorLocation());
-	if(Distance > InMaxRange) return;
+	/*float Distance = FVector::Distance(InLocation, GetActorLocation());
+	if(Distance > InMaxRange) return;*/
 	int32 OutIndex;
+	UE_LOG(LogTemp, Warning, TEXT("Hitttt"));
 	if(GetInstancedHitIndex(InLocation, InMaxRange, OutIndex))
 	{
 		if(OutIndex >= 0)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Helloo DestroyInstance"));
 			InstancedMeshComponent->RemoveInstance(OutIndex);
-			Health.RemoveAt(OutIndex);
+			// InstancedMeshComponent->RemoveInsta
+			OnDestroyChildInstance(OutIndex, InLocation);
 		}
 	}
 }
@@ -291,7 +295,7 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 	FTransform Transform;
 	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DestroyInstance %s"), *Transform.GetLocation().ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Helloo DestroyInstance %s"), *Transform.GetLocation().ToString());
 		InstancedMeshComponent->RemoveInstance(InIndex);
 		OnDestroyChildInstance(InIndex, Transform.GetLocation());
 		

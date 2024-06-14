@@ -67,6 +67,7 @@ void ADigumGameItemActor_Weapon_Melee::OnTraceCollision()
 					FDigumWorldRequestParams Params = FDigumWorldRequestParams();
 					Params.Request = EDigumWorld_Request::DigumWorldRequest_Destroy;
 					Params.Instigator = GetItemInstigator();
+					Params.HitLocation = ImpactLocation;
 					Params.HitInstanceIndex = Index;
 					Params.Magnitude = GetScaledDamage();
 					IIDigumWorldInteractionInterface::Execute_OnInteract(HitActor, GetItemInstigator(), Params);

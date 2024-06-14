@@ -24,6 +24,9 @@ public:
 
 	UPROPERTY()
 	int32 HitInstanceIndex;
+
+	UPROPERTY()
+	FVector HitLocation;
 	
 	UPROPERTY()
 	AActor* Instigator;

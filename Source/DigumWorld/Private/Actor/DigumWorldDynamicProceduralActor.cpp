@@ -40,7 +40,7 @@ void ADigumWorldDynamicProceduralActor::OnGenerateMap(const FName InSeed, const 
 	Super::OnGenerateMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis,
 	                     InSectionCount_VerticalAxis, InNumberOfHierarchies, InProceduralAsset);
 
-	// InitializePool(10, GetFolderPath());
+	InitializePool(10, GetFolderPath());
 }
 
 /*ADigumWorldActorSection* ADigumWorldDynamicProceduralActor::GetSectionActor(const int32& InX, const int32& InY) const
@@ -119,7 +119,6 @@ void ADigumWorldDynamicProceduralActor::SpawnChunks(const FDigumWorldProceduralS
 		}
 	}
 
-	// PurgeChunks();
 }
 
 void ADigumWorldDynamicProceduralActor::PurgeChunks()
@@ -186,6 +185,7 @@ void ADigumWorldDynamicProceduralActor::InitializePool(int32 InPoolSize, const F
 		if(ADigumWorldActorSection* Section = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity))
 		{
 			Section->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+			Section->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldDynamicProceduralActor::RemoveSection);
 			Section->SetFolderPath(InFolderPath);
 			Section->SetActorHiddenInGame(true);
 			// Section->SetActorEnableCollision(false);
@@ -205,14 +205,14 @@ bool ADigumWorldDynamicProceduralActor::SpawnSectionFromPool(const FVector& InLo
 	{
 		Section = InactiveSectionPool.Pop();
 	}
-	/*else if(ActiveSectionPool.Num() > 0)
+	else if(ActiveSectionPool.Num() > 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Reusing Active Section Pool"));
 		Section = ActiveSectionPool[0];
 		/*Section->ResetSection();
-		ActiveSectionPool.RemoveAt(0);#2##1#
-	}*/
-	else
+		ActiveSectionPool.RemoveAt(0);*/
+	}
+	/*else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Creating New Section"));
 		if(ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity))
@@ -226,7 +226,7 @@ bool ADigumWorldDynamicProceduralActor::SpawnSectionFromPool(const FVector& InLo
 			Section = NewSection;
 		}
 		
-	}
+	}*/
 
 
 	if(Section)
@@ -236,7 +236,7 @@ bool ADigumWorldDynamicProceduralActor::SpawnSectionFromPool(const FVector& InLo
 		Section->SetActorLocation(InLocation);
 		Section->SetActorHiddenInGame(false);
 		// Section->SetActorEnableCollision(true);
-		ActiveSectionPool.Add(Section);
+		SectionActors.Add(Section);
 
 		UE_LOG(LogTemp, Warning, TEXT("Spawned Section"));
 		return true;
@@ -261,8 +261,13 @@ void ADigumWorldDynamicProceduralActor::RemoveSection(ADigumWorldActorSection* I
 {
 	if(SectionActors.Contains(InSection))
 	{
-		InSection->DestroySection();
+		// if()
+		InSection->SetActorHiddenInGame(true);
+		InSection->ResetSection();
+		
+		// InSection->DestroySection();
 		SectionActors.Remove(InSection);
+		InactiveSectionPool.Add(InSection);
 	}
 }
 
@@ -284,6 +289,7 @@ void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSecti
 	if(SX < 0 || SY < 0) return;
 	if(ADigumWorldActorSection* Section = GetSectionActor(SX, SY))
 	{
+		// Important for resetting cleanup timer
 		Section->Reinitialize();
 		return;
 	}
@@ -294,21 +300,21 @@ void ADigumWorldDynamicProceduralActor::CreateSection(FDigumWorldProceduralSecti
 	UE_LOG(LogTemp, Warning, TEXT("UnitSize %s"), *UnitSectionSize.ToString());
 	const FVector SectionLocation = FVector(X, 0, Z) + WorldOffset;
 
-	// SpawnSectionFromPool(SectionLocation, FRotator::ZeroRotator, InSection);
-	if(ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity))
+	SpawnSectionFromPool(SectionLocation, FRotator::ZeroRotator, InSection);
+	/*if(ADigumWorldActorSection* NewSection = GetWorld()->SpawnActorDeferred<ADigumWorldActorSection>(ADigumWorldActorSection::StaticClass(), FTransform::Identity))
 	{
 		NewSection->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		NewSection->SetFolderPath(GetFolderPath());
 		NewSection->InitializeSection(UnitSectionSize, InSection, ProceduralAsset);
 		NewSection->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldDynamicProceduralActor::RemoveSection);
 		/*NewSection->SetActorHiddenInGame(true);
-		NewSection->SetActorEnableCollision(false);*/
+		NewSection->SetActorEnableCollision(false);#1#
 		NewSection->FinishSpawning(FTransform::Identity);
 		NewSection->SetActorLocation(SectionLocation);
 		SectionActors.Add(NewSection);
 		/*
-		Section = NewSection;*/
-	}
+		Section = NewSection;#1#
+	}*/
 }
 
 void ADigumWorldDynamicProceduralActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
