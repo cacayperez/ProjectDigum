@@ -4,7 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Procedural/DigumWorldGenerator.h"
 #include "DigumWorldMap.generated.h"
+
+
 
 USTRUCT()
 struct FDigumWorldMap
@@ -62,6 +65,9 @@ public:
 	UPROPERTY()
 	FVector GridSize = FVector::ZeroVector;
 
+	UPROPERTY()
+	TArray<FDigumWorldProceduralSection> SectionDataArray;
+
 	FVector2D GetSectionUnitSize() const
 	{
 		return FVector2D(SectionWidth * GridSize.X, SectionHeight * GridSize.Z);
@@ -91,5 +97,10 @@ public:
 	int32 GetLocalSectionHeight() const { return SectionHeight; }
 	
 	bool IsInitialized() const { return bIsInitialized; }
+	void AddSection(const FDigumWorldProceduralSection& InSection)
+	{
+		SectionDataArray.Add(InSection);
+	}
 };
+
 

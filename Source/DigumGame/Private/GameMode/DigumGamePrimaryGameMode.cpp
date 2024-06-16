@@ -10,7 +10,9 @@
 #include "GameState/DigumGamePrimaryGameState.h"
 #include "Interface/IDigumWorldPawnInterface.h"
 #include "Procedural/DigumWorldGenerator.h"
+#include "Procedural/DigumWorldMap.h"
 #include "Procedural/DigumWorldMapHandler.h"
+#include "Procedural/DigumWorldMapLoader.h"
 #include "Settings/DigumWorldSettings.h"
 
 ADigumGamePrimaryGameMode::ADigumGamePrimaryGameMode()
@@ -36,16 +38,25 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 
-		UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
-		if(Asset)
-		{
-			const FVector GridSize = GetGridSize();
-			ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-			ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,12, 12, 64, 64, 2, Asset);
-			ProceduralActor->FinishSpawning(FTransform::Identity);
-			ProceduralActor->ApplyWorldOffsetPosition();
-			
-		}
+	UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
+	
+	/*Loader = NewObject<UDigumWorldMapAsyncLoader>(this);
+	if(Loader && Asset)
+	{
+		Loader->CreateMap(Asset, TEXT("Hello World"), GetGridSize(), 12, 12, 1, 1, 3);
+	
+	}*/
+
+	if(Asset)
+	{
+		const FVector GridSize = GetGridSize();
+		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
+		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 64, 64, 2, Asset);
+		ProceduralActor->FinishSpawning(FTransform::Identity);
+		ProceduralActor->ApplyWorldOffsetPosition();
+		ProceduralActor->SpawnChunks(FVector::Zero(), 4);
+		
+	}
 }
 
 void ADigumGamePrimaryGameMode::StartPlay()
@@ -120,6 +131,5 @@ void ADigumGamePrimaryGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	
 }
 

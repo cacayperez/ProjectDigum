@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/DigumGamePlayerCharacter.h"
 #include "Components/DigumWorldPositioningComponent.h"
+#include "Procedural/DigumWorldMap.h"
 #include "GameFramework/GameMode.h"
 #include "GameMode/DigumGameMode.h"
 #include "DigumGamePrimaryGameMode.generated.h"
@@ -13,6 +14,17 @@ struct FDigumWorldProceduralSectionCoordinate;
 class UDigumWorldMapHandler;
 class UDigumWorldProceduralAsset;
 class ADigumWorldDynamicProceduralActor;
+class UDigumWorldMapAsyncLoader;
+UENUM()
+enum DigumGamePhase : uint8
+{
+	GamePhase_None,
+	GamePhase_Initializing,
+	GamePhase_Playing,
+	GamePhase_Ending,
+	GamePhase_Paused
+};
+
 /**
  * 
  */
@@ -24,12 +36,7 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 	// Throw error if is on left side of number plane
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Digum Game State", meta=(AllowPrivateAccess="true"))
 	int32 WorldSeed = -1;
-
-	/*
-	UPROPERTY()
-	TObjectPtr<UDigumWorldMapHandler> WorldMapHandler;
-	*/
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Digum Game State", meta=(AllowPrivateAccess="true"))
 	TSoftObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
 
@@ -53,9 +60,6 @@ protected:
 	int32 GetWorldSeed() const;
 	void SetWorldSeed(const int32& InValue);
 	FVector GetGridSize() const;
-	/*FVector2D GetSectionSize() const;
-	FVector GetWorldOffset() const*/;
-	
 	
 	virtual void Tick(float DeltaSeconds) override;
 	// void HandleCharacterCoordinateChanged(const AActor* InActor, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate);

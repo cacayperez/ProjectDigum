@@ -52,15 +52,10 @@ public:
 	int32 Height;
 };
 
-
-/**
- * 
- */
-UCLASS()
-class DIGUMWORLD_API UDigumWorldProceduralAsset : public UPrimaryDataAsset
+USTRUCT()
+struct FDigumWorldProceduralDefinition
 {
 	GENERATED_BODY()
-public:
 	UPROPERTY(EditAnywhere)
 	TArray<FDigumWorldProceduralBlock> TerrainBlocks;
 
@@ -76,6 +71,18 @@ public:
 	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
 	TArray<FDigumWorldProceduralBlock> GetGrassBlocks() const { return GrassFoliage;}
 	TArray<FDigumWorldProceduralBlock> GetTreesBlock() const { return TreesFoliage;}
+};
+
+/**
+ * 
+ */
+UCLASS()
+class DIGUMWORLD_API UDigumWorldProceduralAsset : public UPrimaryDataAsset
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(EditAnywhere)
+	FDigumWorldProceduralDefinition ProceduralDefinition;
 	
 	// UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID);
 };

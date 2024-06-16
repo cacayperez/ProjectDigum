@@ -28,15 +28,6 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 void ADigumWorldActorChild::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
-	// Initialize Health
-	/*int32 InstanceCount = InstancedMeshComponent->GetInstanceCount();
-	for(int32 i = 0; i < InstanceCount; i++)
-	{
-		Health.Add(1.0f);
-	}*/
-	
 }
 
 void ADigumWorldActorChild::OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
@@ -282,7 +273,6 @@ void ADigumWorldActorChild::DestroyInstance(const FVector& InLocation, const flo
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Helloo DestroyInstance"));
 			InstancedMeshComponent->RemoveInstance(OutIndex);
-			// InstancedMeshComponent->RemoveInsta
 			OnDestroyChildInstance(OutIndex, InLocation);
 		}
 	}

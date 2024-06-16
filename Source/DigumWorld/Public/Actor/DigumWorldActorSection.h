@@ -59,7 +59,7 @@ public:
 
 protected:
 	UPROPERTY()
-	float CleanupTimer = 5.0f;
+	float CleanupTimer = 10.0f;
 
 	UPROPERTY()
 	FTimerHandle CleanupTimerHandle;

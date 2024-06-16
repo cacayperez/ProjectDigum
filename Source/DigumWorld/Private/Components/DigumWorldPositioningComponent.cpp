@@ -15,7 +15,7 @@ UDigumWorldPositioningComponent::UDigumWorldPositioningComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	
 
-	SetComponentTickInterval(0.5f);
+	SetComponentTickInterval(0.1f);
 	// ...
 }
 

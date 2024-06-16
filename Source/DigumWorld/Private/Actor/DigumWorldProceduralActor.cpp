@@ -136,16 +136,11 @@ void ADigumWorldProceduralActor::MarkForFoliage(FDigumWorldProceduralCoordinate*
 {
 	if(InCoordinate)
 	{
-		 UE_LOG(LogTemp, Log, TEXT("Coordinate (%d, %d, %d) marked for foliage"), InCoordinate->X, InCoordinate->Y, InCoordinate->Hierarchy);
+		
 		InCoordinate->bIsDirectSurfaceBlock = true;
 	}
 }
 
-void ADigumWorldProceduralActor::OnGenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth,
-	const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
-	const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset)
-{
-}
 
 /*FDigumWorldProceduralSection& ADigumWorldProceduralActor::GetSectionData(const int32& InX, const int32& InY)
 {
@@ -173,86 +168,12 @@ void ADigumWorldProceduralActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADigumWorldProceduralActor::GenerateMap(const FName InSeed,  const FVector InGridSize, const int32 InSectionWidth,
-	const int32 InSectionHeight, int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
-	const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset)
-{
-	Map = FDigumWorldMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies);
-	LocalSectionWidth = InSectionWidth;
-	LocalSectionHeight = InSectionHeight;
-	GridSize = InGridSize;
-	UnitSectionSize = Map.GetSectionUnitSize();
-	WorldOffset = Map.GetWorldOffset();
-	ProceduralAsset = InProceduralAsset;
-	const int32 SectionCount = Map.SectionCount_HorizontalAxis * Map.SectionCount_VerticalAxis;
-
-	for(int32 i = 0; i < SectionCount; i++)
-	{
-		const int32 x = i % Map.SectionCount_HorizontalAxis;
-		const int32 y = i / Map.SectionCount_HorizontalAxis;
-
-		FDigumWorldProceduralSection OutSection;
-		
-		if(GetSection(x, y, OutSection))
-		{
-			SectionDataArray.Add(OutSection);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to generate section at %d, %d"), x, y);
-		}
-	}
-
-	for(int32 i = 0; i < SectionDataArray.Num(); i++)
-	{
-		const int32 x = i % Map.SectionCount_HorizontalAxis;
-		const int32 y = i / Map.SectionCount_HorizontalAxis;
-
-		FDigumWorldProceduralSection* Section = &SectionDataArray[i];
-		FDigumWorldProceduralSection* LeftSection = nullptr;
-		FDigumWorldProceduralSection* RightSection = nullptr;
-		FDigumWorldProceduralSection* TopSection = nullptr;
-		FDigumWorldProceduralSection* BottomSection = nullptr;
-
-		if(x > 0)
-		{
-			LeftSection = &SectionDataArray[i - 1];
-		}
-
-		if(x < Map.SectionCount_HorizontalAxis - 1)
-		{
-			RightSection = &SectionDataArray[i + 1];
-		}
-
-		if(y > 0)
-		{
-			TopSection = &SectionDataArray[i - Map.SectionCount_HorizontalAxis];
-		}
-
-		if(y < Map.SectionCount_VerticalAxis - 1)
-		{
-			BottomSection = &SectionDataArray[i + Map.SectionCount_HorizontalAxis];
-		}
-		
-		CheckAndSetNeighbors(Section, Map.NumberOfHierarchies, LeftSection, RightSection, TopSection, BottomSection, LocalSectionWidth, LocalSectionHeight);
-		
-	}
-	
-	TArray<FDigumWorldProceduralBlock> PlacedGrassBlocks;
-	TArray<FDigumWorldProceduralBlock> PlacedTreesBlocks;
-	
-	// Foliage
-	UDigumWorldGenerator::GenerateFoliage(Map.Seed, SectionDataArray, ProceduralAsset, PlacedGrassBlocks);
-	// UDigumWorldGenerator::GenerateTrees(Map.Seed, SectionDataArray, ProceduralAsset, PlacedTreesBlocks);
-	OnGenerateMap(InSeed, InGridSize, InSectionWidth, InSectionHeight, InSectionCount_HorizontalAxis, InSectionCount_VerticalAxis, InNumberOfHierarchies, InProceduralAsset);
-}
-
 bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32& InSectionY,
 	FDigumWorldProceduralSection& OutSection) const
 {
 	if(ProceduralAsset == nullptr) return false;
 
-	return UDigumWorldGenerator::GenerateSection(Map, InSectionX, InSectionY, ProceduralAsset, OutSection);
+	return UDigumWorldGenerator::GenerateSection(Map, InSectionX, InSectionY, ProceduralAsset->ProceduralDefinition, OutSection);
 }
 
 

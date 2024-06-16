@@ -143,12 +143,6 @@ public:
 	UPROPERTY()
 	TArray<FDigumWorldProceduralCoordinate> Coordinates;
 
-	/*void AddCoordinate(const int32& InX, const int32& InY)
-	{
-		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InX, InY);
-		Coordinates.Add(Coordinate);
-	}*/
-
 	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{
 		FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate(InLocalX, InLocalY, InGlobalX, InGlobalY);
@@ -418,14 +412,23 @@ private:
 	}
 	// static void GenerateSection(const )
 public:
-	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
-	static bool GenerateSection(const int32& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
+	static bool GenerateSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralDefinition& ProceduralDefinition, FDigumWorldProceduralSection& OutSection);
+	static bool GenerateSection(const FName& InSeed, const int32& InSectionX, const int32& InSectionY,
+                        const int32& InSectionWidth, const int32& InSectionHeight,
+                        const int32& InSectionCount_HorizontalAxis, const int32& InSectionCount_VerticalAxis,
+                        const int32& InNumberOfHierarchies,
+                        const FDigumWorldProceduralDefinition& InProceduralDefinition,
+                        FDigumWorldProceduralSection& OutSection);
 	static bool GenerateSection(const int32& InMapWidth, const int32& InMapHeight, const int32& InSectionX, const int32& InSectionY, const int32& InWidth, const int32& InHeight, const FRandomStream& InRandomStream, 
-	                           const int32& NumOfHierarchies,  const UDigumWorldProceduralAsset* ProceduralAsset, FDigumWorldProceduralSection& OutSection);
-	static bool GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
-	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const UDigumWorldProceduralAsset* ProceduralAsset, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
+							   const int32& NumOfHierarchies,  const FDigumWorldProceduralDefinition& ProceduralDefinition, FDigumWorldProceduralSection& OutSection);
+	static bool GenerateSection(const FName& InSeed, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralSection& OutSection);
+
+	static bool GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const FDigumWorldProceduralDefinition& ProceduralDefinition, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
+	static bool GenerateFoliage(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray, const FDigumWorldProceduralDefinition& ProceduralDefinition, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks);
 	static void GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap);
-	
+	static void MarkForFoliage(FDigumWorldProceduralCoordinate* InCoordinate);
+	static void CheckAndSetNeighbors(FDigumWorldProceduralSection* InSection, const int32& NumOfHierarchies, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection, int32 InLocalSectionWidth, int32 InLocalSectionHeight);
+
 	/*static bool GetCumulativeWeights(TArray<TPair<float, float>>& OutCumulativeWeights, const TArray<FDigumWorldProceduralBlock>& Blocks, const FVector2D& Seed)
 	{
 		if (Blocks.IsEmpty()) return false;

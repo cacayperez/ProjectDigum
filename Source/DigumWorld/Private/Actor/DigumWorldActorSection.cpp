@@ -91,7 +91,6 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 
 	TMap<FName, FDigumWorldProceduralCoordinateArray> Blocks;
 	FDigumWorldProceduralCoordinateArray* Array = InSection.GetCoordinateArray();
-	UE_LOG(LogTemp, Warning, TEXT("Initialize Section, %s"), *InSection.GetSectionCoordinate().ToString());
 	
 	if(!Array)
 	{
@@ -108,7 +107,6 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 		
 		UDigumWorldSwatchAsset* SwatchAsset = UDigumWorldFunctionHelpers::GetSwatchAsset(BlockID, TEXT("Primary"));
 		
-			
 		if(SwatchAsset)
 		{
 			ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(BlockID);
@@ -168,14 +166,10 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	const int32 X = InLocation.X / GridSize.X;
 	const int32 Y = -(InLocation.Z / GridSize.Z);
 	const int32 Hierarchy = -InLocation.Y / GridSize.Y;
-
-	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d"), *InBlockID.ToString(), X, Y);
 	
 	Coordinate.X = FMath::Abs(X % WidthOffset);
 	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
 	Coordinate.Hierarchy = Hierarchy;
-	
-	UE_LOG(LogTemp, Warning, TEXT("Add Block %s %d %d %d"), *InBlockID.ToString(), Coordinate.X, Coordinate.Y, Coordinate.Hierarchy);
 
 	CoordinateArray.AddCoordinate(Coordinate);
 	
@@ -203,7 +197,6 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 				}
 			}
 		}
-
 	}
 	
 	// create block if it doesnt exist
@@ -227,6 +220,7 @@ void ADigumWorldActorSection::DestroySection()
 void ADigumWorldActorSection::ResetSection()
 {
 	SectionData = FDigumWorldProceduralSection(-1,-1);
+	
 	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
 	{
 		if(ADigumWorldActorChild* ChildActor = It->Value)
