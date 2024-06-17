@@ -78,7 +78,7 @@ void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 
 		UE_LOG(LogTemp, Warning, TEXT("Map or Definition is null"));
 	}
 	
-	AsyncTask(ENamedThreads:: AnyThread, [this, Map, Definition, InX, InY]()
+	AsyncTask(ENamedThreads:: AnyBackgroundThreadNormalTask, [this, Map, Definition, InX, InY]()
 	{
 		(new FAutoDeleteAsyncTask<FDigumWorldAsyncSection>(this, Map, Definition, InX, InY))->StartBackgroundTask();
 	});

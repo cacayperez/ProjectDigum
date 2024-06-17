@@ -19,7 +19,7 @@ bool UDigumWorldMapHandler::GetSection(const int32& InSectionX, const int32& InS
 {
 	if(ProceduralAsset == nullptr) return false;
 
-	return UDigumWorldGenerator::GenerateSection(Map, InSectionX, InSectionY, ProceduralAsset->ProceduralDefinition, OutSection);
+	return UDigumWorldGenerator::GenerateTerrainSection(Map, InSectionX, InSectionY, ProceduralAsset->ProceduralDefinition, OutSection);
 }
 
 UDigumWorldProceduralAsset* UDigumWorldMapHandler::GetProceduralAsset() const

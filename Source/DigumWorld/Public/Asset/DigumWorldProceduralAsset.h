@@ -33,23 +33,19 @@ public:
 	float Weight = 1.0f;
 
 	UPROPERTY(EditAnywhere)
+	bool bIsBlocking = true;
+	
+	UPROPERTY(EditAnywhere)
+	int32 Width = 0;
+
+	UPROPERTY(EditAnywhere)
+	int32 Height = 0;
+	
+	UPROPERTY(EditAnywhere)
 	TArray<FDigumWorldProceduralBlockVariant> Variants;
 
 	TArray<FDigumWorldProceduralBlockVariant> GetVariants() const { return Variants; }
 
-};
-
-USTRUCT()
-struct FDigumWorldProceduralBlock_Sized : public FDigumWorldProceduralBlock
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere)
-	int32 Width;
-
-	UPROPERTY(EditAnywhere)
-	int32 Height;
 };
 
 USTRUCT()
@@ -71,6 +67,17 @@ struct FDigumWorldProceduralDefinition
 	TArray<FDigumWorldProceduralBlock> GetTerrainBlocks() const { return TerrainBlocks;}
 	TArray<FDigumWorldProceduralBlock> GetGrassBlocks() const { return GrassFoliage;}
 	TArray<FDigumWorldProceduralBlock> GetTreesBlock() const { return TreesFoliage;}
+	
+	static const FDigumWorldProceduralBlock* GetBlockInfo(const FName& InBlockID, const TArray<FDigumWorldProceduralBlock>& InBlocks)
+	{
+		for(int32 i = 0; i < InBlocks.Num(); i++)
+		{
+			const FDigumWorldProceduralBlock* Block = &InBlocks[i];
+			if(Block->BlockID == InBlockID) return Block;
+		}
+
+		return nullptr;
+	}
 };
 
 /**

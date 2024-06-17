@@ -173,7 +173,7 @@ bool ADigumWorldProceduralActor::GetSection(const int32& InSectionX, const int32
 {
 	if(ProceduralAsset == nullptr) return false;
 
-	return UDigumWorldGenerator::GenerateSection(Map, InSectionX, InSectionY, ProceduralAsset->ProceduralDefinition, OutSection);
+	return UDigumWorldGenerator::GenerateTerrainSection(Map, InSectionX, InSectionY, ProceduralAsset->ProceduralDefinition, OutSection);
 }
 
 

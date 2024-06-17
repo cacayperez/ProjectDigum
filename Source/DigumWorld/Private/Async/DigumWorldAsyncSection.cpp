@@ -29,7 +29,7 @@ void FDigumWorldAsyncSection::DoWork()
 	if(Component && Map)
 	{
 		FDigumWorldProceduralSection OutSection;
-		if(UDigumWorldGenerator::GenerateSection(*Map, X, Y,  *ProceduralDefinition, OutSection))
+		if(UDigumWorldGenerator::CreateSection(*Map, X, Y,  *ProceduralDefinition, OutSection))
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Working: Section Generated %i, %i"), X, Y);
 			UE_LOG(LogTemp, Warning, TEXT("Working: Result Generated %i, %i"), OutSection.GetX(), OutSection.GetY());
