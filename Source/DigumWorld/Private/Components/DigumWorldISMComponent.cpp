@@ -183,7 +183,7 @@ void UDigumWorldISMComponent::SetTint(const int32& InstanceIndex, const int32& I
 		// but for now, we will just use a single level of hierarchy, due to performance reasons
 		if(InHierarchyIndex != 0)
 		{
-			Brightness = 0.2f;
+			Brightness = 1.0f - (FMath::Abs(InHierarchyIndex) * 0.4f);
 		}
 		else
 		{

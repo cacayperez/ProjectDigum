@@ -12,7 +12,8 @@
 struct FDigumWorldMap;
 class UDigumWorldProceduralAsset;
 
-USTRUCT ()
+
+USTRUCT()
 struct FDigumWorldBlockID
 {
 	GENERATED_BODY()
@@ -28,7 +29,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	bool bIsBlocking = true;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EDigumWorldSurfaceAttachType> AttachmentType = EDigumWorldSurfaceAttachType::DigumWorldAttach_Default;
 };
+
 
 USTRUCT()
 struct FDigumWorldProceduralSectionCoordinate
@@ -134,6 +139,19 @@ public:
 		FDigumWorldBlockID ID(InBlockIDName, InVariant);
 		ID.bIsBlocking = bIsBlocking;
 		BlockIDs.Add(ID);
+		return true;
+	}
+
+	bool AddBlockID(const FDigumWorldBlockID& InBlockID)
+	{
+		for(const auto& Item : BlockIDs)
+		{
+			if(Item.BlockID == InBlockID.BlockID)
+			{
+				return false;
+			}
+		}
+		BlockIDs.Add(InBlockID);
 		return true;
 	}
 
@@ -256,7 +274,9 @@ public:
 	UPROPERTY()
 	FDigumWorldProceduralCoordinateArray CoordinateArrayData;
 
-
+	UPROPERTY()
+	int32 SectionWidth = 0;
+	
 	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{
 		CoordinateArrayData.AddCoordinate(InBlockID, InLocalX, InLocalY, InGlobalX, InGlobalY, InHierarchy, InNoiseValue);
@@ -277,6 +297,13 @@ public:
 	
 	FDigumWorldProceduralSectionCoordinate GetSectionCoordinate() const { return SectionCoordinate; }
 	bool IsInitialized() const { return SectionCoordinate.X != -1 && SectionCoordinate.Y != -1; }
+	int32 GetSectionWidth() const { return SectionWidth; };
+
+	
+	bool operator==(const FDigumWorldProceduralSection& InSection) const
+	{
+		return GetX() == InSection.GetX() && GetY() == InSection.GetY();
+	}
 };
 
 USTRUCT()
@@ -377,6 +404,7 @@ class DIGUMWORLD_API UDigumWorldGenerator : public UObject
 {
 	GENERATED_BODY()
 private:
+	static bool GetBooleanViaPerlinNoise(const float& InX, const FRandomStream& InRandomStream, const float& NormalizedThreshold = 0.5f);
 	static float GetPerlinNoiseValue1D(const float InX, const FRandomStream& InRandomStream);
 	static float GetPerlinNoiseValue2D(const float InX, const int32 InY, const FRandomStream& InRandomStream);
 	static float GetPerlinNoiseValue3D(const float InX, const int32 InY, const int32 InZ, const FRandomStream& InRandomStream);
@@ -438,8 +466,10 @@ private:
 		}
 	}
 	static bool IsInPlacedBlock(const int32& InGlobalX, const int32& InGlobalY, const int32& InWidth, const int32& InHeight, const int32& InHierarchyIndex, const TArray<FDigumWorldProceduralPlacedBlocks>& InPlacedBlocks);
-	static bool CanPlaceSizedBlock(FDigumWorldProceduralCoordinate* InCoordinate, const int32& InPlaceableWidth, const int32& InPlaceableHeight, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection);
+	static FDigumWorldProceduralCoordinate* GetCoordinateInSection(const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchyIndex, FDigumWorldProceduralSection* InSection);
+	static bool CanPlaceSizedBlock(const EDigumWorldSurfaceAttachType& AttachType, FDigumWorldProceduralCoordinate* InCoordinate, const int32& InPlaceableWidth, const int32& InPlaceableHeight, FDigumWorldProceduralSection* InMainSection, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection);
 	static bool IsBlockOccupied(const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchyIndex, FDigumWorldProceduralSection* InSection);
+	static bool IsSurfaceBlock(const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchyIndex, FDigumWorldProceduralSection* InSection);
 	// static void GenerateSection(const )
 public:
 	static bool GenerateTerrainSection(const FDigumWorldMap &InMap, const int32& InSectionX, const int32& InSectionY, const FDigumWorldProceduralDefinition& InProceduralDefinition, FDigumWorldProceduralSection& OutSection);

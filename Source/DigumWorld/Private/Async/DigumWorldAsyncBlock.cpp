@@ -37,7 +37,7 @@ void FDigumWorldAsyncBlock::DoWork()
 		const FDigumWorldProceduralCoordinate* Coordinate = Coordinates.GetCoordinate(LoopCount);
 		const int32 Variant = Coordinate->GetVariant(BlockID);
 		const float X = Coordinate->X * GridX;
-		const float Y = Coordinate->Hierarchy * GridY;
+		const float Y = Coordinate->Hierarchy * GridY * (2.0f * -Coordinate->Hierarchy);
 		const float Z = -(Coordinate->Y * GridZ);
 		FVector Location = FVector(X, Y, Z);
 		FTransform Transform = FTransform(FRotator::ZeroRotator, Location + PositionOffset, FVector(1.0f));

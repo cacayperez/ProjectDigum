@@ -45,7 +45,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	void InitializeDefaultSections();
-	virtual bool AddSection_Internal(FDigumWorldProceduralSection& InSection);
+	virtual bool AddSection_Internal(FDigumWorldProceduralSection& InSection, const bool& bNew = false);
 	virtual void OnGenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth, const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset);
 public:
 	void GenerateMap(const FName InSeed, const FVector InGridSize, const int32 InSectionWidth, const int32 InSectionHeight, const int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset);

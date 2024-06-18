@@ -116,9 +116,9 @@ TArray<float> UDigumWorldGenerator::GenerateGroundCurve(const int32& InWidth, co
 	GroundCurve.SetNum(InWidth);
 
 	const int32 VerticalCenter = InHeight / 2;
-	const float AmplitudeScale = 0.1f; // Adjustable amplitude scale
-	const float FrequencyScale = 0.007f; // Adjustable frequency
-    const float Amplitude = InHeight / 2 * AmplitudeScale; // Adjustable amplitude
+	const float AmplitudeScale = 0.06f; // Adjustable amplitude scale
+	const float FrequencyScale = 0.07f; // Adjustable frequency
+    const float Amplitude = InHeight / 8 * AmplitudeScale; // Adjustable amplitude
     const float NoiseScale = FrequencyScale; // Adjustable frequency
 
     // Generate Perlin noise values for the base heights
@@ -231,12 +231,20 @@ bool UDigumWorldGenerator::IsInPlacedBlock(const int32& InGlobalX, const int32& 
 	return false;
 }
 
-bool UDigumWorldGenerator::CanPlaceSizedBlock(FDigumWorldProceduralCoordinate* InCoordinate,
-                                              const int32& InPlaceableWidth, const int32& InPlaceableHeight, FDigumWorldProceduralSection* InLeftSection,
+FDigumWorldProceduralCoordinate* UDigumWorldGenerator::GetCoordinateInSection(const int32& InGlobalX,
+	const int32& InGlobalY, const int32& InHierarchyIndex, FDigumWorldProceduralSection* InSection)
+{
+	return InSection->GetCoordinateArray()->GetGlobalCoordinate(InGlobalX, InGlobalY, InHierarchyIndex);
+}
+
+bool UDigumWorldGenerator::CanPlaceSizedBlock(const EDigumWorldSurfaceAttachType& AttachType, FDigumWorldProceduralCoordinate* InCoordinate, 
+                                              const int32& InPlaceableWidth, const int32& InPlaceableHeight, FDigumWorldProceduralSection* InMainSection, FDigumWorldProceduralSection* InLeftSection,
                                               FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection,  FDigumWorldProceduralSection* InBottomSection)
 {
 	if(InCoordinate == nullptr) return false;
-	
+	const int32 LocalSectionWidth = InMainSection->GetSectionWidth();
+	const int32 LocalX = InCoordinate->X;
+	const int32 LocalY = InCoordinate->Y;
 	const int32 OriginX = InCoordinate->GlobalX;
 	const int32 OriginY = InCoordinate->GlobalY;
 	const int32 HalfWidth = InPlaceableWidth / 2;
@@ -246,23 +254,36 @@ bool UDigumWorldGenerator::CanPlaceSizedBlock(FDigumWorldProceduralCoordinate* I
 	const int32 EndY = OriginY + InPlaceableHeight - 1;
 	const int32 HierarchyIndex = InCoordinate->Hierarchy;
 
-	// bool bCanPlaceSizedBlock = true;
-	bool bOccupied = false;
+	
+
+	// TODO other types of attachments
+
+	
 	for(int32 x = StartX; x <= EndX; x++)
 	{
+		if(AttachType == EDigumWorldSurfaceAttachType::DigumWorldAttach_Top)
+		{
+			const bool bCanAttachToTop_Main = IsSurfaceBlock(x, StartY, HierarchyIndex, InMainSection);
+			// const bool bCanAttachToTop_Left = IsSurfaceBlock(x, y, HierarchyIndex, InLeftSection);
+			// const bool bCanAttachToTop_Right = IsSurfaceBlock(x, y, HierarchyIndex, InRightSection);
+			if(!bCanAttachToTop_Main)  return false;
+		}
+		
 		for(int32 y = StartY; y <= EndY; y++)
 		{
+			
 			
 			const bool bTop = IsBlockOccupied(x, y, HierarchyIndex, InTopSection);
 			const bool bRight = IsBlockOccupied(x, y, HierarchyIndex, InRightSection);
 			const bool bLeft = IsBlockOccupied(x, y, HierarchyIndex, InLeftSection);
+			
 			// const bool bBottom = IsBlockOccupied(x, y, HierarchyIndex, InBottomSection);
 
 			if(bTop || bRight || bLeft) return false;
 		}
 	}
 
-	return !bOccupied;
+	return true;
 }
 
 bool UDigumWorldGenerator::IsBlockOccupied(const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchyIndex,
@@ -281,6 +302,24 @@ bool UDigumWorldGenerator::IsBlockOccupied(const int32& InGlobalX, const int32& 
 		}
 	}
 
+	return false;
+}
+
+bool UDigumWorldGenerator::IsSurfaceBlock(const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchyIndex,
+	FDigumWorldProceduralSection* InSection)
+{
+	if(InSection)
+	{
+		FDigumWorldProceduralCoordinateArray* Array = InSection->GetCoordinateArray();
+		if(Array)
+		{
+			FDigumWorldProceduralCoordinate* Coordinate = Array->GetGlobalCoordinate(InGlobalX, InGlobalY, InHierarchyIndex);
+			if(Coordinate && Coordinate->IsInitialized())
+			{
+				if(Coordinate->IsDirectSurfaceBlock()) return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -448,11 +487,14 @@ bool UDigumWorldGenerator::GenerateTerrainSection(const int32& InMapWidth, const
 
 	bool bResult = false;
 	OutSection = FDigumWorldProceduralSection(InSectionX, InSectionY);
-	TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, InRandomStream);
+
+	
 	for(int32 i = 0; i < NumOfHierarchies; i++)
 	{
 		const int32 HierarchyIndex = i - (NumOfHierarchies -1);
+		const FRandomStream HierarchyStream = FRandomStream(InRandomStream.GetInitialSeed() + HierarchyIndex);
 		
+		TArray<float> GroundCurve = GenerateGroundCurve(InWidth, InMapHeight, InSectionX, HierarchyStream);
 		for(int32 x = 0; x < InWidth; x++)
 		{
 			for(int32 y = 0; y < InHeight; y++)
@@ -488,6 +530,8 @@ bool UDigumWorldGenerator::GenerateTerrainSection(const int32& InMapWidth, const
 			}
 		}
 	}
+
+	OutSection.SectionWidth = InWidth;
 	
 	return bResult;
 }
@@ -568,7 +612,7 @@ bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName,
 				int32 OutVariant = 0;
 				
 				GetWeightedBlockID(NormalizedNoise, GrassBlocks, OutBlockID, OutVariant);
-				UE_LOG(LogTemp, Warning, TEXT("ID: %s Variant Value: %i"),*OutBlockID.ToString(), OutVariant);
+				// UE_LOG(LogTemp, Warning, TEXT("ID: %s Variant Value: %i"),*OutBlockID.ToString(), OutVariant);
 				Coordinate->AddBlockID(OutBlockID, OutVariant, false);
 			}
 		}
@@ -603,7 +647,7 @@ bool UDigumWorldGenerator::GenerateFoliage(const FName& InSeedName, FDigumWorldP
 			int32 OutVariant = 0;
 				
 			GetWeightedBlockID(NormalizedNoise, GrassBlocks, OutBlockID, OutVariant);
-			UE_LOG(LogTemp, Warning, TEXT("ID: %s Variant Value: %i"),*OutBlockID.ToString(), OutVariant);
+			// UE_LOG(LogTemp, Warning, TEXT("ID: %s Variant Value: %i"),*OutBlockID.ToString(), OutVariant);
 			Coordinate->AddBlockID(OutBlockID, OutVariant);
 		}
 	}
@@ -620,10 +664,12 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, FDigumWorldPro
 	const TArray<FDigumWorldProceduralBlock> TreesBlock = InProceduralDefinition.GetTreesBlock();
 	TArray<float> NormalizedWeights;
 	NormalizeWeights(TreesBlock, NormalizedWeights);
-
+	const float SpawnThreshold = 0.25f;
 	TArray<TPair<float, float>> CumulativeWeights;
 	GetCumulativeWeights(NormalizedWeights, CumulativeWeights);
 	FRandomStream RandomStream(InSeedName);
+	const FName TreeSeed = FName(TEXT("TreeSeed_") + InSeedName.ToString());;
+	const FRandomStream TreeThresholdStream(TreeSeed);
 	
 	FDigumWorldProceduralCoordinateArray* Coordinates = InSection->GetCoordinateArray();
 	for(int32 j = 0; j < Coordinates->CoordinateCount(); j++)
@@ -636,8 +682,11 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, FDigumWorldPro
 			const int32 HierarchyIndex = Coordinate->Hierarchy;
 			const float NoiseValue= GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, RandomStream);
 			const float NormalizedNoise = NormalizeNoiseValue(NoiseValue);
-
+			const float MappedThreshold = 2.0f * SpawnThreshold - 1;
 			
+			const float TreeNoiseValue = GetPerlinNoiseValue3D(PositionX, PositionY, HierarchyIndex, TreeThresholdStream);
+			if(TreeNoiseValue < MappedThreshold) continue;
+
 			FName TreeBlockID = NAME_None;
 			int32 TreeVariant = 0;
 			GetWeightedBlockID(NormalizedNoise, TreesBlock, TreeBlockID, TreeVariant);
@@ -647,19 +696,23 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, FDigumWorldPro
 			{
 				const int32 Width = Block->Width;
 				const int32 Height = Block->Height;
-				// if(Width > 0 && Height)
-
+				const EDigumWorldSurfaceAttachType AttachType = Block->AttachmentType;
+				
 				if(!IsInPlacedBlock(PositionX, PositionY, Width, Height, HierarchyIndex, InPlacedBlocks))
 				{
-					if(CanPlaceSizedBlock(Coordinate, Width, Height, InLeftSection, InRightSection, InTopSection, InBottomSection))
+					if(CanPlaceSizedBlock(AttachType, Coordinate, Width, Height, InSection, InLeftSection, InRightSection, InTopSection, InBottomSection))
 					{
 						FDigumWorldProceduralPlacedBlocks PlacedBlocks = FDigumWorldProceduralPlacedBlocks();
 						PlacedBlocks.OriginX = PositionX;
 						PlacedBlocks.OriginY = PositionY;
 						PlacedBlocks.HierarchyIndex = HierarchyIndex;
-					
-						Coordinate->AddBlockID(TreeBlockID, TreeVariant);
-						InPlacedBlocks.Add(PlacedBlocks);		
+
+						FDigumWorldBlockID NewID(TreeBlockID, TreeVariant);
+						NewID.bIsBlocking = Block->bIsBlocking;
+						NewID.AttachmentType = AttachType;
+
+						InPlacedBlocks.Add(PlacedBlocks);
+						Coordinate->AddBlockID(NewID);
 					}
 				}
 
@@ -891,6 +944,14 @@ float UDigumWorldGenerator::GetPerlinNoiseValue2D(const float InX, const int32 I
 	constexpr float Scale = 0.1f;
 	const FVector2D NoiseInput = FVector2D(InX * Scale, InY * Scale) + FVector2D(RandomStream.GetFraction(), RandomStream.GetFraction());
 	return FMath::PerlinNoise2D(NoiseInput);
+}
+bool UDigumWorldGenerator::GetBooleanViaPerlinNoise(const float& InX, const FRandomStream& InRandomStream,
+	const float& NormalizedThreshold)
+{
+	const float MappedThreshold = 2 * NormalizedThreshold - 1;
+	const float NoiseValue = GetPerlinNoiseValue1D(InX, InRandomStream);
+
+	return NoiseValue > MappedThreshold;
 }
 
 float UDigumWorldGenerator::GetPerlinNoiseValue1D(const float InX, const FRandomStream& InRandomStream)

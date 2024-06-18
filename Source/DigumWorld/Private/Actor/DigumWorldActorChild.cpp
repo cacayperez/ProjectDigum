@@ -82,8 +82,9 @@ void ADigumWorldActorChild::AsyncAddBlock()
 {
 	TSharedPtr<FDigumWorldAsyncBlockResultArray> ArrayResultPtr;
 
-	if(!AsyncBlockResultArrayQueue.IsEmpty() && AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr))
+	if(!AsyncBlockResultArrayQueue.IsEmpty())
 	{
+		AsyncBlockResultArrayQueue.Peek(ArrayResultPtr);
 		if(ArrayResultPtr)
 		{
 			TArray<FTransform> GeneratedTransform;
@@ -101,9 +102,9 @@ void ADigumWorldActorChild::AsyncAddBlock()
 				Health.Add(1.0f);
 			}
 			SetActorTickEnabled(false);
-			
+			AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr);
 		}
-
+		
 		ArrayResultPtr.Reset();
 	}
 
@@ -145,7 +146,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 			FDigumWorldAssetCoordinate* Coordinate = Coordinates.GetAt(i);
 			// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
 			const float X = Coordinate->X * GridX;
-			const float Y = HierarchyIndex * GridY;
+			const float Y = (HierarchyIndex * 3) * GridY;
 			const float Z = -((Coordinate->Y * GridZ) + GridZ);
 			FVector Location = FVector(X, Y, Z);
 			FTransform Transform = FTransform(FRotator::ZeroRotator, Location, FVector(1.0f));
@@ -223,26 +224,7 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 	{
 		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates))->StartBackgroundTask();
 	});
-	/*for(int32 i = 0; i < InCoordinates.CoordinateCount(); i++)
-	{
-		FDigumWorldProceduralCoordinate* Coordinate = InCoordinates.GetCoordinate(i);
-		const int32 Variant = Coordinate->GetVariant(InBlockID);
-		UE_LOG(LogTemp, Warning, TEXT("AddBlock %s %i %i %i"), *InBlockID.ToString(), Coordinate->X, Coordinate->Y, Variant);
-		// Since this is a 2D grid, we can use the X and Y coordinates to determine the location of the instance
-		const float X = Coordinate->X * GridX;
-		const float Y = Coordinate->Hierarchy * GridY;
-		const float Z = -(Coordinate->Y * GridZ);
-		// const int32 Variant = Coordinate->Variant;
-		FVector Location = FVector(X, Y, Z);
-		FTransform Transform = FTransform(FRotator::ZeroRotator, Location + PositionOffset, FVector(1.0f));
-			
-		int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
-		InstancedMeshComponent->SetTint(InstanceIndex, Coordinate->Hierarchy);
-		
-		InstancedMeshComponent->SetSurfacePoint(InstanceIndex, Coordinate->bHasTopNeighbor);
-		InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
-		Health.Add(1.0f);
-	}*/
+	
 }
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)

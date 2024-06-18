@@ -33,16 +33,30 @@ void UDigumWorldMapLoaderComponent::AsyncLoadSection()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Procedural Actor is null"));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Async Load Section"));
+	
 	TSharedPtr<FDigumWorldProceduralSection> Section;
-	if(!SectionQueue.IsEmpty() && SectionQueue.Dequeue(Section))
+	if(!SectionQueue.IsEmpty())
 	{
-		if(ProceduralActor && ProceduralActor->TryAddSection(*Section.Get()))
+		SectionQueue.Peek(Section);
+		if(Section)
 		{
-			
-			// TO DO when task completes
+			UE_LOG(LogTemp, Warning, TEXT("Enqueuing Section, %i, %i"), Section->GetX(), Section->GetY());
+			if(ProceduralActor && ProceduralActor->TryAddSection(*Section.Get()))
+			{
+				SectionQueue.Dequeue(Section);
+				// TO DO when task completes
+			}
+			else
+			{
+				if(ProceduralActor == nullptr)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Procedural Actor is null"));
+				}
+				UE_LOG(LogTemp, Warning, TEXT("Failed to Add Section"));
+			}
+			Section.Reset();
 		}
-		Section.Reset();
+
 	}
 }
 
@@ -78,7 +92,7 @@ void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 
 		UE_LOG(LogTemp, Warning, TEXT("Map or Definition is null"));
 	}
 	
-	AsyncTask(ENamedThreads:: AnyBackgroundThreadNormalTask, [this, Map, Definition, InX, InY]()
+	AsyncTask(ENamedThreads:: AnyThread, [this, Map, Definition, InX, InY]()
 	{
 		(new FAutoDeleteAsyncTask<FDigumWorldAsyncSection>(this, Map, Definition, InX, InY))->StartBackgroundTask();
 	});

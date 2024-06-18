@@ -8,6 +8,18 @@
 
 class UDigumWorldSwatchAsset;
 
+
+UENUM()
+enum EDigumWorldSurfaceAttachType : uint8
+{
+	DigumWorldAttach_Default,
+	DigumWorldAttach_Top,
+	DigumWorldAttach_Bottom,
+	DigumWorldAttach_Left,
+	DigumWorldAttach_Right,
+	DigumWorldAttach_All,
+};
+
 USTRUCT()
 struct FDigumWorldProceduralBlockVariant
 {
@@ -40,6 +52,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 Height = 0;
+
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<EDigumWorldSurfaceAttachType> AttachmentType = EDigumWorldSurfaceAttachType::DigumWorldAttach_Default;
 	
 	UPROPERTY(EditAnywhere)
 	TArray<FDigumWorldProceduralBlockVariant> Variants;
