@@ -6,6 +6,8 @@
 #include "DigumAction.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "ToolBuilderUtil.h"
+#include "Actor/DigumWorldDynamicProceduralActor.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Miner/Components/DigumGameActionBarComponent.h"
 #include "Character/Miner/Components/DigumGameEquipComponent.h"
@@ -17,10 +19,13 @@
 #include "Components/DigumPickupHandlerComponent.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameMode/DigumGamePrimaryGameMode.h"
 #include "Input/DigumInputSettingsAsset.h"
 #include "Item/DigumGameItem.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Properties/DigumActionProperties.h"
 #include "Properties/DigumItem.h"
@@ -138,7 +143,7 @@ void ADigumMinerCharacter::EquipItem(const int32& InItemIndex)
 void ADigumMinerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Begin Play"))
 	// Enable pickup detection
 	// if(PickupHandlerComponent) PickupHandlerComponent->SetPickupEnabled(false);
 	
@@ -146,33 +151,6 @@ void ADigumMinerCharacter::BeginPlay()
 	GetCharacterMovement()->SetPlaneConstraintNormal(FVector(0.0f, 1.0f, 0.0f));
 	
 	GetCharacterMovement()->bConstrainToPlane = true;
-	
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-	{
-		
-		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
-		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
-		if (DigumGameDeveloperSettings && Subsystem)
-		{
-			if(const UDigumInputSettingsAsset* InputSettings = DigumGameDeveloperSettings->PrimaryMinerInputSettings.LoadSynchronous())
-			{
-				if(InputSettings->MappingContext)
-					Subsystem->AddMappingContext(InputSettings->MappingContext, 0);
-				else
-				{
-					UE_LOG(LogDigumMinerCharacter, Error, TEXT("PrimaryMinerInputSettings Mapping Context is null!"));
-				}
-			}
-			else
-			{
-				UE_LOG(LogDigumMinerCharacter, Error, TEXT("Miner Input Settings is null!"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogDigumMinerCharacter, Error, TEXT("Failed to add mapping context"));
-		}
-	}
 
 	// Bind Action Bar Event
 	if(GetActionBarComponent() && GetInventoryComponent() && GetEquipComponent())
@@ -189,18 +167,20 @@ void ADigumMinerCharacter::BeginPlay()
 		GetActionBarComponent()->OnActivateItemActionDelegate().AddDynamic(this, &ADigumMinerCharacter::ActivateEquippedItemAction);
 		EquipItem(GDigum_ActionBarIndex_0);
 	}
-
+	
+	// Input and actions
+	// InitializeInputBindings();																																																																																																																																									
+	
 	// Pickup Handler
 
 	if(PositioningComponent)
 	{
-		AGameModeBase* GameMode = GetWorld()->GetAuthGameMode();
-		if(GameMode)
+		if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldDynamicProceduralActor::StaticClass()))
 		{
-			if(ADigumGamePrimaryGameMode* DigumGameMode = Cast<ADigumGamePrimaryGameMode>(GameMode))
+			if(ADigumWorldDynamicProceduralActor* ProceduralActor = Cast<ADigumWorldDynamicProceduralActor>(Actor))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
-				DigumGameMode->RegisterPositioningComponent(PositioningComponent);
+				ProceduralActor->RegisterPositioningComponent(PositioningComponent);
 			}
 			
 		}
@@ -233,45 +213,12 @@ void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 
 void ADigumMinerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
-	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	if(DigumGameDeveloperSettings && EnhancedInputComponent)
-	{
-		if(const UDigumInputSettingsAsset* InputSettings = DigumGameDeveloperSettings->PrimaryMinerInputSettings.LoadSynchronous())
-		{
-			auto BindActionLambda = [&](const FString& Context, UInputAction* Action, ETriggerEvent TriggerEvent, auto Func)
-			{
-				if(Action != nullptr)
-					EnhancedInputComponent->BindAction(Action, TriggerEvent, this, Func);
-				else
-				{
-					UE_LOG(LogDigumMinerCharacter, Error, TEXT("%s Action is null!"), *Context);
-				}
-			};
-
-			BindActionLambda("Move", InputSettings->MoveAction, ETriggerEvent::Triggered, &ADigumMinerCharacter::Move);
-			BindActionLambda("Jump", InputSettings->JumpAction, ETriggerEvent::Started, &ADigumMinerCharacter::Jump);
-			BindActionLambda("Primary",InputSettings->PrimaryAction, ETriggerEvent::Started, &ADigumMinerCharacter::PrimaryAction);
-			BindActionLambda("Secondary",InputSettings->SecondaryAction, ETriggerEvent::Started,&ADigumMinerCharacter::SecondaryAction);
-			BindActionLambda("Cancel",InputSettings->CancelAction, ETriggerEvent::Started,&ADigumMinerCharacter::CancelAction);
-			BindActionLambda("Toggle Inventory", InputSettings->CharacterContextAction1, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleInventory);
-			BindActionLambda("Toggle Character Menu", InputSettings->CharacterContextAction2, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleCharacterMenu);
-
-			if(GetActionBarComponent())
-			{
-				BindActionLambda("ActionBar 0", InputSettings->ActionBar_Action_0, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_0);
-				BindActionLambda("ActionBar 1", InputSettings->ActionBar_Action_1, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_1);
-				BindActionLambda("ActionBar 2", InputSettings->ActionBar_Action_2, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_2);
-				BindActionLambda("ActionBar 3", InputSettings->ActionBar_Action_3, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_3);
-				BindActionLambda("ActionBar 4", InputSettings->ActionBar_Action_4, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_4);
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogDigumMinerCharacter, Error, TEXT("Failed to bind actions"));
-	}
-	
+	UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Setup input component"))
+	AssignedInputComponent = PlayerInputComponent;
+	InitializeInputBindings(PlayerInputComponent);
+	// Super::SetupPlayerInputComponent(PlayerInputComponent);
+	// InitializeInputBindings(PlayerInputComponent);
+	// AssignedInputComponent = PlayerInputComponent;
 }
 
 void ADigumMinerCharacter::Jump()
@@ -299,6 +246,95 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 			GetActionBarComponent()->SetActiveAction(InItemIndex);
 		}
 	}
+}
+
+void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputComponent)
+{
+	UE_LOG(LogTemp, Warning, TEXT("=== Initializing input"));
+	if(!GetController())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Controller is null"));
+		return;
+	}
+
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	{
+		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
+		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
+		if (DigumGameDeveloperSettings && Subsystem)
+		{
+			if(const UDigumInputSettingsAsset* InputSettings = DigumGameDeveloperSettings->PrimaryMinerInputSettings.LoadSynchronous())
+			{
+				if(InputSettings->MappingContext)
+					Subsystem->AddMappingContext(InputSettings->MappingContext, 0);
+				else
+				{
+					UE_LOG(LogDigumMinerCharacter, Error, TEXT("PrimaryMinerInputSettings Mapping Context is null!"));
+				}
+			}
+			else
+			{
+				UE_LOG(LogDigumMinerCharacter, Error, TEXT("Miner Input Settings is null!"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogDigumMinerCharacter, Error, TEXT("Failed to add mapping context"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogDigumMinerCharacter, Error, TEXT("Player Controller is null"));
+	}
+	
+
+	
+	if(AssignedInputComponent)
+	{
+		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
+		UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(AssignedInputComponent);
+		if(DigumGameDeveloperSettings && EnhancedInputComponent)
+		{
+			if(const UDigumInputSettingsAsset* InputSettings = DigumGameDeveloperSettings->PrimaryMinerInputSettings.LoadSynchronous())
+			{
+				auto BindActionLambda = [&](const FString& Context, UInputAction* Action, ETriggerEvent TriggerEvent, auto Func)
+				{
+					if(Action != nullptr)
+						EnhancedInputComponent->BindAction(Action, TriggerEvent, this, Func);
+					else
+					{
+						UE_LOG(LogDigumMinerCharacter, Error, TEXT("%s Action is null!"), *Context);
+					}
+				};
+
+				BindActionLambda("Move", InputSettings->MoveAction, ETriggerEvent::Triggered, &ADigumMinerCharacter::Move);
+				BindActionLambda("Jump", InputSettings->JumpAction, ETriggerEvent::Started, &ADigumMinerCharacter::Jump);
+				BindActionLambda("Primary",InputSettings->PrimaryAction, ETriggerEvent::Started, &ADigumMinerCharacter::PrimaryAction);
+				BindActionLambda("Secondary",InputSettings->SecondaryAction, ETriggerEvent::Started,&ADigumMinerCharacter::SecondaryAction);
+				BindActionLambda("Cancel",InputSettings->CancelAction, ETriggerEvent::Started,&ADigumMinerCharacter::CancelAction);
+				BindActionLambda("Toggle Inventory", InputSettings->CharacterContextAction1, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleInventory);
+				BindActionLambda("Toggle Character Menu", InputSettings->CharacterContextAction2, ETriggerEvent::Started, &ADigumMinerCharacter::ToggleCharacterMenu);
+
+				if(GetActionBarComponent())
+				{
+					BindActionLambda("ActionBar 0", InputSettings->ActionBar_Action_0, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_0);
+					BindActionLambda("ActionBar 1", InputSettings->ActionBar_Action_1, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_1);
+					BindActionLambda("ActionBar 2", InputSettings->ActionBar_Action_2, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_2);
+					BindActionLambda("ActionBar 3", InputSettings->ActionBar_Action_3, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_3);
+					BindActionLambda("ActionBar 4", InputSettings->ActionBar_Action_4, ETriggerEvent::Started, &ADigumMinerCharacter::SelectActionBar_4);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogDigumMinerCharacter, Error, TEXT("Failed to bind actions"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogDigumMinerCharacter, Error, TEXT("Input Component is null"));
+	}
+	
 }
 
 void ADigumMinerCharacter::ActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)
@@ -333,6 +369,13 @@ UDigumActionComponent* ADigumMinerCharacter::GetActionComponentBP_Implementation
 	return GetActionComponent();
 }
 
+void ADigumMinerCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	UE_LOG(LogTemp, Warning, TEXT("=== Possessing"));
+	
+}
+
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)
 {
 	FacedDirection = InDirection;
@@ -362,6 +405,11 @@ void ADigumMinerCharacter::ToggleCharacterMenu()
 void ADigumMinerCharacter::CancelAction()
 {
 	OnCancelAction.Broadcast();
+}
+
+void ADigumMinerCharacter::SelectActionBar(const int32& InActionIndex)
+{
+	EquipItem(InActionIndex);
 }
 
 void ADigumMinerCharacter::SelectActionBar_0()

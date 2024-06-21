@@ -5,7 +5,6 @@
 
 #include "Actor/DigumWorldDynamicProceduralActor.h"
 #include "Async/DigumWorldAsyncSection.h"
-#include "Procedural/DigumWorldMap.h"
 
 
 // Sets default values for this component's properties
@@ -40,10 +39,21 @@ void UDigumWorldMapLoaderComponent::AsyncLoadSection()
 		SectionQueue.Peek(Section);
 		if(Section)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enqueuing Section, %i, %i"), Section->GetX(), Section->GetY());
-			if(ProceduralActor && ProceduralActor->TryAddSection(*Section.Get()))
+			//FString ClientName = FString::Printf(TEXT("Client %i"), GetNetMode());
+			// GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Try Add Section, %i, %i, %s"), Section->GetX(), Section->GetY(), *ClientName));
+
+			//UE_LOG(LogTemp, Warning, TEXT("Enqueuing Section, %i, %i"), Section->GetX(), Section->GetY());
+			
+			if(ProceduralActor)
 			{
-				SectionQueue.Dequeue(Section);
+				if(ProceduralActor->TryAddSection(*Section.Get()))
+				{
+					SectionQueue.Dequeue(Section);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Cant add Section"));
+				}
 				// TO DO when task completes
 			}
 			else
@@ -77,8 +87,14 @@ void UDigumWorldMapLoaderComponent::InitializeDynamicProceduralMap(ADigumWorldDy
 
 void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 InY)
 {
-	if(ProceduralActor == nullptr) return;
-	UE_LOG(LogTemp, Warning, TEXT("Requesting Section %d, %d"), InX, InY);
+	ProceduralActor = GetProceduralActor();
+	 
+	if(ProceduralActor == nullptr)
+	{
+		return;
+	}
+	
+	// UE_LOG(LogTemp, Warning, TEXT("Requesting Section %d, %d"), InX, InY);
 	if(InX < 0 || InY < 0)
 	{
 		return;
@@ -96,5 +112,14 @@ void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 
 	{
 		(new FAutoDeleteAsyncTask<FDigumWorldAsyncSection>(this, Map, Definition, InX, InY))->StartBackgroundTask();
 	});
+}
+
+ADigumWorldDynamicProceduralActor* UDigumWorldMapLoaderComponent::GetProceduralActor()
+{
+	if(ProceduralActor == nullptr)
+	{
+		ProceduralActor = Cast<ADigumWorldDynamicProceduralActor>(GetOwner());
+	}
+	return ProceduralActor;
 }
 

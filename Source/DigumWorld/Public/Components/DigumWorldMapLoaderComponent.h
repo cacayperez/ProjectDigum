@@ -15,14 +15,16 @@ class DIGUMWORLD_API UDigumWorldMapLoaderComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TObjectPtr<ADigumWorldDynamicProceduralActor> ProceduralActor;
 	
 public:
 	// Sets default values for this component's properties
 	UDigumWorldMapLoaderComponent();
 
 protected:
+
+	UPROPERTY()
+	TObjectPtr<ADigumWorldDynamicProceduralActor> ProceduralActor;
+	
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
@@ -36,7 +38,7 @@ public:
 
 	void InitializeDynamicProceduralMap(ADigumWorldDynamicProceduralActor* InProceduralActor);
 	void RequestSection(const int32 InX, const int32 InY);
-	
+	ADigumWorldDynamicProceduralActor* GetProceduralActor();
 
-	FORCEINLINE ADigumWorldDynamicProceduralActor* GetProceduralActor() const { return ProceduralActor; }
+	// FORCEINLINE ADigumWorldDynamicProceduralActor* GetProceduralActor() const { return ProceduralActor; }
 };

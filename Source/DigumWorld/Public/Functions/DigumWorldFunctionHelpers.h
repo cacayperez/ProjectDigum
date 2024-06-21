@@ -18,6 +18,7 @@ class DIGUMWORLD_API UDigumWorldFunctionHelpers : public UObject
 {
 	GENERATED_BODY()
 public:
+	static FVector GetGridSize();
 	static UDigumWorldSwatchAsset* GetSwatchAsset(const FName& BlockID, const FName& ContentCategory);
 	static FDigumWorldBlockTableRow* GetBlockTableRow(const FName& BlockID, UDataTable* InTable);
 	static UDataTable* GetSwatchDataTable(const FName ContentCategory);

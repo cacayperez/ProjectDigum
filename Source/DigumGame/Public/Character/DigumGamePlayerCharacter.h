@@ -8,6 +8,8 @@
 #include "Miner/DigumMinerCharacter.h"
 #include "DigumGamePlayerCharacter.generated.h"
 
+class ADigumMinerPlayerController;
+
 UCLASS()
 class DIGUMGAME_API ADigumGamePlayerCharacter : public ADigumMinerCharacter, public IIDigumPlayerCharacterInterface
 {
@@ -23,6 +25,8 @@ protected:
 public:
 	virtual APlayerController* GetPlayerController() const override;
 	virtual float GetVisibilityRadius() const override;
-	
+
+	// virtual void InitializeInputBindings(ADigumMinerPlayerController* PlayerController);
+	virtual void PossessedBy(AController* NewController) override;
 	
 };

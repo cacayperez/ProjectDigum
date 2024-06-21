@@ -25,6 +25,7 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(Root);*/
 	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
+	bReplicates = true;
 	
 }
 
@@ -75,7 +76,7 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 
 void ADigumWorldActorSection::Reinitialize()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Reinitialize Section"));
+	// UE_LOG(LogTemp, Warning, TEXT("Reinitialize Section"));
 	EnableSection();
 	GetWorld()->GetTimerManager().ClearTimer(CleanupTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);

@@ -9,6 +9,7 @@
 #include "Async/DigumWorldAsyncBlock.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Components/DigumWorldISMComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Settings/DigumWorldSettings.h"
 #include "Subsystem/DigumWorldSubsystem.h"
 
@@ -21,8 +22,16 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	PrimaryActorTick.bCanEverTick = true;
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
+
+	bReplicates = true;
 	SetActorTickEnabled(false);
 
+}
+
+void ADigumWorldActorChild::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
 }
 
 void ADigumWorldActorChild::BeginPlay()
@@ -179,8 +188,9 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
-		
-		AddBlock(InBlockID,Coordinates);
+
+		if(HasAuthority())
+			AddBlock(InBlockID,Coordinates);
 		
 	}
 	

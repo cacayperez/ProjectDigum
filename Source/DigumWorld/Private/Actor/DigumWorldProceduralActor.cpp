@@ -16,6 +16,7 @@ ADigumWorldProceduralActor::ADigumWorldProceduralActor()
 	
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
+	bReplicates = true;
 }
 
 void ADigumWorldProceduralActor::CheckAndSetNeighbors(FDigumWorldProceduralSection* InSection, const int32& NumOfHierarchies, FDigumWorldProceduralSection* InLeftSection, FDigumWorldProceduralSection* InRightSection, FDigumWorldProceduralSection* InTopSection, FDigumWorldProceduralSection* InBottomSection, int32 InLocalSectionWidth, int32 InLocalSectionHeight)
@@ -268,6 +269,28 @@ void ADigumWorldProceduralActor::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(ADigumWorldProceduralActor, Map);
+	DOREPLIFETIME(ADigumWorldProceduralActor, SectionDataArray);
+	DOREPLIFETIME(ADigumWorldProceduralActor, SectionActors);
+	DOREPLIFETIME(ADigumWorldProceduralActor, UnitSectionSize);
+	DOREPLIFETIME(ADigumWorldProceduralActor, LocalSectionWidth);
+	DOREPLIFETIME(ADigumWorldProceduralActor, LocalSectionHeight);
+	DOREPLIFETIME(ADigumWorldProceduralActor, GridSize);
+	DOREPLIFETIME(ADigumWorldProceduralActor, WorldOffset);
+	/*	UPROPERTY(Replicated)
+	FVector2D UnitSectionSize;
+	
+	UPROPERTY(Replicated)
+	int32 LocalSectionWidth;
+
+	UPROPERTY(Replicated)
+	int32 LocalSectionHeight;
+
+	UPROPERTY(Replicated)
+	FVector GridSize;
+
+	UPROPERTY(Replicated)
+	FVector WorldOffset;
+	*/
 }
 
 void ADigumWorldProceduralActor::Editor_GenerateProceduralWorld()

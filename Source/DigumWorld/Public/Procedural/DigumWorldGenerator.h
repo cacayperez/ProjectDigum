@@ -346,21 +346,21 @@ struct FDigumWorldProceduralRules
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere)
-	int32 Seed = 0;
+	FName Seed = TEXT("Hello World");
 	
 	UPROPERTY(EditAnywhere)
-	int32 SectionWidth = 12;
+	int32 SectionWidth = 8;
 
 	UPROPERTY(EditAnywhere)
-	int32 SectionHeight = 12;
-
-	// Spans both negative and positive values
-	UPROPERTY(EditAnywhere)
-	int32 SectionCount_HorizontalAxis = 1;
+	int32 SectionHeight = 8;
 
 	// Spans both negative and positive values
 	UPROPERTY(EditAnywhere)
-	int32 SectionCount_VerticalAxis = 1;
+	int32 SectionCount_HorizontalAxis = 64;
+
+	// Spans both negative and positive values
+	UPROPERTY(EditAnywhere)
+	int32 SectionCount_VerticalAxis = 64;
 	
 	UPROPERTY(EditAnywhere)
 	int32 GroundZero = 0;

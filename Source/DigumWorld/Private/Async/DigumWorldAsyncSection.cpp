@@ -31,7 +31,7 @@ void FDigumWorldAsyncSection::DoWork()
 		FDigumWorldProceduralSection OutSection;
 		if(UDigumWorldGenerator::CreateSection(*Map, X, Y,  *ProceduralDefinition, OutSection))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Working: Result Generated %i, %i"), OutSection.GetX(), OutSection.GetY());
+			// UE_LOG(LogTemp, Warning, TEXT("Working: Result Generated %i, %i"), OutSection.GetX(), OutSection.GetY());
 			const TSharedPtr<FDigumWorldProceduralSection> Shared = MakeShared<FDigumWorldProceduralSection>(OutSection);
 			Component->SectionQueue.Enqueue(Shared);
 		}

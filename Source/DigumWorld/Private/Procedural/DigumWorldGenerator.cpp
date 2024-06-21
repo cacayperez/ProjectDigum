@@ -731,7 +731,7 @@ bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, FDigumWorldPro
 
 void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& InRules, FDigumWorldProceduralMap& OutMap)
 {
-	const int32 Seed = InRules.Seed;
+	const FName Seed = InRules.Seed;
 	const int32 SectionWidth = InRules.SectionWidth;
 	const int32 SectionHeight = InRules.SectionHeight;
 	const int32 NumberOfHierarchies = InRules.NumberOfHierarchies;
@@ -775,7 +775,7 @@ void UDigumWorldGenerator::MarkForFoliage(FDigumWorldProceduralCoordinate* InCoo
 {
 	if(InCoordinate)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Coordinate (%d, %d, %d) marked for foliage"), InCoordinate->X, InCoordinate->Y, InCoordinate->Hierarchy);
+		// UE_LOG(LogTemp, Log, TEXT("Coordinate (%d, %d, %d) marked for foliage"), InCoordinate->X, InCoordinate->Y, InCoordinate->Hierarchy);
 		InCoordinate->bIsDirectSurfaceBlock = true;
 	}
 }

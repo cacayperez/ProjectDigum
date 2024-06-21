@@ -7,6 +7,12 @@
 #include "Asset/DigumWorldSwatchAsset.h"
 #include "Settings/DigumWorldSettings.h"
 
+/*
+FVector UDigumWorldFunctionHelpers::GetGridSize()
+{
+	if(const UDigumWorldSettings* Sett)
+}*/
+
 UDigumWorldSwatchAsset* UDigumWorldFunctionHelpers::GetSwatchAsset(const FName& BlockID, const FName& ContentCategory)
 {
 	if(UDataTable* Table = GetSwatchDataTable(ContentCategory))

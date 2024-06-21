@@ -57,10 +57,19 @@ public:
 	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
 
 protected:
+	UPROPERTY()
+	float PlayerSpawnDelay = 5.0f;
+
+	UPROPERTY(EditAnywhere)
+	TSoftClassPtr<ADigumGamePlayerCharacter> SoftPlayerCharacterClass;
+	
 	int32 GetWorldSeed() const;
 	void SetWorldSeed(const int32& InValue);
 	FVector GetGridSize() const;
 	
 	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
 	// void HandleCharacterCoordinateChanged(const AActor* InActor, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate);
 };

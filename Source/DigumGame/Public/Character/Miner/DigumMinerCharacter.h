@@ -60,6 +60,9 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigu
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UDigumGameEquipComponent> EquipComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UInputComponent> AssignedInputComponent;
 	
 	UPROPERTY()
 	TObjectPtr<UDigumWorldPositioningComponent> PositioningComponent;
@@ -68,7 +71,7 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigu
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	void Move(const FInputActionValue& InputActionValue);
+	
 
 	FOnToggleInventory OnToggleInventory;
 	FOnToggleCharacterMenu OnToggleCharacterMenu;
@@ -95,6 +98,7 @@ protected:
 	virtual void ActivateEquippedItemAction_Internal(const FDigumGameActionParams& ActionParams);
 	virtual void EquipItem_Internal(const int32& InItemIndex);
 	
+	
 public:
 	// Sets default values for this character's properties
 	ADigumMinerCharacter(const FObjectInitializer& ObjectInitializer);
@@ -115,11 +119,13 @@ public:
 	
 public:
 	virtual void SetFaceDirection(float InDirection = 1.0f);
+	void Move(const FInputActionValue& InputActionValue);
 	virtual void PrimaryAction();
 	virtual void SecondaryAction();
 	virtual void ToggleInventory();
 	virtual void ToggleCharacterMenu();
 	virtual void CancelAction();
+	virtual void SelectActionBar(const int32& InActionIndex);
 	virtual void SelectActionBar_0();
 	virtual void SelectActionBar_1();
 	virtual void SelectActionBar_2();
@@ -134,6 +140,7 @@ public:
 
 	virtual FVector GetForwardDirection() const override;
 	virtual UDigumInventoryComponent* GetInventoryComponent() const override;
+	virtual void InitializeInputBindings(UInputComponent* InInputComponent = nullptr);
 	
 public:
 	FORCEINLINE USpringArmComponent* GetSpringArmComponent() const { return SpringArmComponent; }
@@ -149,5 +156,6 @@ public:
 	virtual UDigumWorldPositioningComponent* GetPositioningComponent() const override;
 	virtual UDigumActionComponent* GetActionComponent() const override;
 	virtual UDigumActionComponent* GetActionComponentBP_Implementation() const override;
+	virtual void PossessedBy(AController* NewController) override;
 	
 };

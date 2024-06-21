@@ -9,6 +9,7 @@
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "GameState/DigumGamePrimaryGameState.h"
 #include "Interface/IDigumWorldPawnInterface.h"
+#include "Player/DigumMinerPlayerController.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Procedural/DigumWorldMap.h"
 #include "Procedural/DigumWorldMapHandler.h"
@@ -38,39 +39,34 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 
-	UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
-	
-	/*Loader = NewObject<UDigumWorldMapAsyncLoader>(this);
-	if(Loader && Asset)
-	{
-		Loader->CreateMap(Asset, TEXT("Hello World"), GetGridSize(), 12, 12, 1, 1, 3);
-	
-	}*/
-
-	if(Asset)
-	{
-		const FVector GridSize = GetGridSize();
-		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
-		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 512, 512, 3, Asset);
-		ProceduralActor->FinishSpawning(FTransform::Identity);
-		ProceduralActor->ApplyWorldOffsetPosition();
-		ProceduralActor->SpawnChunks(FVector::Zero(), 4);
-		
-	}
 }
 
 void ADigumGamePrimaryGameMode::StartPlay()
 {
 	Super::StartPlay();
 
-	// bInPlayMode = true;
-	// ProceduralActor->SpawnChunks(FVector::ZeroVector, 1);
+	/*// TODO Move spawning somewhere else because spawning here doesnt replicate to clients
+	UDigumWorldProceduralAsset* Asset = UDigumAssetManager::GetAsset<UDigumWorldProceduralAsset>(ProceduralAsset);
+	
+	if(Asset)
+	{
+		const FVector GridSize = GetGridSize();
+		ProceduralActor = GetWorld()->SpawnActorDeferred<ADigumWorldDynamicProceduralActor>(ADigumWorldDynamicProceduralActor::StaticClass(), FTransform::Identity);
+		ProceduralActor->SetReplicates(true);
+		ProceduralActor->GenerateMap(TEXT("Hello World"), GridSize,8, 8, 512, 512, 2, Asset);
+		ProceduralActor->FinishSpawning(FTransform::Identity);
+		ProceduralActor->ApplyWorldOffsetPosition();
+		ProceduralActor->SpawnChunks(FVector::Zero(), 4);
+		
+	}
+	UE_LOG(LogTemp, Warning, TEXT("======== GameMode: Start Play"));*/
 }
 
 void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
 {
+	
+	UE_LOG(LogTemp, Warning, TEXT("======== GameMode: Handle Player"));
 	Super::HandleStartingNewPlayer_Implementation(NewPlayer);
-
 	// this function doesnt spawn the character yet
 }
 
@@ -131,5 +127,37 @@ void ADigumGamePrimaryGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+}
+
+void ADigumGamePrimaryGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	// UE_LOG(LogTemp, Warning)
+	if(TSubclassOf<ADigumGamePlayerCharacter> PlayerCharacterClass = UDigumAssetManager::GetSubclass<ADigumGamePlayerCharacter>(SoftPlayerCharacterClass))
+	{
+		FVector SpawnLocation = FVector(0.0f, 0.0f, 200.0f);
+		FRotator SpawnRotation = FRotator::ZeroRotator;
+		
+		FTimerHandle SpawnTimerHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, [this, SpawnLocation, SpawnRotation, NewPlayer, PlayerCharacterClass]()
+		{
+			if(NewPlayer)
+			{
+				
+					if(ADigumGamePlayerCharacter* Character = GetWorld()->SpawnActor<ADigumGamePlayerCharacter>(PlayerCharacterClass, SpawnLocation, SpawnRotation))
+					{
+						UE_LOG(LogTemp, Warning, TEXT("====== Post Login: Spawning character"));
+						NewPlayer->Possess(Character);
+					}
+				
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No Player found"));
+			}
+		}, PlayerSpawnDelay, false);
+	}
+	
 }
 

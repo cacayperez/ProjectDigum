@@ -8,9 +8,11 @@
 #include "Procedural/DigumWorldMap.h"
 #include "DigumWorldDynamicProceduralActor.generated.h"
 
+class UDigumWorldPositioningComponent;
 class UDigumWorldMapLoaderComponent;
 class UDigumActorPool;
 struct FDigumWorldProceduralSectionCoordinate;
+
 
 UCLASS()
 class DIGUMWORLD_API ADigumWorldDynamicProceduralActor : public ADigumWorldProceduralActor
@@ -29,17 +31,19 @@ class DIGUMWORLD_API ADigumWorldDynamicProceduralActor : public ADigumWorldProce
 	UPROPERTY()
 	TArray<ADigumWorldActorSection*> InactiveSectionPool;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	int32 PoolSize = 10;
 	
 	UPROPERTY()
 	FDigumWorldProceduralSectionCoordinate ActiveCoordinate;
-	
-	
+
+	UPROPERTY(EditAnywhere)
+	FDigumWorldProceduralRules ProceduralRules;
+
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldDynamicProceduralActor();
-
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -68,6 +72,8 @@ public:
 	
 	void InitializePool(int32 InPoolSize, const FName& InFolderPath = NAME_None);
 	bool SpawnSectionFromPool(const FVector& InLocation, const FRotator& InRotation, FDigumWorldProceduralSection& InSection);
+	void HandleCharacterCoordinateChanged(const AActor* Actor, const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate, const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate1);
+	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
 	// void DespawnActorFromPool(ADigumWorldActorSection* InSection);
 
 	void RemoveSection(ADigumWorldActorSection* InSection);

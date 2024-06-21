@@ -66,15 +66,16 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 protected:
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FName BlockID;
 	
 	UPROPERTY()
 	TObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FVector GridSize;
 	
 	virtual void BeginPlay() override;

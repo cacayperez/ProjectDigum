@@ -17,6 +17,7 @@ FDigumWorldAsyncBlock::FDigumWorldAsyncBlock(ADigumWorldActorChild* InActorChild
 
 FDigumWorldAsyncBlock::~FDigumWorldAsyncBlock()
 {
+	
 }
 
 void FDigumWorldAsyncBlock::DoWork()
@@ -37,19 +38,17 @@ void FDigumWorldAsyncBlock::DoWork()
 		const FDigumWorldProceduralCoordinate* Coordinate = Coordinates.GetCoordinate(LoopCount);
 		const int32 Variant = Coordinate->GetVariant(BlockID);
 		const float X = Coordinate->X * GridX;
-		const float Y = Coordinate->Hierarchy * GridY * (2.0f * -Coordinate->Hierarchy);
+		const float Y = Coordinate->Hierarchy * GridY * (20.0f * -Coordinate->Hierarchy);
 		const float Z = -(Coordinate->Y * GridZ);
 		FVector Location = FVector(X, Y, Z);
 		FTransform Transform = FTransform(FRotator::ZeroRotator, Location + PositionOffset, FVector(1.0f));
 
-		FDigumWorldAsyncBlockResult Result; //= MakeShared<FDigumWorldAsyncBlockResult>();
+		FDigumWorldAsyncBlockResult Result;
 		Result.BlockID = BlockID;
 		Result.Coordinate = *Coordinate;
 		Result.Transform = Transform;
 		Result.Variant = Variant;
 		ResultArray->Add(Result);
-		
-		// ActorChild->AsyncBlockResultQueue.Enqueue(Result);
 		LoopCount++;
 	}
 

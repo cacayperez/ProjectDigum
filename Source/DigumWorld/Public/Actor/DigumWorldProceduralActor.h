@@ -23,8 +23,6 @@ class DIGUMWORLD_API ADigumWorldProceduralActor : public AActor
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 
-
-	
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldProceduralActor();
@@ -36,28 +34,28 @@ protected:
 	UPROPERTY(Replicated)
 	FDigumWorldMap Map;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<FDigumWorldProceduralSection> SectionDataArray;
 	
 	UPROPERTY()
 	TObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FVector2D UnitSectionSize;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	int32 LocalSectionWidth;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	int32 LocalSectionHeight;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FVector GridSize;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FVector WorldOffset;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TArray<ADigumWorldActorSection*> SectionActors;
 	
 	// Called when the game starts or when spawned
