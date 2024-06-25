@@ -39,12 +39,6 @@ float ADigumGamePlayerCharacter::GetVisibilityRadius() const
 	return 3000.0f;
 }
 
-void ADigumGamePlayerCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-	UE_LOG(LogTemp, Warning, TEXT("Character Possessed"));
-	// InitializeInputBindings(InputComponent);
-}
 
 /*
 void ADigumGamePlayerCharacter::InitializeInputBindings(ADigumMinerPlayerController* PlayerController)

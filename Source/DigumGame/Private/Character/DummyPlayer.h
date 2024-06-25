@@ -6,9 +6,9 @@
 #include "GameFramework/Pawn.h"
 #include "DummyPlayer.generated.h"
 
+class ADigumMinerCharacter;
 class UCameraComponent;
 class USpringArmComponent;
-class ADigumGamePlayerCharacter;
 
 UCLASS()
 class DIGUMGAME_API ADummyPlayer : public APawn
@@ -35,10 +35,10 @@ protected:
 	float SpawnDelay = 5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dummy Player", meta=(AllowPrivateAccess="true"))
-	TSoftClassPtr<ADigumGamePlayerCharacter> SoftPlayerCharacterClass;
+	TSoftClassPtr<ADigumMinerCharacter> SoftPlayerCharacterClass;
 
 	UPROPERTY()
-	TSubclassOf<ADigumGamePlayerCharacter> PlayerCharacterClass = nullptr;
+	TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = nullptr;
 
 	void SpawnPlayerCharacter();
 	// Called when the game starts or when spawned

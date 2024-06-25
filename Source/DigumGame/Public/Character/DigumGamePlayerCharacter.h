@@ -26,7 +26,5 @@ public:
 	virtual APlayerController* GetPlayerController() const override;
 	virtual float GetVisibilityRadius() const override;
 
-	// virtual void InitializeInputBindings(ADigumMinerPlayerController* PlayerController);
-	virtual void PossessedBy(AController* NewController) override;
 	
 };

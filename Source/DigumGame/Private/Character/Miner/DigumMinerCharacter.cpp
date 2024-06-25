@@ -169,7 +169,7 @@ void ADigumMinerCharacter::BeginPlay()
 	}
 	
 	// Input and actions
-	// InitializeInputBindings();																																																																																																																																									
+	InitializeInputBindings();																																																																																																																																									
 	
 	// Pickup Handler
 
@@ -197,7 +197,7 @@ void ADigumMinerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 {
 	FVector2D MovementVector = InputActionValue.Get<FVector2D>();
-
+	UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Move"))
 	if (Controller != nullptr)
 	{
 		// we only want to move on the x axis
@@ -214,9 +214,10 @@ void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 void ADigumMinerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Setup input component"))
+	// Super::SetupPlayerInputComponent(PlayerInputComponent);
 	AssignedInputComponent = PlayerInputComponent;
 	InitializeInputBindings(PlayerInputComponent);
-	// Super::SetupPlayerInputComponent(PlayerInputComponent);
+	// 
 	// InitializeInputBindings(PlayerInputComponent);
 	// AssignedInputComponent = PlayerInputComponent;
 }
@@ -256,14 +257,15 @@ void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputCompo
 		UE_LOG(LogTemp, Warning, TEXT("Controller is null"));
 		return;
 	}
-
+	
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
 		UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer());
 		if (DigumGameDeveloperSettings && Subsystem)
 		{
-			if(const UDigumInputSettingsAsset* InputSettings = DigumGameDeveloperSettings->PrimaryMinerInputSettings.LoadSynchronous())
+			const TSoftObjectPtr<UDigumInputSettingsAsset> InputSettingsAsset = DigumGameDeveloperSettings->PrimaryMinerInputSettings;
+			if(const UDigumInputSettingsAsset* InputSettings = UDigumAssetManager::GetAsset<UDigumInputSettingsAsset>(InputSettingsAsset))
 			{
 				if(InputSettings->MappingContext)
 					Subsystem->AddMappingContext(InputSettings->MappingContext, 0);

@@ -106,8 +106,8 @@ void ADigumMinerPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	
-	EnableInput(this);
-	SetInputMode(FInputModeGameAndUI());
+	/*InPawn->EnableInput(this);
+	SetInputMode(FInputModeGameAndUI());*/
 
 	// InitializeMinerController();
 }/*

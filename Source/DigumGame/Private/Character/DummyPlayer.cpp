@@ -29,12 +29,13 @@ void ADummyPlayer::SpawnPlayerCharacter()
 {
 	/*if(GetController() && PlayerCharacterClass)
 	{
-		ADigumGamePlayerCharacter* Character = GetWorld()->SpawnActor<ADigumGamePlayerCharacter>(PlayerCharacterClass, GetActorLocation(), GetActorRotation());
+		ADigumMinerCharacter* Character = GetWorld()->SpawnActor<ADigumMinerCharacter>(PlayerCharacterClass, GetActorLocation(), GetActorRotation());
 		APlayerController* PlayerController = Cast<APlayerController>(GetController());
 		if(Character)
 		{
 			GetWorld()->GetTimerManager().ClearTimer(SpawnTimerHandle);
-			GetController()->Possess(Character);
+			PlayerController->Possess(Character);
+			
 			
 			// Character->InitializeInputBindings();
 			// Destroy();

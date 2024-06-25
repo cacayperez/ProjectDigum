@@ -5,6 +5,7 @@
 
 #include "Actor/DigumWorldDynamicProceduralActor.h"
 #include "Asset/DigumAssetManager.h"
+#include "Character/Miner/DigumMinerCharacter.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "GameState/DigumGamePrimaryGameState.h"
@@ -133,7 +134,7 @@ void ADigumGamePrimaryGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 	// UE_LOG(LogTemp, Warning)
-	if(TSubclassOf<ADigumGamePlayerCharacter> PlayerCharacterClass = UDigumAssetManager::GetSubclass<ADigumGamePlayerCharacter>(SoftPlayerCharacterClass))
+	if(TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = UDigumAssetManager::GetSubclass<ADigumMinerCharacter>(SoftPlayerCharacterClass))
 	{
 		FVector SpawnLocation = FVector(0.0f, 0.0f, 200.0f);
 		FRotator SpawnRotation = FRotator::ZeroRotator;
@@ -144,13 +145,12 @@ void ADigumGamePrimaryGameMode::PostLogin(APlayerController* NewPlayer)
 		{
 			if(NewPlayer)
 			{
-				
-					if(ADigumGamePlayerCharacter* Character = GetWorld()->SpawnActor<ADigumGamePlayerCharacter>(PlayerCharacterClass, SpawnLocation, SpawnRotation))
+					if(ADigumMinerCharacter* Character = GetWorld()->SpawnActor<ADigumMinerCharacter>(PlayerCharacterClass, SpawnLocation, SpawnRotation))
 					{
 						UE_LOG(LogTemp, Warning, TEXT("====== Post Login: Spawning character"));
 						NewPlayer->Possess(Character);
+						
 					}
-				
 			}
 			else
 			{

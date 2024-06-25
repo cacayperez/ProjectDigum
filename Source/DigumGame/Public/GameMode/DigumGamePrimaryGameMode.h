@@ -3,14 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Character/DigumGamePlayerCharacter.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "Procedural/DigumWorldMap.h"
-#include "GameFramework/GameMode.h"
 #include "GameMode/DigumGameMode.h"
 #include "DigumGamePrimaryGameMode.generated.h"
 
 struct FDigumWorldProceduralSectionCoordinate;
+class ADigumMinerCharacter;
 class UDigumWorldMapHandler;
 class UDigumWorldProceduralAsset;
 class ADigumWorldDynamicProceduralActor;
@@ -61,7 +60,7 @@ protected:
 	float PlayerSpawnDelay = 5.0f;
 
 	UPROPERTY(EditAnywhere)
-	TSoftClassPtr<ADigumGamePlayerCharacter> SoftPlayerCharacterClass;
+	TSoftClassPtr<ADigumMinerCharacter> SoftPlayerCharacterClass;
 	
 	int32 GetWorldSeed() const;
 	void SetWorldSeed(const int32& InValue);
