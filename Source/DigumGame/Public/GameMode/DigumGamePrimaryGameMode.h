@@ -44,7 +44,6 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 
 	UPROPERTY()
 	bool bInPlayMode = false;
-
 public:
 	ADigumGamePrimaryGameMode();
 	
@@ -52,8 +51,11 @@ public:
 	virtual void PostInitializeComponents() override;
 	virtual void StartPlay() override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
+	void SpawnPlayerCharacter(APlayerController* NewPlayer);
+	/*
 	void HandleCharacterCoordinateChanged(const AActor* Actor, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate);
 	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
+	*/
 
 protected:
 	UPROPERTY()
@@ -68,7 +70,12 @@ protected:
 	
 	virtual void Tick(float DeltaSeconds) override;
 
+	virtual void InitializeProceduralMap(APlayerController* NewPlayer);
+
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void OnMapLoaded(APlayerController* NewPlayer);
 	// void HandleCharacterCoordinateChanged(const AActor* InActor, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate);
 };

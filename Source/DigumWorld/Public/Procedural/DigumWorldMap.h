@@ -41,7 +41,20 @@ public:
 		NumberOfHierarchies = InNumberOfHierarchies;
 		bIsInitialized = true;
 	}
-	
+
+	FDigumWorldMap(const FDigumWorldProceduralRules& ProceduralRules, const FVector InGridSize)
+	{
+		Seed = ProceduralRules.Seed;
+		GridSize = InGridSize;
+		SectionWidth = ProceduralRules.SectionWidth;
+		SectionHeight = ProceduralRules.SectionHeight;
+		SectionCount_HorizontalAxis = ProceduralRules.SectionCount_HorizontalAxis;
+		SectionCount_VerticalAxis = ProceduralRules.SectionCount_VerticalAxis;
+		NumberOfHierarchies = ProceduralRules.NumberOfHierarchies;
+		bIsInitialized = true;
+		
+	}
+
 	UPROPERTY()
 	FName Seed = TEXT("Hello World!");
 

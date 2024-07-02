@@ -3,6 +3,7 @@
 
 #include "DummyPlayer.h"
 
+#include "Actor/DigumWorldDynamicProceduralActor.h"
 #include "Asset/DigumAssetManager.h"
 #include "Camera/CameraComponent.h"
 #include "Character/DigumGamePlayerCharacter.h"
@@ -23,6 +24,7 @@ ADummyPlayer::ADummyPlayer()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	CameraComponent->SetupAttachment(CameraBoom);
+
 }
 
 void ADummyPlayer::SpawnPlayerCharacter()
@@ -48,9 +50,28 @@ void ADummyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PlayerCharacterClass = UDigumAssetManager::GetSubclass(SoftPlayerCharacterClass);
-	if(PlayerCharacterClass)
+	// SpawnMap();
+}
+
+void ADummyPlayer::Multicast_SpawnMap_Implementation()
+{
+	SpawnMap_Internal();
+}
+
+void ADummyPlayer::Server_SpawnMap_Implementation()
+{
+	if(HasAuthority())
 	{
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, this, &ADummyPlayer::SpawnPlayerCharacter, SpawnDelay, false);
+		Multicast_SpawnMap();
 	}
+}
+
+void ADummyPlayer::SpawnMap_Internal()
+{
+
+}
+
+void ADummyPlayer::SpawnMap()
+{
+	Server_SpawnMap();
 }

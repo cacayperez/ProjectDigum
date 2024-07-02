@@ -10,6 +10,33 @@
 
 struct FDigumWorldProceduralSectionCoordinate;
 
+USTRUCT()
+struct FDigumWorldPositioningParams
+{
+	GENERATED_BODY()
+public:
+	FDigumWorldPositioningParams() {}
+	FDigumWorldPositioningParams(const FUniqueNetIdRepl& InPlayerId, const FVector& InWorldLocation)
+	{
+		PlayerId = InPlayerId;
+		WorldLocation = InWorldLocation;
+	}
+	FDigumWorldPositioningParams(const int32& InPlayerIndex, const FVector& InWorldLocation)
+	{
+		PlayerIndex = InPlayerIndex;
+		WorldLocation = InWorldLocation;
+	}
+
+	UPROPERTY()
+	FUniqueNetIdRepl PlayerId = FUniqueNetIdRepl();
+	
+	UPROPERTY()
+	int32 PlayerIndex = -1;
+
+	UPROPERTY()
+	FVector WorldLocation = FVector::ZeroVector;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMWORLD_API UDigumWorldPositioningComponent : public UActorComponent
 {
@@ -38,6 +65,9 @@ class DIGUMWORLD_API UDigumWorldPositioningComponent : public UActorComponent
 
 	UPROPERTY()
 	bool bInitialized = false;
+
+	UPROPERTY()
+	FUniqueNetIdRepl PlayerId;
 	
 public:
 	// Sets default values for this component's properties
@@ -45,13 +75,14 @@ public:
 	void CheckCoordinateChange();
 
 protected:
-	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnSectionCoordinateChanged, const AActor*, const FDigumWorldProceduralSectionCoordinate&, const FDigumWorldProceduralSectionCoordinate&);
+	// DECLARE_MULTICAST_DELEGATE_()
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSectionCoordinateChanged, const FDigumWorldPositioningParams&);
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	FOnSectionCoordinateChanged OnSectionCoordinateChanged;
-
+	
 public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,

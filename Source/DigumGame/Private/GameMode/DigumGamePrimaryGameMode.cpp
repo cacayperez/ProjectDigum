@@ -4,12 +4,14 @@
 #include "GameMode/DigumGamePrimaryGameMode.h"
 
 #include "Actor/DigumWorldDynamicProceduralActor.h"
+#include "Actor/DigumWorldMapActor.h"
 #include "Asset/DigumAssetManager.h"
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "GameState/DigumGamePrimaryGameState.h"
 #include "Interface/IDigumWorldPawnInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Player/DigumMinerPlayerController.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Procedural/DigumWorldMap.h"
@@ -71,37 +73,40 @@ void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerCo
 	// this function doesnt spawn the character yet
 }
 
-void ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged(const AActor* Actor,
-	const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate,
-	const FDigumWorldProceduralSectionCoordinate& InPreviusCoordinate)
+void ADigumGamePrimaryGameMode::SpawnPlayerCharacter(APlayerController* NewPlayer)
 {
-	if(Actor)
+	if(NewPlayer == nullptr)
 	{
-		ProceduralActor->SetActiveLocation(Actor->GetActorLocation());
+		UE_LOG(LogTemp, Warning, TEXT("No Player found"));
+		return;
+	}
+	if(TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = UDigumAssetManager::GetSubclass<ADigumMinerCharacter>(SoftPlayerCharacterClass))
+	{
+		FVector SpawnLocation = FVector(0.0f, 0.0f, 200.0f);
+		FRotator SpawnRotation = FRotator::ZeroRotator;
+		if(ADigumMinerCharacter* Character = GetWorld()->SpawnActor<ADigumMinerCharacter>(PlayerCharacterClass, SpawnLocation, SpawnRotation))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("====== Post Login: Spawning character"));
+			NewPlayer->Possess(Character);
+						
+		}
+		/*
+		FTimerHandle SpawnTimerHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, [this, SpawnLocation, SpawnRotation, NewPlayer, PlayerCharacterClass]()
+		{
+			if(NewPlayer)
+			{
+					
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No Player found"));
+			}
+		}, PlayerSpawnDelay, false);*/
 	}
 }
 
-void ADigumGamePrimaryGameMode::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
-{
-	if(ProceduralActor == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Procedural Actor is null"));
-		return;
-	}
-	const FDigumWorldMap* Map = ProceduralActor->GetMap();
-
-	if(Map == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Map is null"));
-		return;
-	}
-	
-	if(InComponent)
-	{
-		InComponent->InitializePositioningComponent(Map->GridSize, Map->SectionWidth, Map->SectionHeight, Map->GetWorldOffset());
-		InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::HandleCharacterCoordinateChanged);
-	}
-}
 
 int32 ADigumGamePrimaryGameMode::GetWorldSeed() const
 {
@@ -130,33 +135,43 @@ void ADigumGamePrimaryGameMode::Tick(float DeltaSeconds)
 
 }
 
+void ADigumGamePrimaryGameMode::InitializeProceduralMap(APlayerController* NewPlayer)
+{
+	/*if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldDynamicProceduralActor::StaticClass()))
+	{
+		if(NewPlayer->HasAuthority())
+			Actor->SetOwner(NewPlayer);
+		
+	}*/
+}
+
 void ADigumGamePrimaryGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
-	// UE_LOG(LogTemp, Warning)
-	if(TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = UDigumAssetManager::GetSubclass<ADigumMinerCharacter>(SoftPlayerCharacterClass))
-	{
-		FVector SpawnLocation = FVector(0.0f, 0.0f, 200.0f);
-		FRotator SpawnRotation = FRotator::ZeroRotator;
-		
-		FTimerHandle SpawnTimerHandle;
 
-		GetWorld()->GetTimerManager().SetTimer(SpawnTimerHandle, [this, SpawnLocation, SpawnRotation, NewPlayer, PlayerCharacterClass]()
+	InitializeProceduralMap(NewPlayer);
+
+	if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass()))
+	{
+		if(ADigumWorldMapActor* WorldMapActor = Cast<ADigumWorldMapActor>(Actor))
 		{
-			if(NewPlayer)
+			if(NewPlayer && NewPlayer->HasAuthority())
 			{
-					if(ADigumMinerCharacter* Character = GetWorld()->SpawnActor<ADigumMinerCharacter>(PlayerCharacterClass, SpawnLocation, SpawnRotation))
-					{
-						UE_LOG(LogTemp, Warning, TEXT("====== Post Login: Spawning character"));
-						NewPlayer->Possess(Character);
-						
-					}
+				WorldMapActor->SetOwningPlayerController(NewPlayer);
+				// WorldMapActor->SetOwner(NewPlayer);
 			}
-			else
+			
+			WorldMapActor->GetOnWorldLoadedDelegate().AddLambda([NewPlayer, this]()
 			{
-				UE_LOG(LogTemp, Warning, TEXT("No Player found"));
-			}
-		}, PlayerSpawnDelay, false);
+				OnMapLoaded(NewPlayer);
+				// SpawnPlayerCharacter(NewPlayer);
+			});
+		}
+		// UE_LOG(LogTemp, Warning)
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No World Map Actor found"));
 	}
 	
 }

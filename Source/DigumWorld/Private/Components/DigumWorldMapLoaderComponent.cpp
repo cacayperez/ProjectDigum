@@ -14,6 +14,7 @@ UDigumWorldMapLoaderComponent::UDigumWorldMapLoaderComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	SetIsReplicated(true);
 }
 
 
@@ -23,6 +24,15 @@ void UDigumWorldMapLoaderComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+
+	if(GetOwner())
+	{
+		if(ADigumWorldDynamicProceduralActor* Actor = Cast<ADigumWorldDynamicProceduralActor>(GetOwner()))
+		{
+			ProceduralActor = Actor;
+		}
+		
+	}
 	
 }
 
@@ -91,6 +101,7 @@ void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 
 	 
 	if(ProceduralActor == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Procedural Actor is null"));
 		return;
 	}
 	
@@ -106,6 +117,7 @@ void UDigumWorldMapLoaderComponent::RequestSection(const int32 InX, const int32 
 	if(Map == nullptr || Definition == nullptr)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Map or Definition is null"));
+		return;
 	}
 	
 	AsyncTask(ENamedThreads:: AnyThread, [this, Map, Definition, InX, InY]()

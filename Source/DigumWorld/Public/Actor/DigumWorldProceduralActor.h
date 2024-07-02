@@ -33,9 +33,6 @@ private:
 protected:
 	UPROPERTY(Replicated)
 	FDigumWorldMap Map;
-
-	UPROPERTY(Replicated)
-	TArray<FDigumWorldProceduralSection> SectionDataArray;
 	
 	UPROPERTY()
 	TObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
@@ -68,6 +65,11 @@ protected:
 
 	// FDigumWorldProceduralSection& GetSectionData(const int32& InX, const int32& InY);
 public:
+	
+
+	UPROPERTY(Replicated)
+	TArray<FDigumWorldProceduralSection> SectionDataArray;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void SetProceduralAsset(UDigumWorldProceduralAsset* InProceduralAsset) { ProceduralAsset = InProceduralAsset; }

@@ -6,6 +6,7 @@
 #include "Actor/DigumWorldActorSection.h"
 #include "Components/DigumWorldMapLoaderComponent.h"
 #include "Components/DigumWorldPositioningComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Settings/DigumWorldSettings.h"
@@ -16,16 +17,16 @@ ADigumWorldDynamicProceduralActor::ADigumWorldDynamicProceduralActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	SetActorTickInterval(0.2f);
+	// SetActorTickInterval(0.1f);
 	bReplicates = true;
 
 	WorldMapLoaderComponent = CreateDefaultSubobject<UDigumWorldMapLoaderComponent>(TEXT("WorldMapLoaderComponent"));
+	// WorldMapLoaderComponent->InitializeDynamicProceduralMap(this);
 }
 
 void ADigumWorldDynamicProceduralActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ADigumWorldDynamicProceduralActor, PoolSize);
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +34,19 @@ void ADigumWorldDynamicProceduralActor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	/*APlayerController* Controller = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if(Controller)
+	{
+		SetOwner(Controller);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("No Player Controller"));
+	}*/
+
+	// Preinitialize sections
+	// InitializeDefaultSections();
+	
 	UDigumWorldProceduralAsset* Asset = ProceduralRules.GetProceduralAsset();
 	// const UDigumWorldSettings* Settings = GetDefault<UDigumWorldSettings>();
 	if(Asset)
@@ -44,16 +58,32 @@ void ADigumWorldDynamicProceduralActor::BeginPlay()
 		const int32 Horizontal = ProceduralRules.SectionCount_HorizontalAxis;
 		const int32 Vertical = ProceduralRules.SectionCount_VerticalAxis;
 		const int32 Hierarchies = ProceduralRules.NumberOfHierarchies;
-		
+		// ProceduralAsset = Asset;
 		GenerateMap(SeedName, SettingGridSize, SectionWidth, SectionHeight, Horizontal, Vertical, Hierarchies, Asset);
 		ApplyWorldOffsetPosition();
-		SpawnChunks(FVector::Zero(), 5);
+		
 	}
+
+	 Server_SpawnChunksAtLocation(FVector::ZeroVector, 4);
 }
 
 void ADigumWorldDynamicProceduralActor::InitializeDefaultSections()
 {
-	
+	const FVector SettingGridSize = UDigumWorldSettings::GetGridSize();
+	const FName SeedName = ProceduralRules.Seed;
+	const int32 SectionWidth = ProceduralRules.SectionWidth;
+	const int32 SectionHeight = ProceduralRules.SectionHeight;
+	const int32 Horizontal = ProceduralRules.SectionCount_HorizontalAxis;
+	const int32 Vertical = ProceduralRules.SectionCount_VerticalAxis;
+	const int32 Hierarchies = ProceduralRules.NumberOfHierarchies;
+
+	for(int32 x = 0; x < Horizontal; x++)
+	{
+		for(int32 y = 0; y < Vertical; y++)
+		{
+			WorldMapLoaderComponent->RequestSection(x, y);
+		}
+	}
 }
 
 bool ADigumWorldDynamicProceduralActor::AddSection_Internal(FDigumWorldProceduralSection& InSection, const bool& bNew)
@@ -96,6 +126,90 @@ bool ADigumWorldDynamicProceduralActor::AddSection_Internal(FDigumWorldProcedura
 	return false;
 }
 
+void ADigumWorldDynamicProceduralActor::Multicast_HandleCoordinateChanged_Implementation(
+	const FDigumWorldPositioningParams& InParams)
+{
+	HandleCoordinateChanged_Internal(InParams);	
+}
+
+void ADigumWorldDynamicProceduralActor::HandleCoordinateChanged_Internal(const FDigumWorldPositioningParams& InParams)
+{
+	bool bExists = false;
+	for(auto& Params : PositioningParamsArray)
+	{
+		if(Params.PlayerId == InParams.PlayerId)
+		{
+			bExists = true;
+			Params.WorldLocation = InParams.WorldLocation;
+			break;
+		}
+	}
+
+	if(!bExists)
+	{
+		PositioningParamsArray.Add(InParams);
+	}
+}
+
+void ADigumWorldDynamicProceduralActor::UpdateCoordinates()
+{
+	for(auto& Params : PositioningParamsArray)
+	{
+		FDigumWorldProceduralSectionCoordinate SectionCoordinate = GetSectionCoordinate(Params.WorldLocation);
+		const int32 MaxX = GetMap()->SectionCount_HorizontalAxis;
+		const int32 MaxY = GetMap()->SectionCount_VerticalAxis;
+		const TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRect(SectionCoordinate, 3, 0, MaxX, 0, MaxY);
+		
+		for(auto& Coordinate : Coordinates)
+		{
+			if(ADigumWorldActorSection* Section = GetSectionActor(Coordinate.X, Coordinate.Y))
+			{
+				Section->Reinitialize();
+			}
+		}
+	}
+}
+
+void ADigumWorldDynamicProceduralActor::Server_SpawnChunks_Implementation(const int32& InHalfSize)
+{
+	if(HasAuthority())
+	{
+		Multicast_SpawnChunks(InHalfSize);
+	}
+}
+
+void ADigumWorldDynamicProceduralActor::Multicast_SpawnChunks_Implementation(const int32& InHalfSize)
+{
+	SpawnChunks_Internal(InHalfSize);
+}
+
+void ADigumWorldDynamicProceduralActor::SpawnChunks_Internal(const int32& InHalfSize)
+{
+	SpawnChunks(InHalfSize);
+	UpdateCoordinates();
+}
+
+void ADigumWorldDynamicProceduralActor::Server_SpawnChunksAtLocation_Implementation(const FVector& InWorldLocation,
+	const int32& InHalfSize)
+{
+	if(HasAuthority())
+	{
+		Multicast_SpawnChunksAtLocation(InWorldLocation, InHalfSize);
+	}
+}
+
+void ADigumWorldDynamicProceduralActor::Multicast_SpawnChunksAtLocation_Implementation(const FVector& InWorldLocation,
+	const int32& InHalfSize)
+{
+	SpawnChunksAtLocation_Internal(InWorldLocation, InHalfSize);
+}
+
+void ADigumWorldDynamicProceduralActor::SpawnChunksAtLocation_Internal(const FVector& InWorldLocation,
+	const int32& InHalfSize)
+{
+	SpawnChunks(InWorldLocation, InHalfSize);
+}
+
 void ADigumWorldDynamicProceduralActor::GenerateMap(const FName InSeed,  const FVector InGridSize, const int32 InSectionWidth,
                                                     const int32 InSectionHeight, int32 InSectionCount_HorizontalAxis, const int32 InSectionCount_VerticalAxis,
                                                     const int32 InNumberOfHierarchies, UDigumWorldProceduralAsset* InProceduralAsset)
@@ -116,13 +230,22 @@ void ADigumWorldDynamicProceduralActor::OnGenerateMap(const FName InSeed, const 
 	const int32 InSectionCount_VerticalAxis, const int32 InNumberOfHierarchies,
 	UDigumWorldProceduralAsset* InProceduralAsset)
 {
-	
-	InitializePool(200, GetFolderPath());
+	if(HasAuthority())
+	{
+		InitializePool(400, GetFolderPath());
+		
+		UE_LOG(LogTemp, Warning, TEXT("Generating Map %s"), *GetFolderPath().ToString());
+		
+	}
+}
 
-
-	UE_LOG(LogTemp, Warning, TEXT("Generating Map %s"), *GetFolderPath().ToString());
-	WorldMapLoaderComponent->InitializeDynamicProceduralMap(this);
-	
+void ADigumWorldDynamicProceduralActor::Server_HandleCoordinateChanged_Implementation(
+	const FDigumWorldPositioningParams& InParams)
+{
+	if(HasAuthority())
+	{
+		Multicast_HandleCoordinateChanged(InParams);
+	}
 }
 
 TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldDynamicProceduralActor::GetSectionCoordinatesInRect(
@@ -166,17 +289,14 @@ void ADigumWorldDynamicProceduralActor::SpawnChunks(const FVector& InWorldLocati
 }
 
 void ADigumWorldDynamicProceduralActor::SpawnChunks(const FDigumWorldProceduralSectionCoordinate& InCoordinate,
-	const int32& HalfSize)
+	const int32& InHalfSize)
 {
-	if(WorldMapLoaderComponent == nullptr) return;
-	
-	ActiveCoordinates.Empty();
 	const int32 MaxX = GetMap()->SectionCount_HorizontalAxis;
 	const int32 MaxY = GetMap()->SectionCount_VerticalAxis;
-	const TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRect(InCoordinate, HalfSize, 0, MaxX, 0, MaxY);
-	ActiveCoordinates = Coordinates;
+	const TArray<FDigumWorldProceduralSectionCoordinate> Coordinates = GetSectionCoordinatesInRect(InCoordinate, InHalfSize, 0, MaxX, 0, MaxY);
+	// ActiveCoordinates = Coordinates;
 	
-	for(const FDigumWorldProceduralSectionCoordinate& Coordinate : ActiveCoordinates)
+	for(const FDigumWorldProceduralSectionCoordinate& Coordinate : Coordinates)
 	{
 		bool bAdded = false;
 		for(auto& Section : SectionDataArray)
@@ -192,6 +312,25 @@ void ADigumWorldDynamicProceduralActor::SpawnChunks(const FDigumWorldProceduralS
 		if(!bAdded)
 			WorldMapLoaderComponent->RequestSection(Coordinate.X, Coordinate.Y);	
 	}
+}
+
+void ADigumWorldDynamicProceduralActor::SpawnChunks(const int32& HalfSize)
+{
+	if(WorldMapLoaderComponent == nullptr) return;
+
+	TArray<FDigumWorldProceduralSectionCoordinate> ActorCoordinates;
+
+	for(auto& Params : PositioningParamsArray)
+	{
+		FDigumWorldProceduralSectionCoordinate Coordinate = GetSectionCoordinate(Params.WorldLocation);
+		ActorCoordinates.Add(Coordinate);
+	}
+
+	for(const auto& ActorCoordinate : ActorCoordinates)
+	{
+		SpawnChunks(ActorCoordinate, HalfSize);
+	}
+	
 
 }
 
@@ -205,6 +344,7 @@ void ADigumWorldDynamicProceduralActor::InitializePool(int32 InPoolSize, const F
 		{
 			Section->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 			Section->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldDynamicProceduralActor::RemoveSection);
+			Section->SetOwner(GetOwner());
 			Section->SetFolderPath(InFolderPath);
 			Section->SetActorHiddenInGame(true);
 			Section->SetActorEnableCollision(false);
@@ -228,15 +368,16 @@ bool ADigumWorldDynamicProceduralActor::SpawnSectionFromPool(const FVector& InLo
 	}
 	else if(SectionActors.Num() > 0)
 	{
-		// UE_LOG(LogTemp, Warning, TEXT("Pool: Removing from active, %i, %i"), InSection.GetX(), InSection.GetY());
+		UE_LOG(LogTemp, Warning, TEXT("Pool: Removing from active, %i, %i"), InSection.GetX(), InSection.GetY());
 		Section = SectionActors[0];
 		SectionActors.Remove(Section);
 	}
 	
-	if(Section)
+	if(Section && ProceduralAsset)
 	{
 		Section->ResetSection();
 		Section->SetActorHiddenInGame(false);
+		Section->SetActorEnableCollision(false);
 		Section->InitializeSection(UnitSectionSize, InSection, ProceduralAsset);
 		Section->SetActorLocation(InLocation);
 
@@ -250,14 +391,12 @@ bool ADigumWorldDynamicProceduralActor::SpawnSectionFromPool(const FVector& InLo
 	return false;
 }
 
-void ADigumWorldDynamicProceduralActor::HandleCharacterCoordinateChanged(const AActor* Actor,
-	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate,
-	const FDigumWorldProceduralSectionCoordinate& DigumWorldProceduralSectionCoordinate1)
+void ADigumWorldDynamicProceduralActor::HandleCharacterCoordinateChanged(const FDigumWorldPositioningParams& InParams)
 {
-	if(Actor)
-	{
-		SetActiveLocation(Actor->GetActorLocation());
-	}
+
+	Server_HandleCoordinateChanged(InParams);
+	// HandleCoordinateChanged_Internal(InParams);
+
 }
 
 void ADigumWorldDynamicProceduralActor::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
@@ -272,8 +411,11 @@ void ADigumWorldDynamicProceduralActor::RegisterPositioningComponent(UDigumWorld
 	
 	if(InComponent)
 	{
+		
 		InComponent->InitializePositioningComponent(WorldMap->GridSize, WorldMap->SectionWidth, WorldMap->SectionHeight, WorldMap->GetWorldOffset());
 		InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumWorldDynamicProceduralActor::HandleCharacterCoordinateChanged);
+
+		OnRegisterPositioningComponent(InComponent);
 	}
 }
 
@@ -297,6 +439,8 @@ FDigumWorldProceduralDefinition* ADigumWorldDynamicProceduralActor::GetProcedura
 		return &ProceduralAsset->ProceduralDefinition;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Procedural Asset is null"));
+
 	return nullptr;
 }
 
@@ -304,7 +448,9 @@ FDigumWorldProceduralDefinition* ADigumWorldDynamicProceduralActor::GetProcedura
 void ADigumWorldDynamicProceduralActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	SpawnChunks(ActiveCoordinate, 3);
+
+	Server_SpawnChunks(2);
+	// SpawnChunks(4);
 }
 
 

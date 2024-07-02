@@ -1,5 +1,4 @@
-﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
-
+﻿
 #pragma once
 
 #include "CoreMinimal.h"
@@ -276,6 +275,7 @@ public:
 
 	UPROPERTY()
 	int32 SectionWidth = 0;
+
 	
 	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{

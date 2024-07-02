@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "ToolBuilderUtil.h"
 #include "Actor/DigumWorldDynamicProceduralActor.h"
+#include "Actor/DigumWorldMapActor.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Miner/Components/DigumGameActionBarComponent.h"
 #include "Character/Miner/Components/DigumGameEquipComponent.h"
@@ -117,6 +118,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
 	PositioningComponent = CreateDefaultSubobject<UDigumWorldPositioningComponent>(TEXT("PositioningComponent"));
 
+
 }
 
 void ADigumMinerCharacter::OnActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)
@@ -175,12 +177,12 @@ void ADigumMinerCharacter::BeginPlay()
 
 	if(PositioningComponent)
 	{
-		if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldDynamicProceduralActor::StaticClass()))
+		if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass()))
 		{
-			if(ADigumWorldDynamicProceduralActor* ProceduralActor = Cast<ADigumWorldDynamicProceduralActor>(Actor))
+			if(ADigumWorldMapActor* WorldMapActor = Cast<ADigumWorldMapActor>(Actor))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
-				ProceduralActor->RegisterPositioningComponent(PositioningComponent);
+				WorldMapActor->RegisterPositioningComponent(PositioningComponent);
 			}
 			
 		}
@@ -197,7 +199,7 @@ void ADigumMinerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 void ADigumMinerCharacter::Move(const FInputActionValue& InputActionValue)
 {
 	FVector2D MovementVector = InputActionValue.Get<FVector2D>();
-	UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Move"))
+	// UE_LOG(LogDigumMinerCharacter, Warning, TEXT("=== Character: Move"))
 	if (Controller != nullptr)
 	{
 		// we only want to move on the x axis

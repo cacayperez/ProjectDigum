@@ -73,11 +73,13 @@ protected:
 	void CleanupSection();
 
 	FDigumWorldSectionReadyForCleanup OnSectionReadyForCleanup;
+	
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	void Reinitialize();
+	void InitializeSpawnData(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection);
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset = 0, const int32& HeightOffset = 0);
@@ -85,10 +87,8 @@ public:
 	void DestroySection();
 	void ResetSection();
 	void EnableSection();
+	void SetSectionEnabled(const bool& bValue);
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
 	FDigumWorldSectionReadyForCleanup& GetDigumWorldSectionReadyForCleanupDelegate() { return OnSectionReadyForCleanup; }
-	/*int32 GetX() const;
-	int32 GetY() const;*/
-	// void SetBoxExtent(const FVector& InExtent) const;
-	// bool IsFlaggedForReuse() const { return bFlaggedForReuse; }
+
 };

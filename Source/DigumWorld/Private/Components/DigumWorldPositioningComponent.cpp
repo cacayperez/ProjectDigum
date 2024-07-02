@@ -4,6 +4,8 @@
 #include "Components/DigumWorldPositioningComponent.h"
 
 #include "Functions/DigumWorldFunctionHelpers.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/PlayerState.h"
 #include "Settings/DigumWorldSettings.h"
 
 
@@ -33,8 +35,11 @@ void UDigumWorldPositioningComponent::CheckCoordinateChange()
 	{
 		PreviousCoordinate = CurrentCoordinate;
 		CurrentCoordinate = NewCoordinate;
-		OnSectionCoordinateChanged.Broadcast(GetOwner(), CurrentCoordinate, PreviousCoordinate);
+		
+		//OnSectionCoordinateChanged.Broadcast(GetOwner(), CurrentCoordinate, PreviousCoordinate);
 	}
+	const FDigumWorldPositioningParams Params = FDigumWorldPositioningParams(PlayerId, ActorLoc);
+	OnSectionCoordinateChanged.Broadcast(Params);
 }
 
 
@@ -42,6 +47,21 @@ void UDigumWorldPositioningComponent::CheckCoordinateChange()
 void UDigumWorldPositioningComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if(GetOwner())
+	{
+		if(ACharacter* Character = Cast<ACharacter>(GetOwner()))
+		{
+			if(const APlayerController* PlayerController = Character->GetController<APlayerController>())
+			{
+				if(const APlayerState* PlayerState = PlayerController->PlayerState)
+				{
+					PlayerId = PlayerState->GetUniqueId();
+				}
+			}
+		}
+		
+	}
 	/*if(GetWorld())
 	{
 		// TODO Get Current Content Category from Game Mode

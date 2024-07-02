@@ -747,7 +747,7 @@ void UDigumWorldGenerator::GenerateWorldMap(const FDigumWorldProceduralRules& In
 	}
 	if(ProceduralAsset == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Procedural Asset is null"));
+		UE_LOG(LogTemp, Error, TEXT("UDigumWorldGenerator: Procedural Asset is null"));
 		return;
 	}
 	const FRandomStream RandomStream(Seed);

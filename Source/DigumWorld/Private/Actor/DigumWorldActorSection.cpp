@@ -63,7 +63,9 @@ void ADigumWorldActorSection::BeginPlay()
 
 void ADigumWorldActorSection::CleanupSection()
 {
+	
 	OnSectionReadyForCleanup.Broadcast(this);
+	SetSectionEnabled(false);
 }
 
 // Called every frame
@@ -77,14 +79,20 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 void ADigumWorldActorSection::Reinitialize()
 {
 	// UE_LOG(LogTemp, Warning, TEXT("Reinitialize Section"));
-	EnableSection();
+	// EnableSection();
 	GetWorld()->GetTimerManager().ClearTimer(CleanupTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 }
 
+void ADigumWorldActorSection::InitializeSpawnData(const FVector2D& InSectionSize,
+	FDigumWorldProceduralSection& InSection)
+{
+	InitializeSection(InSectionSize, InSection, nullptr);
+}
+
 void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
+	// GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 	SectionData = InSection;
 	SectionX = InSection.GetX();
 	SectionY = InSection.GetY();
@@ -101,7 +109,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	}
 
 	Array->MakeMappedCoordinates(Blocks);
-	EnableSection();
+	// EnableSection();
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
 	{
 		FName BlockID = It->Key;
@@ -246,6 +254,28 @@ void ADigumWorldActorSection::EnableSection()
 	
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
+}
+
+void ADigumWorldActorSection::SetSectionEnabled(const bool& bValue)
+{
+	const bool bCollisionEnabled = bValue;
+	const bool bHiddenInGame = !bValue;
+	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	{
+		if(ADigumWorldActorChild* ChildActor = It->Value)
+		{
+			ChildActor->SetActorEnableCollision(bCollisionEnabled);
+			ChildActor->SetActorHiddenInGame(bHiddenInGame);
+		}
+	}
+
+	SetActorEnableCollision(bCollisionEnabled);
+	SetActorHiddenInGame(bHiddenInGame);
+
+	if(bValue)
+	{
+		// Reinitialize();
+	}
 }
 
 /*

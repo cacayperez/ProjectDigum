@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "DummyPlayer.generated.h"
 
+class ADigumWorldDynamicProceduralActor;
 class ADigumMinerCharacter;
 class UCameraComponent;
 class USpringArmComponent;
@@ -23,6 +24,9 @@ class DIGUMGAME_API ADummyPlayer : public APawn
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category= "Dummy Player", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCameraComponent> CameraComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dummy Player", meta=(AllowPrivateAccess="true"))
+	TSoftClassPtr<ADigumWorldDynamicProceduralActor> ProceduralActorSoftClass;
 public:
 	// Sets default values for this pawn's properties
 	ADummyPlayer();
@@ -43,4 +47,15 @@ protected:
 	void SpawnPlayerCharacter();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnMap();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnMap();
+
+	void SpawnMap_Internal();
+	
+public:
+	void SpawnMap();
 };
