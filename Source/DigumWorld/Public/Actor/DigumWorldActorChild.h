@@ -56,11 +56,11 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 	
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDigumWorldISMComponent> InstancedMeshComponent;
 
 	
-	UPROPERTY()
+	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<float> Health;
 
 public:
@@ -72,7 +72,7 @@ protected:
 	UPROPERTY(Replicated)
 	FName BlockID;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	TObjectPtr<UDigumWorldSwatchAsset> SwatchAsset;
 	
 	UPROPERTY(Replicated)
@@ -89,7 +89,9 @@ protected:
 	
 public:
 	virtual void Tick(float DeltaSeconds) override;
-	TQueue<TSharedPtr<FDigumWorldAsyncBlockResult>> AsyncBlockResultQueue;
+	// TQueue<TSharedPtr<FDigumWorldAsyncBlockResult>> AsyncBlockResultQueue;
+
+	
 	TQueue<TSharedPtr<FDigumWorldAsyncBlockResultArray>> AsyncBlockResultArrayQueue;
 	
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);

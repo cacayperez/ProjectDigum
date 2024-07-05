@@ -182,7 +182,7 @@ void ADigumMinerCharacter::BeginPlay()
 			if(ADigumWorldMapActor* WorldMapActor = Cast<ADigumWorldMapActor>(Actor))
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
-				WorldMapActor->RegisterPositioningComponent(PositioningComponent);
+				// WorldMapActor->RegisterPositioningComponent(PositioningComponent);
 			}
 			
 		}

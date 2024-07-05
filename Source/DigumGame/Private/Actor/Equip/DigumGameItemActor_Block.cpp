@@ -3,6 +3,8 @@
 
 #include "Actor/Equip/DigumGameItemActor_Block.h"
 
+#include "Actor/DigumWorldActor.h"
+#include "Actor/DigumWorldMapActor.h"
 #include "Actor/DigumWorldProceduralActor.h"
 #include "Actor/Build/Preview/DigumBlockPreview.h"
 #include "DigumBuild/Public/Actor/DigumBuildPreviewActor.h"
@@ -120,10 +122,10 @@ void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigu
 	if(BlockPreview)
 	{
 		FVector TargetLocation = BlockPreview->GetPreviewTargetLocation();
-		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldProceduralActor::StaticClass());
+		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass());
 		if(Actor)
 		{
-			if(ADigumWorldProceduralActor* ProceduralActor = Cast<ADigumWorldProceduralActor>(Actor))
+			if(ADigumWorldMapActor* ProceduralActor = Cast<ADigumWorldMapActor>(Actor))
 			{
 				FName BlockID = GetItemProperties()->GetItemID();
 				ProceduralActor->AddBlock(BlockID, TargetLocation);

@@ -33,6 +33,18 @@ class DIGUMWORLD_API UDigumWorldMapSectionComponent : public UActorComponent
 
 	UPROPERTY()
 	UDigumWorldProceduralAsset* ProceduralAsset;
+
+	UPROPERTY()
+	int32 SectionWidth;
+
+	UPROPERTY()
+	int32 SectionHeight;
+
+	UPROPERTY()
+	int32 SectionCount_HorizontalAxis;
+
+	UPROPERTY()
+	int32 SectionCount_VerticalAxis;
 	
 public:
 	// Sets default values for this component's properties

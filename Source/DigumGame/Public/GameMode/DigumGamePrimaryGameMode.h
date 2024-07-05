@@ -8,6 +8,7 @@
 #include "GameMode/DigumGameMode.h"
 #include "DigumGamePrimaryGameMode.generated.h"
 
+class ADigumWorldMapActor;
 struct FDigumWorldProceduralSectionCoordinate;
 class ADigumMinerCharacter;
 class UDigumWorldMapHandler;
@@ -42,8 +43,14 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 	UPROPERTY()
 	TObjectPtr<ADigumWorldDynamicProceduralActor> ProceduralActor;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Digum Game State", meta=(AllowPrivateAccess="true"))
+	TSoftClassPtr<ADigumWorldMapActor> SoftWorldMapActorClass;
+
 	UPROPERTY()
-	bool bInPlayMode = false;
+	bool bMapInitialized = false;
+	
+
+	
 public:
 	ADigumGamePrimaryGameMode();
 	
@@ -69,8 +76,7 @@ protected:
 	FVector GetGridSize() const;
 	
 	virtual void Tick(float DeltaSeconds) override;
-
-	virtual void InitializeProceduralMap(APlayerController* NewPlayer);
+	virtual void InitializeWorldMap(APlayerController* NewPlayer);
 
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;

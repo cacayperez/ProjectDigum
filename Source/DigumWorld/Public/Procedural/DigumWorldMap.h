@@ -81,6 +81,11 @@ public:
 	UPROPERTY()
 	TArray<FDigumWorldProceduralSection> SectionDataArray;
 
+	FVector2D GetSectionSize() const
+	{
+		return FVector2D(SectionWidth, SectionHeight);
+	}
+
 	FVector2D GetSectionUnitSize() const
 	{
 		return FVector2D(SectionWidth * GridSize.X, SectionHeight * GridSize.Z);

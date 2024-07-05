@@ -11,6 +11,7 @@
 #include "Functions/DigumWorldFunctionHelpers.h"
 #include "Interface/IDigumPawnInterface.h"
 #include "Interface/IDigumWorldPawnInterface.h"
+#include "Net/UnrealNetwork.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Settings/DigumWorldSettings.h"
 
@@ -25,7 +26,17 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(Root);*/
 	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
-	bReplicates = true;
+	// bReplicates = true;
+	
+}
+
+void ADigumWorldActorSection::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADigumWorldActorSection, ChildActorsContainers);
+	DOREPLIFETIME(ADigumWorldActorSection, SectionData);
+	DOREPLIFETIME(ADigumWorldActorSection, GridSize);
+	DOREPLIFETIME(ADigumWorldActorSection, SectionSize);
 	
 }
 
@@ -48,10 +59,10 @@ void ADigumWorldActorSection::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(VisibilityComponent)
+	/*if(VisibilityComponent)
 	{
 		VisibilityComponent->GetOnSetVisibilityDelegate().AddUObject(this, &ADigumWorldActorSection::OnSetWorldVisibility);
-	}
+	}*/
 
 	/*if(BoxComponent)
 	{
@@ -65,7 +76,7 @@ void ADigumWorldActorSection::CleanupSection()
 {
 	
 	OnSectionReadyForCleanup.Broadcast(this);
-	SetSectionEnabled(false);
+	// SetSectionEnabled(false);
 }
 
 // Called every frame
@@ -87,6 +98,7 @@ void ADigumWorldActorSection::Reinitialize()
 void ADigumWorldActorSection::InitializeSpawnData(const FVector2D& InSectionSize,
 	FDigumWorldProceduralSection& InSection)
 {
+
 	InitializeSection(InSectionSize, InSection, nullptr);
 }
 
@@ -94,8 +106,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 {
 	// GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 	SectionData = InSection;
-	SectionX = InSection.GetX();
-	SectionY = InSection.GetY();
+
 	SectionSize = InSectionSize;
 	GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
 
@@ -109,7 +120,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 	}
 
 	Array->MakeMappedCoordinates(Blocks);
-	// EnableSection();
+	EnableSection();
 	for (auto It = Blocks.CreateConstIterator(); It; ++It)
 	{
 		FName BlockID = It->Key;
@@ -119,12 +130,9 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 		
 		if(SwatchAsset)
 		{
-			ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(BlockID);
-			if(ChildActor)
+			if(ADigumWorldActorChild* ChildActor = GetChildActor(BlockID))
 			{
-				// TODO How to set variants?
 				ChildActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
-				
 			}
 			else
 			{
@@ -138,8 +146,10 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 						// NewActor->SetFolderPath(GetFolderPath());
 						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
 						NewActor->FinishSpawning(FTransform::Identity);
-					
-						WorldChildActors.FindOrAdd(BlockID, NewActor);
+
+						ChildActorsContainers.Add(FDigumWorldChildActorsContainer(BlockID, NewActor));
+						
+						// WorldChildActors.FindOrAdd(BlockID, NewActor);
 						/*#if WITH_EDITOR
 											NewActor->SetIsHiddenEdLayer(true);
 						#endif*/
@@ -152,6 +162,8 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 			
 				}
 			}
+			
+			
 		}
 		else
 		{
@@ -168,7 +180,7 @@ void ADigumWorldActorSection::CreateChildActor(FDigumWorldProceduralCoordinateAr
 void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset,
 	const int32& HeightOffset)
 {
-	ADigumWorldActorChild* ChildActor = WorldChildActors.FindRef(InBlockID);
+	ADigumWorldActorChild* ChildActor = GetChildActor(InBlockID);//WorldChildActors.FindRef(InBlockID);
 	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
 	FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate();
 	Coordinate.BlockID = InBlockID;
@@ -276,6 +288,29 @@ void ADigumWorldActorSection::SetSectionEnabled(const bool& bValue)
 	{
 		// Reinitialize();
 	}
+}
+
+FDigumWorldChildActorsContainer* ADigumWorldActorSection::GetChildActorContainer(const FName& InBlockID)
+{
+	for(auto& Container: ChildActorsContainers)
+	{
+		if(Container.BlockID == InBlockID)
+		{
+			return &Container;
+		}
+	}
+
+	return nullptr;
+}
+
+ADigumWorldActorChild* ADigumWorldActorSection::GetChildActor(const FName& InBlockID)
+{
+	if(FDigumWorldChildActorsContainer* Container = GetChildActorContainer(InBlockID))
+	{
+		return Container->ChildActor;
+	}
+
+	return nullptr;
 }
 
 /*

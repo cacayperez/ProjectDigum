@@ -23,7 +23,7 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
 
-	bReplicates = true;
+	// bReplicates = true;
 	SetActorTickEnabled(false);
 
 }
@@ -32,6 +32,10 @@ void ADigumWorldActorChild::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	// DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
+	DOREPLIFETIME(ADigumWorldActorChild, BlockID);
+	DOREPLIFETIME(ADigumWorldActorChild, Health);
+	DOREPLIFETIME(ADigumWorldActorChild, GridSize);
+	DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
 }
 
 void ADigumWorldActorChild::BeginPlay()
@@ -189,8 +193,8 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
 
-		if(HasAuthority())
-			AddBlock(InBlockID,Coordinates);
+		
+		AddBlock(InBlockID,Coordinates);
 		
 	}
 	
@@ -198,8 +202,8 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 
 void ADigumWorldActorChild::ResetChildActor()
 {
-	SetActorEnableCollision(false);
-	SetActorHiddenInGame(true);
+	// SetActorEnableCollision(false);
+	// SetActorHiddenInGame(true);
 	Health.Empty();
 	InstancedMeshComponent->ClearInstances();
 }
@@ -220,8 +224,7 @@ void ADigumWorldActorChild::SetWorldCollision(const bool& bValue)
 
 void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProceduralCoordinateArray& InCoordinates)
 {
-	/*if(!SwatchAsset)
-		UE_LOG(LogTemp, Warning, TEXT("AddBlock %i,"), InCoordinates.CoordinateCount());*/
+	UE_LOG(LogTemp, Warning, TEXT("Coordinate Count %i,"), InCoordinates.CoordinateCount());
 	
 	const float GridX = GridSize.X;
 	const float GridY = GridSize.Y;

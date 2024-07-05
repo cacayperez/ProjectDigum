@@ -29,3 +29,15 @@ FVector UDigumWorldSettings::GetGridSize()
 	const UDigumWorldSettings* Settings = Get();
 	return Settings->GridSize;
 }
+
+TSubclassOf<ADigumWorldMapActor> UDigumWorldSettings::GetWorldMapActorClass()
+{
+	const UDigumWorldSettings* Settings = Get();
+
+	if(Settings)
+	{
+		return UDigumAssetManager::GetSubclass<ADigumWorldMapActor>(Settings->WorldMapActorClass);
+	}
+
+	return nullptr;
+}

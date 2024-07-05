@@ -14,6 +14,9 @@ UDigumWorldMapSectionComponent::UDigumWorldMapSectionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+
+	// SetIsReplicated(true);
+	
 }
 
 
@@ -37,10 +40,10 @@ void UDigumWorldMapSectionComponent::InitializeSections(const FDigumWorldProcedu
 	TotalNumberOfSections = InProceduralRules.SectionCount_HorizontalAxis * InProceduralRules.SectionCount_VerticalAxis;
 	SectionsArray.SetNum(TotalNumberOfSections);
 	
-	const int32 SectionWidth = InProceduralRules.SectionWidth;
-	const int32 SectionHeight = InProceduralRules.SectionHeight;
-	const int32 SectionCount_HorizontalAxis = InProceduralRules.SectionCount_HorizontalAxis;
-	const int32 SectionCount_VerticalAxis = InProceduralRules.SectionCount_VerticalAxis;
+	SectionWidth = InProceduralRules.SectionWidth;
+	SectionHeight = InProceduralRules.SectionHeight;
+	SectionCount_HorizontalAxis = InProceduralRules.SectionCount_HorizontalAxis;
+	SectionCount_VerticalAxis = InProceduralRules.SectionCount_VerticalAxis;
 	const int32 NumberOfHierarchies = InProceduralRules.NumberOfHierarchies;
 	
 
@@ -99,10 +102,12 @@ bool UDigumWorldMapSectionComponent::LoadSection(FDigumWorldProceduralSection& S
 	const int32 X = Section.GetX();
 	const int32 Y = Section.GetY();
 				
-	const int32 Index = X * Y;
-	if(Section.IsInitialized())
+	// const int32 Index = (SectionCount_HorizontalAxis * X) + Y;
+	const int32 Index = (SectionCount_HorizontalAxis * Y) + X;
+	UE_LOG(LogTemp, Warning, TEXT("Section Loaded: %i, %i, %i"), X, Y, Index);
+	if(Section.IsInitialized() && SectionsArray.IsValidIndex(Index))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Section Loaded: %i, %i"), X, Y);
+
 		SectionsArray[Index] = Section;
 		OnSectionLoaded.Broadcast(Section);
 
@@ -122,33 +127,28 @@ void UDigumWorldMapSectionComponent::SetAsyncCheck(const bool& bValue)
 
 void UDigumWorldMapSectionComponent::CheckSectionToGenerate()
 {
-	bool bFound = false;
+	
 	TPair<int32, int32> SelectedPair;
 	for(TPair<int32, int32> Pair : SectionsToGenerate)
 	{
-		bFound = true;
+		
 		SelectedPair = Pair;
 		const int32 X = Pair.Key;
 		const int32 Y = Pair.Value;
 		if(X < 0 || Y < 0)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Invalid Section Coordinates"));
-			bFound = false;
-			break;
+			return;
 		}
 		
 		AsyncTask(ENamedThreads:: AnyThread, [this, X, Y]()
 		{
 			(new FAutoDeleteAsyncTask<FDigumWorldAsyncSectionLoader>(this, WorldMap, ProceduralAsset->ProceduralDefinition, X, Y))->StartBackgroundTask();
 		});
+
+		SectionsToGenerate.Remove(SelectedPair);
 		break;
 	}
-
-	if(bFound)
-	{
-		SectionsToGenerate.Remove(SelectedPair);
-	}
-
 	
 }
 

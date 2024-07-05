@@ -44,18 +44,7 @@ protected:
 	UPROPERTY()
 	TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = nullptr;
 
-	void SpawnPlayerCharacter();
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SpawnMap();
-
-	UFUNCTION(Server, Reliable)
-	void Server_SpawnMap();
-
-	void SpawnMap_Internal();
-	
-public:
-	void SpawnMap();
 };

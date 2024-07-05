@@ -32,10 +32,10 @@ class DIGUMWORLD_API ADigumWorldMapActor : public AActor
 	UPROPERTY()
 	TObjectPtr<UDigumWorldMapSectionComponent> SectionComponent;
 	
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FDigumWorldMap WorldMap;
 	
-	UPROPERTY(EditAnywhere, Category = "Digum World Map", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(Replicated, EditAnywhere, Category = "Digum World Map", meta = (AllowPrivateAccess = "true"))
 	FDigumWorldProceduralRules ProceduralRules;
 
 	UPROPERTY(Replicated)
@@ -43,6 +43,9 @@ class DIGUMWORLD_API ADigumWorldMapActor : public AActor
 
 	UPROPERTY()
 	TObjectPtr<APlayerController> OwningPlayerController;
+
+	UPROPERTY(Replicated)
+	FVector WorldOffset;
 	
 public:
 
@@ -71,15 +74,13 @@ protected:
 	ADigumWorldActorSection* GetSection(const int32 InX, const int32 InY);
 	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRect(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize, const int32& XMin, const int32& XMax, const int32& YMin, const int32& YMax) const;
 
+	int32 GetSectionIndex(const int32 InX, const int32 InY) const;
 public:
-	void GenerateWorldMap();
+	// void GenerateWorldMap();
 	void SetPhase(const EDigumWorldMapPhase& InPhase) { CurrentPhase = InPhase; }
 	EDigumWorldMapPhase GetPhase() const { return CurrentPhase; }
 
 	void EnableSection(const int32 InX, const int32 InY);
-	void HandleCharacterCoordinateChanged(const FDigumWorldPositioningParams& DigumWorldPositioningParams);
-	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
-
 
 	FOnWorldLoaded& GetOnWorldLoadedDelegate() { return OnWorldLoaded; }
 
@@ -91,10 +92,15 @@ public:
 	
 	void TrySpawnSection(FDigumWorldProceduralSection& InSection);
 
+	void BeginInitializeMap();
+	
 	void SetOwningPlayerController(APlayerController* NewPlayer)
 	{
 		OwningPlayerController = NewPlayer;
 		SetOwner(NewPlayer);
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::SetOwningPlayerController: %s"), *NewPlayer->GetName());
+
 	}
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
+	void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 };

@@ -17,6 +17,7 @@ ADigumWorldActor::ADigumWorldActor(const FObjectInitializer& ObjectInitializer)
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 }
 
 void ADigumWorldActor::OnWorldRequest(const EDigumWorld_Request& InDigumWorld_Request,

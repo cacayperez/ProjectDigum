@@ -22,6 +22,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 	NumCustomDataFloats = 3;
 	SetCastShadow(false);
 	bCastDynamicShadow = false;
+	// SetIsReplicated(true);
 }
 
 /*

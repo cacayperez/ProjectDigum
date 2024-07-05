@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/DigumWorldMapActor.h"
 #include "Engine/DeveloperSettings.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "DigumWorldSettings.generated.h"
@@ -35,8 +36,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "Content", meta=(DisplayName="World Content Category"))
 	TArray<FDigumWorldContentCategory> WorldContentCategories;
 
+	UPROPERTY(Config, EditAnywhere, Category = "Content", meta=(DisplayName="World Content Category"))
+	TSoftClassPtr<ADigumWorldMapActor> WorldMapActorClass;
+	
 	static const UDigumWorldSettings* Get();
 	static const FDigumWorldContentCategory* GetWorldContentCategoryData(FName ContentCategoryName);
 	static FVector GetGridSize();
-	
+	static TSubclassOf<ADigumWorldMapActor> GetWorldMapActorClass();
 };

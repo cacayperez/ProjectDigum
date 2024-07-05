@@ -22,6 +22,8 @@ ADigumWorldMapActor::ADigumWorldMapActor()
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+	bReplicates = true;
 	
 }
 
@@ -29,22 +31,15 @@ void ADigumWorldMapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ADigumWorldMapActor, SectionActors);
+	/*DOREPLIFETIME(ADigumWorldMapActor, SectionActors);
+	DOREPLIFETIME(ADigumWorldMapActor, WorldMap);
+	DOREPLIFETIME(ADigumWorldMapActor, ProceduralRules);
+	DOREPLIFETIME(ADigumWorldMapActor, WorldOffset);*/
 }
 
 void ADigumWorldMapActor::OnSectionLoaded(FDigumWorldProceduralSection& DigumWorldProceduralSection)
 {
 	TrySpawnSection(DigumWorldProceduralSection);
-	/*if(HasAuthority())
-	{
-		SpawnSection(DigumWorldProceduralSection);
-	}
-	else // SpawnLocally
-	{
-		
-		SpawnSection(DigumWorldProceduralSection);
-	}*/
-	
 }
 
 void ADigumWorldMapActor::OnAllSectionsLoaded()
@@ -52,30 +47,13 @@ void ADigumWorldMapActor::OnAllSectionsLoaded()
 	UE_LOG(LogTemp, Warning, TEXT("World Map Actor: All Sections Loaded"));
 
 	OnWorldLoaded.Broadcast();
-	// GenerateWorldMap();
 }
 
 // Called when the game starts or when spawned
 void ADigumWorldMapActor::BeginPlay()
 {
 	Super::BeginPlay();
-	UE_LOG(LogTemp, Warning, TEXT("World Map Actor: Begin Play"));
-	const FVector SettingGridSize = UDigumWorldSettings::GetGridSize();
-	WorldMap = FDigumWorldMap(ProceduralRules, SettingGridSize);
-
-	const int32 NumberOfSections  = WorldMap.SectionCount_HorizontalAxis * WorldMap.SectionCount_VerticalAxis;
-	SectionActors.SetNum(NumberOfSections);
-	// UnitSectionSize = WorldMap.GetSectionUnitSize();
-	if(SectionComponent)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("World Map Actor: Initializing Sections"));
-		SectionComponent->GetOnInitializeSectionDelegate().AddUObject(this, &ADigumWorldMapActor::OnInitializeSection);
-		SectionComponent->GetOnSectionLoadedEventDelegate().AddUObject(this, &ADigumWorldMapActor::OnSectionLoaded);
-		SectionComponent->GetOnAllSectionsLoadedEventDelegate().AddUObject(this, &ADigumWorldMapActor::OnAllSectionsLoaded);
-		
-		SectionComponent->InitializeSections(ProceduralRules, WorldMap);
-		
-	}
+	
 
 }
 
@@ -95,12 +73,11 @@ void ADigumWorldMapActor::SpawnSection(FDigumWorldProceduralSection& InSection)
 			UE_LOG(LogTemp, Warning, TEXT("Invalid Section Coordinates"));
 			return;
 		}
+		
 		const FVector2D UnitSectionSize = WorldMap.GetSectionUnitSize();
 		const float X = (SX * (UnitSectionSize.X));
 		const float Z = -(SY * (UnitSectionSize.Y));
-		const FVector SectionLocation = FVector(X, 0, Z) + WorldMap.GetWorldOffset();
-
-		UE_LOG(LogTemp, Warning, TEXT("SPAWNING: Section Location: %s"), *SectionLocation.ToString());
+		const FVector SectionLocation = FVector(X, 0, Z) + WorldOffset;
 		
 		SectionActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		SectionActor->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldMapActor::OnRemoveSection);
@@ -109,42 +86,32 @@ void ADigumWorldMapActor::SpawnSection(FDigumWorldProceduralSection& InSection)
 		SectionActor->InitializeSpawnData(WorldMap.GetSectionUnitSize(),InSection);
 		SectionActor->FinishSpawning(FTransform::Identity);
 		SectionActor->SetActorLocation(SectionLocation);
-		SectionActor->SetSectionEnabled(true);
+		// SectionActor->SetSectionEnabled(true);
 
-		const int32 SectionIndex = SX * SY;
+		// const int32 ColumnHeight = ;
+		
+		const int32 SectionIndex = GetSectionIndex(SX, SY);
+		// const int32 Index = ;
 		if(SectionActors.IsValidIndex(SectionIndex))
 		{
 			SectionActors[SectionIndex] = SectionActor;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Section Spawned: %i, %i"), SX, SY);
+		UE_LOG(LogTemp, Warning, TEXT("Section Spawned: %i, %i, SectionIndex, %i"), SX, SY, SectionIndex);
 	}
 }
 
 ADigumWorldActorSection* ADigumWorldMapActor::GetSection(const int32 InX, const int32 InY)
 {
-	const int32 Index = InX * InY;
-	if(SectionActors.IsValidIndex(Index))
+	const int32 SectionIndex = GetSectionIndex(InX, InY);
+	if(SectionActors.IsValidIndex(SectionIndex))
 	{
-		return SectionActors[Index];
+		return SectionActors[SectionIndex];
 	}
 	return nullptr;
 }
 
-void ADigumWorldMapActor::GenerateWorldMap()
-{
-	for(int32 x = 0; x < ProceduralRules.SectionCount_HorizontalAxis; x++)
-	{
-		for(int32 y = 0; y < ProceduralRules.SectionCount_VerticalAxis; y++)
-		{
-			if(FDigumWorldProceduralSection* Section = SectionComponent->GetSection(x * y))
-			{
-				// Do something with the section
-				SpawnSection(*Section);
-			}
-		}
-	}
-}
+
 
 void ADigumWorldMapActor::EnableSection(const int32 InX, const int32 InY)
 {
@@ -159,33 +126,6 @@ void ADigumWorldMapActor::EnableSection(const int32 InX, const int32 InY)
 	}
 }
 
-void ADigumWorldMapActor::HandleCharacterCoordinateChanged(
-	const FDigumWorldPositioningParams& DigumWorldPositioningParams)
-{	
-	const FVector OffsetLocation = DigumWorldPositioningParams.WorldLocation - WorldMap.GetWorldOffset();
-	FDigumWorldProceduralSectionCoordinate OutCoordinate;
-	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(OffsetLocation, WorldMap.GetSectionUnitSize(), OutCoordinate);
-
-	TArray<FDigumWorldProceduralSectionCoordinate> SectionCoordinates = GetSectionCoordinatesInRect(OutCoordinate, 2, 0, ProceduralRules.SectionCount_HorizontalAxis, 0, ProceduralRules.SectionCount_VerticalAxis);
-
-	for(const auto& SectionCoordinate: SectionCoordinates)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::HandleCharacterCoordinateChanged"));
-		EnableSection(SectionCoordinate.X, SectionCoordinate.Y);
-	}
-}
-
-void ADigumWorldMapActor::RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent)
-{	
-	if(InComponent)
-	{
-		
-		InComponent->InitializePositioningComponent(WorldMap.GridSize, WorldMap.SectionWidth, WorldMap.SectionHeight, WorldMap.GetWorldOffset());
-		InComponent->GetOnCoordinateChangedDelegate().AddUObject(this, &ADigumWorldMapActor::HandleCharacterCoordinateChanged);
-
-		
-	}
-}
 
 void ADigumWorldMapActor::Server_SpawnSection_Implementation(const FDigumWorldProceduralSection& InSection)
 {
@@ -198,17 +138,94 @@ void ADigumWorldMapActor::Server_SpawnSection_Implementation(const FDigumWorldPr
 void ADigumWorldMapActor::Multicast_SpawnSection_Implementation(const FDigumWorldProceduralSection& InSection)
 {
 	// if(GetOwner())
-	if(OwningPlayerController && OwningPlayerController->IsLocalController())
+	if(HasAuthority())
 	{
 		FDigumWorldProceduralSection Section = FDigumWorldProceduralSection(InSection);
 		SpawnSection(Section);
 	}
-
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_SpawnSection_Implementation: No Owner"));
+	}
 }
 
 void ADigumWorldMapActor::TrySpawnSection(FDigumWorldProceduralSection& InSection)
 {
-	Server_SpawnSection(InSection);
+	/*if(OwningPlayerController && OwningPlayerController->IsLocalController())
+	{
+		SpawnSection(InSection);
+	}*/
+	SpawnSection(InSection);
+	// Server_SpawnSection(InSection);
+}
+
+void ADigumWorldMapActor::BeginInitializeMap()
+{
+	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::BeginInitializeMap Called"));
+	
+	if(SectionComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World Map Actor: Begin Play"));
+		const FVector SettingGridSize = UDigumWorldSettings::GetGridSize();
+		WorldMap = FDigumWorldMap();
+		WorldMap.GridSize = SettingGridSize;
+		WorldMap.SectionWidth = ProceduralRules.SectionWidth;
+		WorldMap.SectionHeight = ProceduralRules.SectionHeight;
+		WorldMap.SectionCount_HorizontalAxis = ProceduralRules.SectionCount_HorizontalAxis;
+		WorldMap.SectionCount_VerticalAxis = ProceduralRules.SectionCount_VerticalAxis;
+		WorldMap.NumberOfHierarchies = ProceduralRules.NumberOfHierarchies;
+	
+		const int32 NumberOfSections  = WorldMap.SectionCount_HorizontalAxis * WorldMap.SectionCount_VerticalAxis;
+		SectionActors.SetNum(NumberOfSections);
+		SectionComponent->InitializeSections(ProceduralRules, WorldMap);
+		if(SectionComponent)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("World Map Actor: Initializing Sections"));
+			SectionComponent->GetOnInitializeSectionDelegate().AddUObject(this, &ADigumWorldMapActor::OnInitializeSection);
+			SectionComponent->GetOnSectionLoadedEventDelegate().AddUObject(this, &ADigumWorldMapActor::OnSectionLoaded);
+			SectionComponent->GetOnAllSectionsLoadedEventDelegate().AddUObject(this, &ADigumWorldMapActor::OnAllSectionsLoaded);
+		}
+	
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::BeginInitializeMap SectionComponent"));
+		WorldOffset =  WorldMap.GetWorldOffset();
+		SetActorLocation(WorldOffset);
+		
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::BeginInitializeMap: Section Component is NULL"));
+	
+	}
+
+}
+
+void ADigumWorldMapActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
+{
+	// Get Local Position
+	const FVector LocalPosition = InBlockLocation - WorldOffset;
+	
+	// Translate World Position to Section Coordinates
+	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, WorldMap.GetSectionUnitSize(), SectionCoordinate);
+
+	if(SectionCoordinate.IsValid())
+	{
+		const int32 SectionIndex = GetSectionIndex(SectionCoordinate.X, SectionCoordinate.Y);
+		
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock: Valid Section Coordinate: %s, %i"), *SectionCoordinate.ToString(), SectionIndex);
+		if(SectionActors.IsValidIndex(SectionIndex))
+		{
+			if(ADigumWorldActorSection* SectionActor = SectionActors[SectionIndex])
+			{
+				SectionActor->AddBlock(InBlockID, LocalPosition, WorldMap.SectionWidth, WorldMap.SectionHeight);
+			}
+		}
+
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock Invalid Section Coordinate"));
+	}
 }
 
 TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldMapActor::GetSectionCoordinatesInRect(
@@ -234,4 +251,9 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldMapActor::GetSectionCo
 	}
 	
 	return SectionCoordinates;
+}
+
+int32 ADigumWorldMapActor::GetSectionIndex(const int32 InX, const int32 InY) const
+{
+	return (WorldMap.SectionCount_HorizontalAxis * InY) + InX;
 }

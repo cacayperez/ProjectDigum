@@ -14,6 +14,18 @@ class UDigumWorldProceduralAsset;
 class UBoxComponent;
 struct FDigumWorldProceduralCoordinateArray;
 
+USTRUCT()
+struct FDigumWorldChildActorsContainer
+{
+	GENERATED_BODY()
+public:
+	UPROPERTY(VisibleAnywhere)
+	FName BlockID;
+
+	UPROPERTY()
+	ADigumWorldActorChild* ChildActor;
+};
+
 UCLASS()
 class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 {
@@ -33,20 +45,6 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY()
 	TMap<FName, ADigumWorldActorChild*> WorldChildActors;
 
-	UPROPERTY(VisibleAnywhere)
-	FDigumWorldProceduralSection SectionData;
-
-	UPROPERTY()
-	FVector GridSize;
-
-	UPROPERTY()
-	FVector2D SectionSize;
-	
-	UPROPERTY()
-	int32 SectionX;
-
-	UPROPERTY()
-	int32 SectionY;
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FDigumWorldSectionReadyForCleanup, ADigumWorldActorSection*);
 
@@ -55,9 +53,26 @@ public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorSection();
 
-	FTimerHandle ReuseTimerHandle;
+	UPROPERTY(Replicated)
+	FVector GridSize;
 
+	UPROPERTY(Replicated)
+	FVector2D SectionSize;
+	
+
+	
+	FTimerHandle ReuseTimerHandle;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
+	
+	UPROPERTY(Replicated, VisibleAnywhere)
+	TArray<FDigumWorldChildActorsContainer> ChildActorsContainers;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	FDigumWorldProceduralSection SectionData;
+
+	
+	
 	UPROPERTY()
 	float CleanupTimer = 10.0f;
 
@@ -90,5 +105,8 @@ public:
 	void SetSectionEnabled(const bool& bValue);
 	FDigumWorldProceduralSection GetSectionData() { return SectionData; }
 	FDigumWorldSectionReadyForCleanup& GetDigumWorldSectionReadyForCleanupDelegate() { return OnSectionReadyForCleanup; }
+
+	FDigumWorldChildActorsContainer* GetChildActorContainer(const FName& InBlockID);
+	ADigumWorldActorChild* GetChildActor(const FName& InBlockID);
 
 };
