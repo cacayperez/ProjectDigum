@@ -3,6 +3,7 @@
 
 #include "Player/DigumMinerPlayerController.h"
 
+#include "Actor/Background/DigumGameBackgroundActor.h"
 #include "Asset/DigumAssetManager.h"
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Kismet/GameplayStatics.h"
@@ -78,7 +79,27 @@ void ADigumMinerPlayerController::Server_SpawnWorldMapActor_Implementation()
 void ADigumMinerPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InitializeBackground();
 	TrySpawnWorldMapActor();
+	
+}
+
+void ADigumMinerPlayerController::InitializeBackground()
+{
+	if(TSubclassOf<ADigumGameBackgroundActor> BackgroundClass = UDigumAssetManager::GetSubclass<ADigumGameBackgroundActor>(DefaultBackgroundClass))
+	{
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.Owner = this;
+
+		FVector Location = FVector::ZeroVector;
+		FRotator Rotation = FRotator::ZeroRotator;
+		
+		if(ADigumGameBackgroundActor* BackgroundActor = GetWorld()->SpawnActor<ADigumGameBackgroundActor>(BackgroundClass, Location, Rotation, SpawnParameters))
+		{
+			BackgroundActor->Initialize(this);
+		}
+	}
 }
 
 void ADigumMinerPlayerController::SpawnPlayerCharacter_Internal(const FVector& InWorldLocation)
@@ -94,13 +115,13 @@ void ADigumMinerPlayerController::SpawnPlayerCharacter_Internal(const FVector& I
 		{
 			bCharacterHasBeenInitialized = true;
 			Possess(CharacterToSpawn);
+			OnMinerCharacterSpawned.Broadcast(CharacterToSpawn);
 		}
 	}
 }
 
 void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 {
-	
 	if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
 	{
 		FActorSpawnParameters SpawnParams;
