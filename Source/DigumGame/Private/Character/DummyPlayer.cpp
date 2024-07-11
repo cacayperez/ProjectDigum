@@ -2,11 +2,7 @@
 
 
 #include "DummyPlayer.h"
-
-#include "Actor/DigumWorldDynamicProceduralActor.h"
-#include "Asset/DigumAssetManager.h"
 #include "Camera/CameraComponent.h"
-#include "Character/DigumGamePlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -30,7 +26,5 @@ ADummyPlayer::ADummyPlayer()
 void ADummyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// SpawnMap();
 }
 

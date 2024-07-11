@@ -24,25 +24,11 @@ class DIGUMGAME_API ADummyPlayer : public APawn
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category= "Dummy Player", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UCameraComponent> CameraComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dummy Player", meta=(AllowPrivateAccess="true"))
-	TSoftClassPtr<ADigumWorldDynamicProceduralActor> ProceduralActorSoftClass;
 public:
 	// Sets default values for this pawn's properties
 	ADummyPlayer();
 
 protected:
-	UPROPERTY()
-	FTimerHandle SpawnTimerHandle;
-	
-	UPROPERTY(EditAnywhere)
-	float SpawnDelay = 5.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dummy Player", meta=(AllowPrivateAccess="true"))
-	TSoftClassPtr<ADigumMinerCharacter> SoftPlayerCharacterClass;
-
-	UPROPERTY()
-	TSubclassOf<ADigumMinerCharacter> PlayerCharacterClass = nullptr;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

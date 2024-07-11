@@ -2,21 +2,12 @@
 
 
 #include "GameMode/DigumGamePrimaryGameMode.h"
-
-#include "Actor/DigumWorldDynamicProceduralActor.h"
 #include "Actor/DigumWorldMapActor.h"
 #include "Asset/DigumAssetManager.h"
 #include "Character/Miner/DigumMinerCharacter.h"
-#include "Components/DigumWorldPositioningComponent.h"
-#include "Functions/DigumWorldFunctionHelpers.h"
 #include "GameState/DigumGamePrimaryGameState.h"
-#include "Interface/IDigumWorldPawnInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Player/DigumMinerPlayerController.h"
-#include "Procedural/DigumWorldGenerator.h"
-#include "Procedural/DigumWorldMap.h"
-#include "Procedural/DigumWorldMapHandler.h"
-#include "Procedural/DigumWorldMapLoader.h"
 #include "Settings/DigumWorldSettings.h"
 
 ADigumGamePrimaryGameMode::ADigumGamePrimaryGameMode()

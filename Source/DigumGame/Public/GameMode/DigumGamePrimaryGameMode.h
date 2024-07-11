@@ -40,8 +40,6 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Digum Game State", meta=(AllowPrivateAccess="true"))
 	TSoftObjectPtr<UDigumWorldProceduralAsset> ProceduralAsset;
 
-	UPROPERTY()
-	TObjectPtr<ADigumWorldDynamicProceduralActor> ProceduralActor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Digum Game State", meta=(AllowPrivateAccess="true"))
 	TSoftClassPtr<ADigumWorldMapActor> SoftWorldMapActorClass;

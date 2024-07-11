@@ -3,10 +3,7 @@
 
 #include "Actor/Equip/DigumGameItemActor_Block.h"
 
-#include "Actor/DigumWorldActor.h"
 #include "Actor/DigumWorldMapActor.h"
-#include "Actor/DigumWorldProceduralActor.h"
-#include "Actor/Build/Preview/DigumBlockPreview.h"
 #include "DigumBuild/Public/Actor/DigumBuildPreviewActor.h"
 #include "Functions/DigumGameItemHelperFunctions.h"
 #include "Interface/IDigumPlayerCharacterInterface.h"
