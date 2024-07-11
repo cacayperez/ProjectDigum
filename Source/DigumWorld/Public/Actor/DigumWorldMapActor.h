@@ -103,4 +103,9 @@ public:
 	}
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
 	void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+
+#if WITH_EDITOR
+	UFUNCTION(BlueprintCallable, Category = "Digum World Map Actor", CallInEditor, meta = (DisplayName = "Generate World Map Actor"))
+	void Editor_GenerateWorldMap();
+#endif
 };

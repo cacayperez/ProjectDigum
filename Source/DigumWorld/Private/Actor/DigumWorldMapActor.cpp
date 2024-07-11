@@ -31,10 +31,10 @@ void ADigumWorldMapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	/*DOREPLIFETIME(ADigumWorldMapActor, SectionActors);
+	DOREPLIFETIME(ADigumWorldMapActor, SectionActors);
 	DOREPLIFETIME(ADigumWorldMapActor, WorldMap);
 	DOREPLIFETIME(ADigumWorldMapActor, ProceduralRules);
-	DOREPLIFETIME(ADigumWorldMapActor, WorldOffset);*/
+	DOREPLIFETIME(ADigumWorldMapActor, WorldOffset);
 }
 
 void ADigumWorldMapActor::OnSectionLoaded(FDigumWorldProceduralSection& DigumWorldProceduralSection)
@@ -53,7 +53,7 @@ void ADigumWorldMapActor::OnAllSectionsLoaded()
 void ADigumWorldMapActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	BeginInitializeMap();
 
 }
 
@@ -122,7 +122,6 @@ void ADigumWorldMapActor::EnableSection(const int32 InX, const int32 InY)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::EnableSection Section Not Found: %i, %i"), InX, InY);
-	
 	}
 }
 
@@ -156,7 +155,7 @@ void ADigumWorldMapActor::TrySpawnSection(FDigumWorldProceduralSection& InSectio
 		SpawnSection(InSection);
 	}*/
 	SpawnSection(InSection);
-	// Server_SpawnSection(InSection);
+
 }
 
 void ADigumWorldMapActor::BeginInitializeMap()
@@ -220,12 +219,16 @@ void ADigumWorldMapActor::AddBlock(const FName& InBlockID, const FVector& InBloc
 				SectionActor->AddBlock(InBlockID, LocalPosition, WorldMap.SectionWidth, WorldMap.SectionHeight);
 			}
 		}
-
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock Invalid Section Coordinate"));
 	}
+}
+
+void ADigumWorldMapActor::Editor_GenerateWorldMap()
+{
+	BeginInitializeMap();
 }
 
 TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldMapActor::GetSectionCoordinatesInRect(

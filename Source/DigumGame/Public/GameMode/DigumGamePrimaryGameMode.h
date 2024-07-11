@@ -48,23 +48,29 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 
 	UPROPERTY()
 	bool bMapInitialized = false;
-	
 
-	
+	UPROPERTY()
+	TObjectPtr<ADigumWorldMapActor> WorldMapActor;
+
+	UPROPERTY()
+	TArray<FVector> PlayerStartPositions;
+
 public:
 	ADigumGamePrimaryGameMode();
 	
 	virtual void InitGameState() override;
 	virtual void PostInitializeComponents() override;
+	void OnMapInitialized();
 	virtual void StartPlay() override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
-	void SpawnPlayerCharacter(APlayerController* NewPlayer);
-	/*
-	void HandleCharacterCoordinateChanged(const AActor* Actor, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate);
-	void RegisterPositioningComponent(UDigumWorldPositioningComponent* InComponent);
-	*/
-
+	void SpawnPlayerCharacter(APlayerController* NewPlayer, TArray<FVector>& StartPositions);
+	
 protected:
+
+	DECLARE_MULTICAST_DELEGATE(FOnGameWorldLoaded);
+
+	FOnGameWorldLoaded OnGameWorldLoaded;
+	
 	UPROPERTY()
 	float PlayerSpawnDelay = 5.0f;
 
@@ -76,12 +82,11 @@ protected:
 	FVector GetGridSize() const;
 	
 	virtual void Tick(float DeltaSeconds) override;
-	virtual void InitializeWorldMap(APlayerController* NewPlayer);
 
+	virtual void FindBestStartPosition(const FVector& InInitialPosition, TArray<FVector>& OccupiedPositions, FVector& OutPosition, const float& InMinDistance = 100.0f);
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void OnMapLoaded(APlayerController* NewPlayer);
-	// void HandleCharacterCoordinateChanged(const AActor* InActor, const FDigumWorldProceduralSectionCoordinate& InPreviousCoordinate, const FDigumWorldProceduralSectionCoordinate& InCurrentCoordinate);
 };

@@ -12,6 +12,7 @@
 #include "DigumMinerCharacter.generated.h"
 
 
+class UDigumGameCharacterSkinComponent;
 struct FDigumGameActionParams;
 DECLARE_LOG_CATEGORY_EXTERN(LogDigumMinerCharacter, Log, All);
 
@@ -60,6 +61,9 @@ class DIGUMGAME_API ADigumMinerCharacter : public ADigumCharacter, public IIDigu
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UDigumGameEquipComponent> EquipComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category= "Digum Character", meta=(AllowPrivateAccess="true"))
+	TObjectPtr<UDigumGameCharacterSkinComponent> SkinComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Digum Character", meta=(AllowPrivateAccess="true"))
 	TObjectPtr<UInputComponent> AssignedInputComponent;

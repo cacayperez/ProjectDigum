@@ -46,7 +46,7 @@ void UDigumWorldMapSectionComponent::InitializeSections(const FDigumWorldProcedu
 	SectionCount_VerticalAxis = InProceduralRules.SectionCount_VerticalAxis;
 	const int32 NumberOfHierarchies = InProceduralRules.NumberOfHierarchies;
 	
-
+	
 	ProceduralAsset = InProceduralRules.GetProceduralAsset();
 	WorldMap = InMap;
 	
@@ -149,7 +149,6 @@ void UDigumWorldMapSectionComponent::CheckSectionToGenerate()
 		SectionsToGenerate.Remove(SelectedPair);
 		break;
 	}
-	
 }
 
 FDigumWorldProceduralSection* UDigumWorldMapSectionComponent::GetSection(const int32& InSectionIndex)

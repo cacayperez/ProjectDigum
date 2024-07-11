@@ -11,6 +11,7 @@
 #include "Actor/DigumWorldMapActor.h"
 #include "Camera/CameraComponent.h"
 #include "Character/Miner/Components/DigumGameActionBarComponent.h"
+#include "Character/Miner/Components/DigumGameCharacterSkinComponent.h"
 #include "Character/Miner/Components/DigumGameEquipComponent.h"
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Components/ArrowComponent.h"
@@ -117,8 +118,7 @@ ADigumMinerCharacter::ADigumMinerCharacter(const FObjectInitializer& ObjectIniti
 	ActionComponent = CreateDefaultSubobject<UDigumActionComponent>(TEXT("ActionComponent"));
 	EquipComponent = CreateDefaultSubobject<UDigumGameEquipComponent>(TEXT("EquipComponent"));
 	PositioningComponent = CreateDefaultSubobject<UDigumWorldPositioningComponent>(TEXT("PositioningComponent"));
-
-
+	SkinComponent = CreateDefaultSubobject<UDigumGameCharacterSkinComponent>(TEXT("SkinComponent"));
 }
 
 void ADigumMinerCharacter::OnActivateEquippedItemAction(const FDigumGameActionParams& InActionParams)

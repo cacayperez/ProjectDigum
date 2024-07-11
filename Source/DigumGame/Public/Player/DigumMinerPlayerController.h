@@ -25,12 +25,13 @@ class DIGUMGAME_API ADigumMinerPlayerController : public ADigumPlayerController
 
 	UPROPERTY()
 	bool bCharacterHasBeenInitialized = false;
+
 public:
 	// Sets default values for this actor's properties
 	ADigumMinerPlayerController();
 	
 	virtual void InitializeController(ADigumMinerCharacter* InCharacter);
-	virtual void TrySpawnPlayerCharacter(const FVector& InWorldLocation = FVector::Zero());
+	/*virtual void TrySpawnPlayerCharacter(const FVector& InWorldLocation = FVector::Zero());
 	virtual void TrySpawnWorldMapActor();
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -43,7 +44,7 @@ public:
 	void Multicast_SpawnWorldMapActor();
 	
 	UFUNCTION(Server, Reliable)
-	void Server_SpawnWorldMapActor();
+	void Server_SpawnWorldMapActor();*/
 
 	
 protected:
@@ -54,11 +55,11 @@ protected:
 	
 	virtual void BeginPlay() override;
 	virtual void InitializeBackground();
-	virtual void SpawnPlayerCharacter_Internal(const FVector& InWorldLocation);
-	virtual void SpawnWorldMapActor_Internal();
-
-	bool IsCharacterInitialized() const { return bCharacterHasBeenInitialized; }
+	/*virtual void SpawnPlayerCharacter_Internal(const FVector& InWorldLocation);
+	virtual void SpawnWorldMapActor_Internal();*/
 
 public:
 	FOnMinerCharacterSpawned& GetOnMinerCharacterSpawned() { return OnMinerCharacterSpawned; }
+	
+	bool IsCharacterInitialized() const { return bCharacterHasBeenInitialized; }
 };

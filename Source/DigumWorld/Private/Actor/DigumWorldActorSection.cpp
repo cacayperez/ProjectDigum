@@ -26,7 +26,7 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetupAttachment(Root);*/
 	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
-	// bReplicates = true;
+	bReplicates = true;
 	
 }
 
@@ -143,6 +143,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					if(NewActor)
 					{
 						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
+						NewActor->SetReplicates(true);
 						// NewActor->SetFolderPath(GetFolderPath());
 						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
 						NewActor->FinishSpawning(FTransform::Identity);

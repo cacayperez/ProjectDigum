@@ -29,6 +29,7 @@ void ADigumMinerPlayerController::InitializeController(ADigumMinerCharacter* InC
 	}
 }
 
+/*
 void ADigumMinerPlayerController::TrySpawnPlayerCharacter(const FVector& InWorldLocation)
 {
 	Server_SpawnPlayerCharacter(InWorldLocation);
@@ -75,13 +76,14 @@ void ADigumMinerPlayerController::Server_SpawnWorldMapActor_Implementation()
 		Multicast_SpawnWorldMapActor();
 	}
 }
+*/
 
 void ADigumMinerPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitializeBackground();
-	TrySpawnWorldMapActor();
+	// TrySpawnWorldMapActor();
 	
 }
 
@@ -102,6 +104,7 @@ void ADigumMinerPlayerController::InitializeBackground()
 	}
 }
 
+/*
 void ADigumMinerPlayerController::SpawnPlayerCharacter_Internal(const FVector& InWorldLocation)
 {
 	if(bCharacterHasBeenInitialized) return;
@@ -138,4 +141,5 @@ void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 		}
 	}
 }
+*/
 

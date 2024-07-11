@@ -23,7 +23,7 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	InstancedMeshComponent = CreateDefaultSubobject<UDigumWorldISMComponent>(TEXT("InstancedMeshComponent"));
 	InstancedMeshComponent->SetupAttachment(Root);
 
-	// bReplicates = true;
+	bReplicates = true;
 	SetActorTickEnabled(false);
 
 }
