@@ -26,6 +26,5 @@ ADummyPlayer::ADummyPlayer()
 void ADummyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
