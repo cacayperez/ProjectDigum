@@ -45,7 +45,10 @@ void ADigumBuildPreviewActor::SetTargetLocation(const FVector& InTargetLocation,
 		return;
 	}
 	TargetLocation = SnapToGrid(GridLocation, InGridSize);
-	OnSetTargetLocation.Broadcast(TargetLocation);
+
+	FVector LocationOFfset = TargetLocation;
+	LocationOFfset.Z += InGridSize.Z;
+	OnSetTargetLocation.Broadcast(LocationOFfset);
 }
 
 bool ADigumBuildPreviewActor::IsBlockOccupied(const FVector& InLocation, const FVector& InGridSize)
@@ -73,7 +76,7 @@ FVector ADigumBuildPreviewActor::SnapToGrid(const FVector& InLocation, const FVe
 
 FVector ADigumBuildPreviewActor::GetPreviewTargetLocation() const
 {
-	FVector Location = GetActorLocation();
-	// Location.Z -= GridSize.Z;
-	return Location;
+	 /*FVector Location = TargetLocation;
+	Location.Z += GridSize.Z;*/
+	return TargetLocation;
 }

@@ -110,31 +110,55 @@ void ADigumMinerPlayerController::Server_TryAddBlock_Implementation(const FName&
 }
 
 
+void ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation(const FVector& InBlockLocation)
+{
+	if(HasAuthority())
+	{
+		if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
+		{
+			FActorSpawnParameters SpawnParams;
+		
+			AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
+			if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
+			{
+				MapActor->TryRemoveBlock(InBlockLocation);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation, World Map Actor Class is null"));
+		}
+	}
+}
 
 void ADigumMinerPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitializeBackground();
-	TrySpawnWorldMapActor();
+	// TrySpawnWorldMapActor();
 	
 }
 
 void ADigumMinerPlayerController::InitializeBackground()
 {
-	if(TSubclassOf<ADigumGameBackgroundActor> BackgroundClass = UDigumAssetManager::GetSubclass<ADigumGameBackgroundActor>(DefaultBackgroundClass))
+	if(IsLocalController())
 	{
-		FActorSpawnParameters SpawnParameters;
-		SpawnParameters.Owner = this;
-
-		FVector Location = FVector::ZeroVector;
-		FRotator Rotation = FRotator::ZeroRotator;
-		
-		if(ADigumGameBackgroundActor* BackgroundActor = GetWorld()->SpawnActor<ADigumGameBackgroundActor>(BackgroundClass, Location, Rotation, SpawnParameters))
+		if(TSubclassOf<ADigumGameBackgroundActor> BackgroundClass = UDigumAssetManager::GetSubclass<ADigumGameBackgroundActor>(DefaultBackgroundClass))
 		{
-			BackgroundActor->Initialize(this);
-		}
+			FActorSpawnParameters SpawnParameters;
+			SpawnParameters.Owner = this;
+
+			FVector Location = FVector::ZeroVector;
+			FRotator Rotation = FRotator::ZeroRotator;
+		
+			if(ADigumGameBackgroundActor* BackgroundActor = GetWorld()->SpawnActor<ADigumGameBackgroundActor>(BackgroundClass, Location, Rotation, SpawnParameters))
+			{
+				BackgroundActor->Initialize(this);
+			}
+		}	
 	}
+
 }
 
 void ADigumMinerPlayerController::SpawnPlayerCharacter_Internal(const FVector& InWorldLocation)
@@ -164,8 +188,7 @@ void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
 		if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
 		{
-			WorldMapActor = MapActor;
-			WorldMapActor->SetReplicates(true);
+			MapActor->SetReplicates(true);
 		}
 	}
 

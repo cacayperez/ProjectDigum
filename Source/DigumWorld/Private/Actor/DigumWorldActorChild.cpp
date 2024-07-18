@@ -24,8 +24,6 @@ ADigumWorldActorChild::ADigumWorldActorChild(const FObjectInitializer& ObjectIni
 	InstancedMeshComponent->SetupAttachment(Root);
 
 	bReplicates = true;
-	SetActorTickEnabled(false);
-
 }
 
 void ADigumWorldActorChild::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -118,13 +116,6 @@ void ADigumWorldActorChild::AsyncAddBlock()
 					// UE_LOG(LogTemp, Warning, TEXT("LocalIndex, %i"), LocalIndex);
 					InstancedMeshComponent->AddWorldInstance(Transform, HierarchyIndex, Variant, LocalIndex, bHasTopNeighbor);
 				}
-				// GeneratedTransform.Add(Transform);
-				
-				/*const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
-				InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
-				InstancedMeshComponent->SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
-				InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
-				Health.Add(1.0f);*/
 			}
 			SetActorTickEnabled(false);
 			AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr);
@@ -320,18 +311,6 @@ void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator
 	if(InParams.Request == EDigumWorld_Request::DigumWorldRequest_Destroy)
 	{
 		DestroyInstance(InParams.HitInstanceIndex);
-		// UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
-		/*if(Health.IsValidIndex(InParams.HitInstanceIndex))
-		{
-			// UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
-			Health[InParams.HitInstanceIndex] -= InParams.Magnitude;
-			if(Health[InParams.HitInstanceIndex] <= 0.0f)
-			{
-				DestroyInstance(InParams.HitInstanceIndex);
-			}
-			UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health[InParams.HitInstanceIndex]);
-			
-		}*/
 	}
 }
 

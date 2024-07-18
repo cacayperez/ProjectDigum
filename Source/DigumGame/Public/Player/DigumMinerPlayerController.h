@@ -57,6 +57,10 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
 
+	UFUNCTION(Server, Reliable)
+	void Server_TryRemoveBlock(const FVector& InBlockLocation);
+
+
 protected:
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnMinerCharacterSpawned, ACharacter*)

@@ -62,6 +62,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+
 protected:
 	
 	FOnWorldLoaded OnWorldLoaded;
@@ -96,13 +97,15 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
-
-	UFUNCTION(Client, Reliable)
-	void Client_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveBlock(const FVector& InBlockLocation);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RemoveBlock(const FVector& InBlockLocation);
 
 public:
 	// void GenerateWorldMap();
@@ -122,6 +125,7 @@ public:
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
 	
 	void TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	void TryRemoveBlock(const FVector& InWorldLocation);
 
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Map Actor", CallInEditor, meta = (DisplayName = "Generate World Map Actor"))

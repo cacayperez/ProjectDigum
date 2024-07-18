@@ -24,7 +24,7 @@ ADigumWorldMapActor::ADigumWorldMapActor()
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
-
+	bReplicates = true;
 }
 
 void ADigumWorldMapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -272,16 +272,12 @@ void ADigumWorldMapActor::BeginInitializeMap()
 
 void ADigumWorldMapActor::TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Remote Role %s"), *UEnum::GetValueAsString(TEXT("Engine.ENetRole"), GetLocalRole()));
-	// AddBlock_Internal(InBlockID, InBlockLocation);
-	Server_AddBlock(InBlockID, InBlockLocation);
-	/*
 
-	if(!HasAuthority())
-	{
-		AddBlock_Internal(InBlockID, InBlockLocation);
-	}*/
-	
+	Server_AddBlock(InBlockID, InBlockLocation);
+}
+
+void ADigumWorldMapActor::TryRemoveBlock(const FVector& InWorldLocation)
+{
 }
 
 void ADigumWorldMapActor::Editor_GenerateWorldMap()
@@ -364,7 +360,7 @@ void ADigumWorldMapActor::Multicast_AddBlock_Implementation(const FName& InBlock
 
 	if(NetMode == NM_Client || NetMode == NM_Standalone)
 	{
-		Client_AddBlock(InBlockID, InBlockLocation);
+		AddBlock_Internal(InBlockID, InBlockLocation);
 	}
 
 	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
@@ -380,7 +376,27 @@ void ADigumWorldMapActor::RemoveBlock_Internal(const FVector& InWorldLocation)
 	
 }
 
-void ADigumWorldMapActor::Client_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+void ADigumWorldMapActor::Server_RemoveBlock_Implementation(const FVector& InBlockLocation)
 {
-	AddBlock_Internal(InBlockID, InBlockLocation);
+	if(HasAuthority())
+	{
+		Multicast_RemoveBlock(InBlockLocation);
+	}
 }
+
+void ADigumWorldMapActor::Multicast_RemoveBlock_Implementation(const FVector& InBlockLocation)
+{
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
+	{
+		RemoveBlock_Internal(InBlockLocation);
+	}
+
+	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
+	{
+		RemoveBlock_Internal(InBlockLocation);
+	}
+}
+
+
