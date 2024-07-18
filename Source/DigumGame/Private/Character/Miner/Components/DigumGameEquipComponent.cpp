@@ -6,6 +6,7 @@
 #include "Actor/DigumItemActor.h"
 #include "Character/DigumCharacter.h"
 #include "Character/Miner/DigumMinerCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values for this component's properties
@@ -25,6 +26,10 @@ void UDigumGameEquipComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+	if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		PlayerController = PC;	
+	}
 	
 }
 
@@ -73,8 +78,10 @@ void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> Item
 		ADigumItemActor* ItemActor = GetWorld()->SpawnActorDeferred<ADigumItemActor>(ItemActorClass, FTransform::Identity);
 		if(ItemActor && Mesh)
 		{
-			ItemActor->SetActorLocation(Character->GetActorLocation());
+			ItemActor->SetOwner(GetOwner());
+			// ItemActor->SetReplicates(true);
 			ItemActor->SetItemInstigator(GetOwner());
+			ItemActor->SetActorLocation(Character->GetActorLocation());
 			ItemActor->SetItemProperties(InItemProperties);
 			ItemActor->FinishSpawning(FTransform::Identity);
 			ItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));

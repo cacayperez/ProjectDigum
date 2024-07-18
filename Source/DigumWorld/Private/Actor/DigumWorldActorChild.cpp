@@ -34,6 +34,9 @@ void ADigumWorldActorChild::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	// DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
 	DOREPLIFETIME(ADigumWorldActorChild, BlockID);
 	DOREPLIFETIME(ADigumWorldActorChild, Health);
+	DOREPLIFETIME(ADigumWorldActorChild, SectionWidth);
+	DOREPLIFETIME(ADigumWorldActorChild, SectionHeight);
+	
 	DOREPLIFETIME(ADigumWorldActorChild, GridSize);
 	DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
 }
@@ -100,19 +103,28 @@ void ADigumWorldActorChild::AsyncAddBlock()
 		AsyncBlockResultArrayQueue.Peek(ArrayResultPtr);
 		if(ArrayResultPtr)
 		{
-			TArray<FTransform> GeneratedTransform;
+			// TArray<FTransform> GeneratedTransform;
 			for(auto& Result : ArrayResultPtr->ResultArray)
 			{
-				const FTransform Transform = Result.Transform;
-				const int32 HierarchyIndex = Result.Coordinate.Hierarchy;
-				const int32 Variant = Result.Variant;
-				const bool bHasTopNeighbor = Result.Coordinate.bHasTopNeighbor;
-				GeneratedTransform.Add(Transform);
-				const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
+				if(InstancedMeshComponent)
+				{
+					const FTransform Transform = Result.Transform;
+					const int32 HierarchyIndex = Result.Coordinate.Hierarchy;
+					const int32 Variant = Result.Variant;
+					const bool bHasTopNeighbor = Result.Coordinate.bHasTopNeighbor;
+					const int32 X = Result.Coordinate.X;
+					const int32 Y = Result.Coordinate.Y;
+					const int32 LocalIndex = (SectionWidth * Y) + X;
+					// UE_LOG(LogTemp, Warning, TEXT("LocalIndex, %i"), LocalIndex);
+					InstancedMeshComponent->AddWorldInstance(Transform, HierarchyIndex, Variant, LocalIndex, bHasTopNeighbor);
+				}
+				// GeneratedTransform.Add(Transform);
+				
+				/*const int32 InstanceIndex = InstancedMeshComponent->AddInstance(Transform);
 				InstancedMeshComponent->SetTint(InstanceIndex, HierarchyIndex);
 				InstancedMeshComponent->SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
 				InstancedMeshComponent->SetVariant(InstanceIndex, Variant);
-				Health.Add(1.0f);
+				Health.Add(1.0f);*/
 			}
 			SetActorTickEnabled(false);
 			AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr);
@@ -127,6 +139,15 @@ void ADigumWorldActorChild::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	AsyncAddBlock();
+}
+
+void ADigumWorldActorChild::InitializeISMComponent(const int32& InHierarchyCount, const int32& InSectionWidth,
+	const int32& InSectionHeight)
+{
+	if(InstancedMeshComponent)
+	{
+		InstancedMeshComponent->InitializeSize(InHierarchyCount, InSectionWidth, InSectionHeight);
+	}
 }
 
 void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset,
@@ -173,11 +194,14 @@ void ADigumWorldActorChild::InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwat
 }
 
 void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset,
-	FDigumWorldProceduralCoordinateArray Coordinates)
+	FDigumWorldProceduralCoordinateArray Coordinates, const int32& NumOfHierarchies, const int32& InSectionWidth, const int32& InSectionHeight)
 {
 	SwatchAsset = InSwatchAsset;
 	BlockID = InBlockID;
-	
+	SectionWidth = InSectionWidth;
+	SectionHeight = InSectionHeight;
+
+	InitializeISMComponent(NumOfHierarchies, SectionWidth, SectionHeight);
 	if(SwatchAsset)
 	{
 		BuildChildProperties(SwatchAsset);
@@ -232,6 +256,8 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 
 	const FVector PositionOffset = SwatchAsset->GetPositionOffset();
 	SetActorTickEnabled(true);
+
+	
 
 	AsyncTask(ENamedThreads::AnyThread, [this, InBlockID, PositionOffset, InCoordinates]
 	{
@@ -290,12 +316,14 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator,
 	const FDigumWorldRequestParams& InParams)
 {
+	UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
 	if(InParams.Request == EDigumWorld_Request::DigumWorldRequest_Destroy)
 	{
+		DestroyInstance(InParams.HitInstanceIndex);
 		// UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
-		if(Health.IsValidIndex(InParams.HitInstanceIndex))
+		/*if(Health.IsValidIndex(InParams.HitInstanceIndex))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
+			// UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
 			Health[InParams.HitInstanceIndex] -= InParams.Magnitude;
 			if(Health[InParams.HitInstanceIndex] <= 0.0f)
 			{
@@ -303,7 +331,7 @@ void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator
 			}
 			UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health[InParams.HitInstanceIndex]);
 			
-		}
+		}*/
 	}
 }
 

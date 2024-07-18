@@ -6,10 +6,14 @@
 #include "Actor/DigumWorldMapActor.h"
 #include "DigumBuild/Public/Actor/DigumBuildPreviewActor.h"
 #include "Functions/DigumGameItemHelperFunctions.h"
+#include "GameState/DigumGamePrimaryGameState.h"
 #include "Interface/IDigumPlayerCharacterInterface.h"
 #include "Item/DigumGameItemAsset.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+#include "Player/DigumMinerPlayerController.h"
 #include "Settings/DigumWorldSettings.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 
 
 // Sets default values
@@ -18,7 +22,16 @@ ADigumGameItemActor_Block::ADigumGameItemActor_Block(const FObjectInitializer& O
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
 }
+
+void ADigumGameItemActor_Block::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADigumGameItemActor_Block, RequestParams);
+	DOREPLIFETIME(ADigumGameItemActor_Block, TargetLocation);
+}
+
 
 // Called when the game starts or when spawned
 void ADigumGameItemActor_Block::BeginPlay()
@@ -28,14 +41,11 @@ void ADigumGameItemActor_Block::BeginPlay()
 	const FDigumItemProperties* Properties = GetItemProperties();
 
 	GridSize = UDigumWorldSettings::GetGridSize();
+
+	// const FDigumItemProperties* Properties = GetItemProperties();
+	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	
-	if(GetItemInstigator() && GetItemInstigator()->GetClass()->ImplementsInterface(UIDigumPlayerCharacterInterface::StaticClass()))
-	{
-		TScriptInterface<IIDigumPlayerCharacterInterface> PlayerCharacterInterface = GetItemInstigator();
-		PlayerController = PlayerCharacterInterface->GetPlayerController();
-	}
-	
-	if(Properties->IsValid() && PlayerController.Get())
+	if(Properties->IsValid() && PlayerController && PlayerController->IsLocalController())
 	{
 		FVector WorldLocation;
 		FVector WorldDirection;
@@ -53,10 +63,15 @@ void ADigumGameItemActor_Block::BeginPlay()
 				
 				if(BlockPreview)
 				{
+					BlockPreview->SetOwner(GetOwner());
 					FVector Location = WorldLocation + WorldDirection * 100.0f;
 					Location.Y = 0.0f;
 					BlockPreview->SetTargetLocation(Location);
 					BlockPreview->FinishSpawning(FTransform::Identity);
+					BlockPreview->GetOnSetTargetLocationDelegate().AddLambda([this](const FVector& InLocation)
+					{
+						TargetLocation = InLocation;
+					});
 				}
 				else
 				{
@@ -68,8 +83,15 @@ void ADigumGameItemActor_Block::BeginPlay()
 				UE_LOG(LogTemp, Warning, TEXT("PreviewClass is null"));
 			}
 		}
-		
 	}
+	/*
+	if(GetItemInstigator() && GetItemInstigator()->GetClass()->ImplementsInterface(UIDigumPlayerCharacterInterface::StaticClass()))
+	{
+		TScriptInterface<IIDigumPlayerCharacterInterface> PlayerCharacterInterface = GetItemInstigator();
+		PlayerController = PlayerCharacterInterface->GetPlayerController();
+	}*/
+
+	
 }
 
 void ADigumGameItemActor_Block::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -99,38 +121,117 @@ bool ADigumGameItemActor_Block::TraceFromCursor(APlayerController* InPlayerContr
 	return true;
 }
 
+void ADigumGameItemActor_Block::Server_SpawnBlockPreview_Implementation()
+{
+	if(HasAuthority())
+	{
+		Client_SpawnBlockPreview();
+	}
+}
+
+void ADigumGameItemActor_Block::Client_SpawnBlockPreview_Implementation()
+{
+	
+}
+
+void ADigumGameItemActor_Block::Server_ExecuteAction_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	if(HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Server_ExecuteAction_Implementation: Add Block"));
+		Multicast_ExecuteAction(InParams);
+		// Client_ExecuteAction(InParams);
+	}
+}
+
+void ADigumGameItemActor_Block::Multicast_ExecuteAction_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	if(PlayerController && PlayerController->IsLocalController())
+	{
+		ExecuteAction_Internal(InParams);
+	}
+}
+
+
+void ADigumGameItemActor_Block::Client_ExecuteAction_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Client_ExecuteAction_Implementation: Add Block"));
+	ExecuteAction_Internal(InParams);
+}
+
+void ADigumGameItemActor_Block::ExecuteAction_Internal(const FDigumWorldRequestParams& InParams)
+{
+
+	if(PlayerController)
+	{
+		if(ADigumMinerPlayerController* MPC = Cast<ADigumMinerPlayerController>(PlayerController.Get()))
+		{
+			MPC->TryAddBlock(InParams.BlockID, InParams.HitLocation);
+		}
+	}
+	/*if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass()))
+	{
+		if(ADigumWorldMapActor* WorldMapActor = Cast<ADigumWorldMapActor>(Actor))
+		{
+			WorldMapActor->TryExecuteAction(InParams);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Actor is not DigumWorldMapActor"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("World Map Actor Class is null"));
+	}*/
+	/*if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	{
+		if(ADigumMinerPlayerController* MPC = Cast<ADigumMinerPlayerController>(PC))
+		{
+			if(ADigumWorldMapActor* WorldMapActor = MPC->GetWorldMapActor())
+			{
+				WorldMapActor->TryExecuteAction(InParams);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("WorldMapActor is null"));
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerController is not DigumMinerPlayerController"));
+		
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerController is null"));
+	}*/
+}
 
 // Called every frame
 void ADigumGameItemActor_Block::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector TargetLocation;
-	if(BlockPreview && TraceFromCursor(PlayerController.Get(), TargetLocation))
+	FVector Location;
+	if(BlockPreview && TraceFromCursor(PlayerController.Get(), Location))
 	{
-		BlockPreview->SetTargetLocation(TargetLocation, GridSize);
+		BlockPreview->SetTargetLocation(Location, GridSize);
 	}
 }
 
 void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigumGameItem_ActionKey ActionKey)
 {
 	Super::OnActivateItem(InInstigator, ActionKey);
-
-	if(BlockPreview)
-	{
-		FVector TargetLocation = BlockPreview->GetPreviewTargetLocation();
-		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass());
-		if(Actor)
-		{
-			if(ADigumWorldMapActor* ProceduralActor = Cast<ADigumWorldMapActor>(Actor))
-			{
-				FName BlockID = GetItemProperties()->GetItemID();
-				ProceduralActor->AddBlock(BlockID, TargetLocation);
-				UE_LOG(LogTemp, Warning, TEXT("BlockID: %s"), *BlockID.ToString());
-				// TODO: Subtract the cost of the block from the player's inventory
-			}
-			
-		}
-	}
+	FName BlockID = GetItemProperties()->GetItemID();
+	RequestParams = FDigumWorldRequestParams();
+	RequestParams.Request = EDigumWorld_Request::DigumWorldRequest_Add;
+	RequestParams.Instigator = GetItemInstigator();
+	RequestParams.HitLocation = TargetLocation;
+	RequestParams.BlockID = BlockID;
+	UE_LOG(LogTemp, Warning, TEXT("OnActivateItem: Add Block, %s"), *TargetLocation.ToString());
+	ExecuteAction_Internal(RequestParams);
+	
 }
 

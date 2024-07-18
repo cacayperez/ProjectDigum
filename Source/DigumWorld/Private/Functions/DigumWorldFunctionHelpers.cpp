@@ -6,6 +6,7 @@
 #include "Asset/DigumWorldBlockTable.h"
 #include "Asset/DigumWorldSwatchAsset.h"
 #include "Settings/DigumWorldSettings.h"
+#include "World/DigumWorldTypes.h"
 
 /*
 FVector UDigumWorldFunctionHelpers::GetGridSize()
@@ -153,4 +154,18 @@ void UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(const FVector& InWo
 	
 	const FDigumWorldProceduralSectionCoordinate SectionCoordinate = FDigumWorldProceduralSectionCoordinate(AbsX, AbsY);
 	OutSectionCoordinate = SectionCoordinate;
+}
+
+void UDigumWorldFunctionHelpers::ConvertToSectionLocalSectionCoordinate(const FVector& InWorldLocation,
+	const FVector& InGridSize, const int32& InWidthOffset, const int32& InHeightOffset,
+	FDigumWorldCoordinate2D& OutLocalCoordinate)
+{
+	const int32 X = InWorldLocation.X / InGridSize.X;
+	const int32 Y = -(InWorldLocation.Z / InGridSize.Z);
+	const int32 Hierarchy = -InWorldLocation.Y / InGridSize.Y;
+	
+	const int32 CoordinateX = FMath::Abs(X % InWidthOffset);
+	const int32 CoordinateY = FMath::Abs(Y) > 0? Y % InWidthOffset : 0;
+
+	OutLocalCoordinate = FDigumWorldCoordinate2D(CoordinateX, CoordinateY);
 }

@@ -32,9 +32,6 @@ class DIGUMWORLD_API ADigumWorldActor : public ADigumActor
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActor(const FObjectInitializer& ObjectInitializer);
-
-	UFUNCTION()
-	void OnWorldRequest(const EDigumWorld_Request& InDigumWorld_Request, const FDigumWorldRequestParams& InDigumWorldRequestParams);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

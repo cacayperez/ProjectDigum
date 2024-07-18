@@ -13,11 +13,17 @@ ADigumItemActor::ADigumItemActor(const FObjectInitializer& ObjectInitializer)
 	Mesh->SetupAttachment(Root);
 	
 	PrimaryActorTick.bCanEverTick = false;
+	bReplicates = true;
 }
 
 ADigumItemActor::~ADigumItemActor()
 {
 	UE_LOG(LogTemp, Warning, TEXT("ADigumItemActor::~ADigumItemActor"));
+}
+
+void ADigumItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 }
 
 void ADigumItemActor::SetItemInstigator(AActor* InInstigator)

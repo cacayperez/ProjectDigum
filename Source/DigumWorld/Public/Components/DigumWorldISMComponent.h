@@ -7,12 +7,42 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "DigumWorldISMComponent.generated.h"
 
+USTRUCT()
+struct FDigumWorldISMInstanceData
+{
+	GENERATED_BODY()
+	
+	UPROPERTY()
+	int32 LocalIndex = -1;
+
+	UPROPERTY()
+	int32 InstanceIndex = -1;
+	
+	UPROPERTY()
+	int32 Variant = -1;
+	
+	UPROPERTY()
+	bool bSurfacePoint = false;
+	
+	UPROPERTY()
+	FLinearColor Tint = FLinearColor::White;
+
+	UPROPERTY()
+	float Health = 1.0f;
+
+	UPROPERTY()
+	FTransform Transform;
+
+	void DecreaseHealth(const float& InAmount) { Health = Health - InAmount; }
+	void IncreaseHealth(const float& InAmount) { Health = Health + InAmount; }
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMWORLD_API UDigumWorldISMComponent : public UInstancedStaticMeshComponent
 {
 	GENERATED_BODY()
-
+	
+	TMap<int32, TArray<FDigumWorldISMInstanceData>> ISMInstanceData;
 public:
 	// Sets default values for this component's properties
 	UDigumWorldISMComponent();
@@ -27,8 +57,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
+	void InitializeSize(const int32& InHierarchyCount, const int32& InSectionWidth, const int32& InSectionHeight);
 	/*virtual bool RemoveInstance(int32 InstanceIndex) override;*/
 	void SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex);
 	void SetSurfacePoint(const int32& InstanceIndex, const bool& bValue = false);
 	void SetVariant(const int32& InstanceIndex, const int32& Variant);
+	void AddWorldInstance(const FTransform& InTransform, const int32& InHierarchyIndex, const int32& InVariant,const int32& InLocalIndex, const bool& bHasTopNeighbor = true);
+	void RemoveWorldInstance(const int32& InLocalIndex, const int32& InHierarchyIndex);
 };

@@ -132,7 +132,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 		{
 			if(ADigumWorldActorChild* ChildActor = GetChildActor(BlockID))
 			{
-				ChildActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
+				ChildActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates, SectionData.HierarchyCount, SectionData.SectionWidth, SectionData.SectionHeight);
 			}
 			else
 			{
@@ -144,8 +144,9 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					{
 						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 						NewActor->SetReplicates(true);
+						// NewActor->InitializeISMComponent()
 						// NewActor->SetFolderPath(GetFolderPath());
-						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates);
+						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates, SectionData.HierarchyCount, SectionData.SectionWidth, SectionData.SectionHeight);
 						NewActor->FinishSpawning(FTransform::Identity);
 
 						ChildActorsContainers.Add(FDigumWorldChildActorsContainer(BlockID, NewActor));
@@ -159,12 +160,8 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					{
 						UE_LOG(LogTemp, Warning, TEXT("Child Actor Class not found for BlockID: %s"), *BlockID.ToString());
 					}
-			
-			
 				}
 			}
-			
-			
 		}
 		else
 		{
@@ -178,8 +175,7 @@ void ADigumWorldActorSection::CreateChildActor(FDigumWorldProceduralCoordinateAr
 }
 
 
-void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset,
-	const int32& HeightOffset)
+void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& InLocation)
 {
 	ADigumWorldActorChild* ChildActor = GetChildActor(InBlockID);//WorldChildActors.FindRef(InBlockID);
 	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
@@ -189,7 +185,8 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	const int32 X = InLocation.X / GridSize.X;
 	const int32 Y = -(InLocation.Z / GridSize.Z);
 	const int32 Hierarchy = -InLocation.Y / GridSize.Y;
-	
+	const int32 WidthOffset = SectionData.SectionWidth;
+	const int32 HeightOffset = SectionData.SectionHeight;
 	Coordinate.X = FMath::Abs(X % WidthOffset);
 	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
 	Coordinate.Hierarchy = Hierarchy;
@@ -212,17 +209,24 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 				if(NewActor)
 				{
 					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
-					NewActor->InitializeSwatchAsset(InBlockID, Asset, CoordinateArray);
+					NewActor->InitializeSwatchAsset(InBlockID, Asset, CoordinateArray, SectionData.HierarchyCount, SectionData.SectionWidth, SectionData.SectionHeight);
 					NewActor->FinishSpawning(FTransform::Identity);
 					NewActor->SetActorLocation(GetActorLocation() + HierarchyOffset);
 					
 					WorldChildActors.FindOrAdd(InBlockID, NewActor);
+					UE_LOG(LogTemp, Warning, TEXT("Block Added %s"), *InBlockID.ToString());
 				}
 			}
 		}
 	}
 	
 	// create block if it doesnt exist
+}
+
+
+void ADigumWorldActorSection::RemoveBlock(const FVector& InLocation)
+{
+	
 }
 
 void ADigumWorldActorSection::DestroySection()
@@ -313,15 +317,3 @@ ADigumWorldActorChild* ADigumWorldActorSection::GetChildActor(const FName& InBlo
 
 	return nullptr;
 }
-
-/*
-int32 ADigumWorldActorSection::GetX() const
-{
-	return FMath::FloorToInt(GetActorLocation().X / SectionSize.X);
-}
-
-int32 ADigumWorldActorSection::GetY() const
-{
-	return FMath::FloorToInt(GetActorLocation().Z / SectionSize.Y);
-}
-*/

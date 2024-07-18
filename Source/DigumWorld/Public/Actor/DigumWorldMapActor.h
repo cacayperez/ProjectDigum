@@ -9,6 +9,7 @@
 #include "Procedural/DigumWorldMap.h"
 #include "DigumWorldMapActor.generated.h"
 
+struct FDigumWorldRequestParams;
 struct FDigumWorldProceduralRules;
 struct FDigumWorldMap;
 class UDigumWorldMapSectionComponent;
@@ -46,6 +47,12 @@ class DIGUMWORLD_API ADigumWorldMapActor : public AActor
 
 	UPROPERTY(Replicated)
 	FVector WorldOffset;
+
+	UPROPERTY()
+	bool bIsLocallyOwned = false;;
+
+	UPROPERTY(Replicated)
+	bool bInitializedMap = false;
 	
 public:
 
@@ -55,19 +62,21 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
 protected:
 	
 	FOnWorldLoaded OnWorldLoaded;
 	
 	UPROPERTY()
 	TEnumAsByte<EDigumWorldMapPhase> CurrentPhase;
+	virtual void BeginPlay() override;
 	
 	void OnInitializeSection();
 	void OnSectionLoaded(FDigumWorldProceduralSection& DigumWorldProceduralSection);
-	void OnAllSectionsLoaded();	
+	void OnAllSectionsLoaded();
+	void OnWorldRequest(const FDigumWorldRequestParams& DigumWorldRequestParams);
 	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	
+	virtual bool IsLocallyOwned();
 	void OnRemoveSection(ADigumWorldActorSection* InDigumWorldActorSection);
 	virtual void SpawnSection(FDigumWorldProceduralSection& InSection);
 
@@ -75,6 +84,26 @@ protected:
 	TArray<FDigumWorldProceduralSectionCoordinate> GetSectionCoordinatesInRect(const FDigumWorldProceduralSectionCoordinate& InStartCoordinate, const int32& HalfSize, const int32& XMin, const int32& XMax, const int32& YMin, const int32& YMax) const;
 
 	int32 GetSectionIndex(const int32 InX, const int32 InY) const;
+
+	void AddBlock_Internal(const FName& InBlockID, const FVector& InWorldLocation);
+	void RemoveBlock_Internal(const FVector& InWoorldLocation);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnSection(const FDigumWorldProceduralSection& InSection);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnSection(const FDigumWorldProceduralSection& InSection);
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+
+	UFUNCTION(Client, Reliable)
+	void Client_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+
+
 public:
 	// void GenerateWorldMap();
 	void SetPhase(const EDigumWorldMapPhase& InPhase) { CurrentPhase = InPhase; }
@@ -83,26 +112,16 @@ public:
 	void EnableSection(const int32 InX, const int32 InY);
 
 	FOnWorldLoaded& GetOnWorldLoadedDelegate() { return OnWorldLoaded; }
-
-	UFUNCTION(Server, Reliable)
-	void Server_SpawnSection(const FDigumWorldProceduralSection& InSection);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SpawnSection(const FDigumWorldProceduralSection& InSection);
 	
 	void TrySpawnSection(FDigumWorldProceduralSection& InSection);
 
+	void TryExecuteAction(const FDigumWorldRequestParams& InParams);
+	
 	void BeginInitializeMap();
 	
-	void SetOwningPlayerController(APlayerController* NewPlayer)
-	{
-		OwningPlayerController = NewPlayer;
-		SetOwner(NewPlayer);
-		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::SetOwningPlayerController: %s"), *NewPlayer->GetName());
-
-	}
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
-	void AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	
+	void TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation);
 
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Map Actor", CallInEditor, meta = (DisplayName = "Generate World Map Actor"))

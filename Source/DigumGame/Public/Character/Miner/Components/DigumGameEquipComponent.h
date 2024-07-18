@@ -25,6 +25,9 @@ class DIGUMGAME_API UDigumGameEquipComponent : public UActorComponent
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Inventory", meta=(AllowPrivateAccess="true"))
 	TMap<TEnumAsByte<EDigumGame_EquipSlot>, TObjectPtr<ADigumItemActor>> EquippedItems;
+
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController = nullptr;
 	
 public:
 	// Sets default values for this component's properties
@@ -48,4 +51,6 @@ public:
 	
 	ADigumItemActor* GetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot);
 	void ClearEquippedItem(const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+
+	APlayerController* GetPlayerController() const { return PlayerController; }
 };

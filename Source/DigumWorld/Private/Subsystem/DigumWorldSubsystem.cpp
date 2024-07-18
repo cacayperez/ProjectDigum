@@ -18,7 +18,21 @@ UDigumWorldSubsystem* UDigumWorldSubsystem::Get(const UWorld* InWorld)
 	return nullptr;
 }
 
-void UDigumWorldSubsystem::Request(const EDigumWorld_Request& InRequest, const FDigumWorldRequestParams& InParams) const
+void UDigumWorldSubsystem::MakeRequest(UWorld* WorldContext, const FDigumWorldRequestParams& InParams)
 {
-	OnWorldRequest.Broadcast(InRequest, InParams);
+	if(UDigumWorldSubsystem* WorldSubsystem = UDigumWorldSubsystem::Get(WorldContext))
+	{
+		WorldSubsystem->Request(InParams);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UDigumWorldSubsystem::MakeRequest - Unable to fullfil request"));
+	}
+}
+
+
+void UDigumWorldSubsystem::Request(const FDigumWorldRequestParams& InParams) const
+{
+	UE_LOG(LogTemp, Warning, TEXT("UDigumWorldSubsystem::Request - Creating request"));
+	OnWorldRequest.Broadcast(InParams);
 }

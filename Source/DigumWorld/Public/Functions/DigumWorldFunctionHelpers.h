@@ -7,6 +7,7 @@
 #include "DigumWorldFunctionHelpers.generated.h"
 
 struct FDigumWorldProceduralSectionCoordinate;
+struct FDigumWorldCoordinate2D;
 class ADigumWorldActorChild;
 struct FDigumWorldBlockTableRow;
 class UDigumWorldSwatchAsset;
@@ -27,4 +28,5 @@ public:
 	static bool GetSectionCoordinates(const FName& InContentCategoryName, const FVector& WorldLocation, int32& OutXCoordinate, int32& OutYCoordinate);
 	static bool GetSectionCoordinates(const FName& InContentCategoryName, const TArray<FVector>& InWorldLocationArray, TArray<FDigumWorldProceduralSectionCoordinate>& OutSectionCoordinateArray);
 	static void ConvertToSectionCoordinates(const FVector& InWorldLocation, const FVector2D& InSectionUnitSize, FDigumWorldProceduralSectionCoordinate& OutSectionCoordinate);
+	static void ConvertToSectionLocalSectionCoordinate(const FVector& InWorldLocation, const FVector& InGridSize, const int32& InWidthOffset, const int32& InHeightOffset, FDigumWorldCoordinate2D& OutLocalCoordinate);
 };

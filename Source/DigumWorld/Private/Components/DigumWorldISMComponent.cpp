@@ -169,6 +169,21 @@ void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType
 	// ...
 }
 
+void UDigumWorldISMComponent::InitializeSize(const int32& InHierarchyCount, const int32& InSectionWidth,
+	const int32& InSectionHeight)
+{
+	
+	ClearInstances();
+	ISMInstanceData.Empty();
+
+	for(int32 i = 0; i < InHierarchyCount; i++)
+	{
+		TArray<FDigumWorldISMInstanceData> Array = {};
+		Array.SetNum(InSectionWidth * InSectionHeight);
+		ISMInstanceData.Add(i, Array);
+	}
+}
+
 /*bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
 {
 	return RemoveInstanceInternal_Custom(InstanceIndex, false);
@@ -205,4 +220,37 @@ void UDigumWorldISMComponent::SetVariant(const int32& InstanceIndex,const int32&
 {
 	SetCustomDataValue(InstanceIndex, 2, Variant, true);
 }
+
+void UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform, const int32& InHierarchyIndex, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor )
+{
+	if(TArray<FDigumWorldISMInstanceData>* Array = ISMInstanceData.Find(InHierarchyIndex))
+	{
+		if(Array->IsValidIndex(InLocalIndex))
+		{
+			int32 InstanceIndex = AddInstance(InTransform);
+			SetTint(InstanceIndex, InHierarchyIndex);
+			SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
+			SetVariant(InstanceIndex, InVariant);
+			FDigumWorldISMInstanceData Data;
+			Data.LocalIndex = InLocalIndex;
+			Data.InstanceIndex = InstanceIndex;
+			Data.Transform = InTransform;
+			(*Array)[InLocalIndex] = Data;
+		}
+	}
+}
+
+void UDigumWorldISMComponent::RemoveWorldInstance(const int32& InLocalIndex, const int32& InHierarchyIndex)
+{
+	if(TArray<FDigumWorldISMInstanceData>* Array = ISMInstanceData.Find(InHierarchyIndex))
+	{
+		if(Array->IsValidIndex(InLocalIndex))
+		{
+			const int32 InstanceIndex = (*Array)[InLocalIndex].InstanceIndex;
+			RemoveInstance(InstanceIndex);
+			(*Array)[InLocalIndex] = FDigumWorldISMInstanceData();
+		}
+	}
+}
+
 

@@ -4,6 +4,7 @@
 #include "Actor/DigumBuildPreviewActor.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
@@ -17,6 +18,14 @@ ADigumBuildPreviewActor::ADigumBuildPreviewActor()
 	
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	// bReplicates = true;
+}
+
+void ADigumBuildPreviewActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADigumBuildPreviewActor, TargetLocation);
+	DOREPLIFETIME(ADigumBuildPreviewActor, GridSize);
 }
 
 void ADigumBuildPreviewActor::Tick(float DeltaSeconds)
@@ -36,6 +45,7 @@ void ADigumBuildPreviewActor::SetTargetLocation(const FVector& InTargetLocation,
 		return;
 	}
 	TargetLocation = SnapToGrid(GridLocation, InGridSize);
+	OnSetTargetLocation.Broadcast(TargetLocation);
 }
 
 bool ADigumBuildPreviewActor::IsBlockOccupied(const FVector& InLocation, const FVector& InGridSize)
@@ -64,6 +74,6 @@ FVector ADigumBuildPreviewActor::SnapToGrid(const FVector& InLocation, const FVe
 FVector ADigumBuildPreviewActor::GetPreviewTargetLocation() const
 {
 	FVector Location = GetActorLocation();
-	Location.Z += GridSize.Z;
+	// Location.Z -= GridSize.Z;
 	return Location;
 }

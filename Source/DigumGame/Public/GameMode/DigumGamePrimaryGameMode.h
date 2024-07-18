@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Actor/Equip/DigumGameItemActor_Block.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "Procedural/DigumWorldMap.h"
 #include "GameMode/DigumGameMode.h"
@@ -47,8 +48,8 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 	UPROPERTY()
 	bool bMapInitialized = false;
 
-	UPROPERTY()
-	TObjectPtr<ADigumWorldMapActor> WorldMapActor;
+	/*UPROPERTY()
+	TObjectPtr<ADigumWorldMapActor> WorldMapActor;*/
 
 	UPROPERTY()
 	TArray<FVector> PlayerStartPositions;
@@ -62,8 +63,12 @@ public:
 	virtual void StartPlay() override;
 	virtual void HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer) override;
 	void SpawnPlayerCharacter(APlayerController* NewPlayer, TArray<FVector>& StartPositions);
-	
+	void TryExecuteRequest(const FDigumWorldRequestParams& InParams);
+
 protected:
+	FTimerHandle SpawnQueueTimerHandle;
+	
+	TQueue<APlayerController*> PlayerQueue;
 
 	DECLARE_MULTICAST_DELEGATE(FOnGameWorldLoaded);
 
@@ -78,7 +83,9 @@ protected:
 	int32 GetWorldSeed() const;
 	void SetWorldSeed(const int32& InValue);
 	FVector GetGridSize() const;
-	
+
+	void CheckPlayerSpawnQueue();
+	bool SpawnPLayerFromQueue(APlayerController* PlayerController);
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void FindBestStartPosition(const FVector& InInitialPosition, TArray<FVector>& OccupiedPositions, FVector& OutPosition, const float& InMinDistance = 100.0f);

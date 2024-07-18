@@ -7,6 +7,7 @@
 #include "Asset/DigumAssetManager.h"
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "Settings/DigumWorldSettings.h"
 
 
@@ -20,6 +21,12 @@ ADigumMinerPlayerController::ADigumMinerPlayerController()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+void ADigumMinerPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// DOREPLIFETIME(ADigumMinerPlayerController, WorldMapActor);
+}
+
 void ADigumMinerPlayerController::InitializeController(ADigumMinerCharacter* InCharacter)
 {
 	if(InCharacter && !bCharacterHasBeenInitialized)
@@ -28,8 +35,6 @@ void ADigumMinerPlayerController::InitializeController(ADigumMinerCharacter* InC
 		bCharacterHasBeenInitialized = true;
 	}
 }
-
-/*
 void ADigumMinerPlayerController::TrySpawnPlayerCharacter(const FVector& InWorldLocation)
 {
 	Server_SpawnPlayerCharacter(InWorldLocation);
@@ -41,10 +46,14 @@ void ADigumMinerPlayerController::TrySpawnWorldMapActor()
 	Server_SpawnWorldMapActor();
 }
 
+void ADigumMinerPlayerController::Client_SpawnWorldMapActor_Implementation()
+{
+	SpawnWorldMapActor_Internal();
+}
+
 void ADigumMinerPlayerController::Multicast_SpawnPlayerCharacter_Implementation(const FVector& InWorldLocation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Multicast Spawn Player Character %s"), *GetName());
-	if(HasAuthority())
+	if(HasAuthority()) // Only spawn on server
 	{
 		SpawnPlayerCharacter_Internal(InWorldLocation);
 	}
@@ -61,7 +70,7 @@ void ADigumMinerPlayerController::Server_SpawnPlayerCharacter_Implementation(con
 
 void ADigumMinerPlayerController::Multicast_SpawnWorldMapActor_Implementation()
 {
-	if(IsLocalController())
+	if(HasAuthority())
 	{
 		SpawnWorldMapActor_Internal();
 
@@ -71,19 +80,43 @@ void ADigumMinerPlayerController::Multicast_SpawnWorldMapActor_Implementation()
 
 void ADigumMinerPlayerController::Server_SpawnWorldMapActor_Implementation()
 {
+	
 	if(HasAuthority())
 	{
 		Multicast_SpawnWorldMapActor();
 	}
 }
-*/
+
+void ADigumMinerPlayerController::Server_TryAddBlock_Implementation(const FName& InBlockID,
+	const FVector& InWorldLocation)
+{
+	if(HasAuthority())
+	{
+		if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
+		{
+			FActorSpawnParameters SpawnParams;
+		
+			AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
+			if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
+			{
+				MapActor->TryAddBlock(InBlockID, InWorldLocation);
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ADigumMinerPlayerController::Server_TryAddBlock_Implementation, World Map Actor Class is null"));
+		}
+	}
+}
+
+
 
 void ADigumMinerPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
 	InitializeBackground();
-	// TrySpawnWorldMapActor();
+	TrySpawnWorldMapActor();
 	
 }
 
@@ -104,7 +137,6 @@ void ADigumMinerPlayerController::InitializeBackground()
 	}
 }
 
-/*
 void ADigumMinerPlayerController::SpawnPlayerCharacter_Internal(const FVector& InWorldLocation)
 {
 	if(bCharacterHasBeenInitialized) return;
@@ -128,18 +160,21 @@ void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 	if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
 	{
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
+		
 		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
-		if(ADigumWorldMapActor* WorldMapActor = GetWorld()->SpawnActor<ADigumWorldMapActor>(WorldMapClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams))
+		if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
 		{
-			// WorldMapActor->SetOwningPlayerController(NewPlayer);
-			WorldMapActor->BeginInitializeMap();
-			WorldMapActor->GetOnWorldLoadedDelegate().AddLambda([ this]()
-			{
-				TrySpawnPlayerCharacter(FVector(0, 0 , 200));
-			});
+			WorldMapActor = MapActor;
+			WorldMapActor->SetReplicates(true);
 		}
 	}
+
+
 }
-*/
+
+void ADigumMinerPlayerController::TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation)
+{
+	Server_TryAddBlock(InBlockID, InWorldLocation);
+}
+
 

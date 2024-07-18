@@ -11,7 +11,7 @@ enum EDigumWorld_Request : uint8
 {
 	DigumWorldRequest_Default,
 	DigumWorldRequest_Destroy,
-	DigumWorldRequest_Spawn,
+	DigumWorldRequest_Add,
 };
 
 USTRUCT(BlueprintType)
@@ -21,6 +21,9 @@ struct FDigumWorldRequestParams
 public:
 	UPROPERTY()
 	TEnumAsByte<EDigumWorld_Request> Request;
+
+	UPROPERTY()
+	FName BlockID;
 
 	UPROPERTY()
 	int32 HitInstanceIndex;
@@ -42,15 +45,20 @@ UCLASS()
 class DIGUMWORLD_API UDigumWorldSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
-public:
+
 	
+
 protected:
-	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWorldRequest, const EDigumWorld_Request&, const FDigumWorldRequestParams&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnWorldRequest, const FDigumWorldRequestParams&);
 	FOnWorldRequest OnWorldRequest;
-	
+
 public:
 	static UDigumWorldSubsystem* Get(const UWorld* InWorld);
 
 	FOnWorldRequest& GetOnWorldRequestDelegate() { return OnWorldRequest; }
-	void Request(const EDigumWorld_Request& InRequest, const FDigumWorldRequestParams& InParams) const;
+	void Request(const FDigumWorldRequestParams& InParams) const;	
+	
+
+	
+	static void MakeRequest(UWorld* WorldContext, const FDigumWorldRequestParams& InParams);
 };

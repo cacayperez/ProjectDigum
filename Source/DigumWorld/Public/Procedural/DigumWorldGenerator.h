@@ -277,6 +277,13 @@ public:
 	int32 SectionWidth = 0;
 
 	
+	UPROPERTY()
+	int32 SectionHeight = 0;
+
+	UPROPERTY()
+	int32 HierarchyCount = 0;
+
+	
 	void AddCoordinate(const FName& InBlockID, const int32& InLocalX, const int32& InLocalY, const int32& InGlobalX, const int32& InGlobalY, const int32& InHierarchy, const float& InNoiseValue)
 	{
 		CoordinateArrayData.AddCoordinate(InBlockID, InLocalX, InLocalY, InGlobalX, InGlobalY, InHierarchy, InNoiseValue);

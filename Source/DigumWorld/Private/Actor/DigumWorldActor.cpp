@@ -19,21 +19,10 @@ ADigumWorldActor::ADigumWorldActor(const FObjectInitializer& ObjectInitializer)
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
 }
-
-void ADigumWorldActor::OnWorldRequest(const EDigumWorld_Request& InDigumWorld_Request,
-	const FDigumWorldRequestParams& InDigumWorldRequestParams)
-{
-
-}
-
 void ADigumWorldActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if(UDigumWorldSubsystem* WorldSubsystem = UDigumWorldSubsystem::Get(GetWorld()))
-	{
-		WorldSubsystem->GetOnWorldRequestDelegate().AddUObject(this, &ADigumWorldActor::OnWorldRequest);
-	}
 	
 #if WITH_EDITOR
 	SetFolderPath(TEXT("/DigumWorld"));
@@ -75,6 +64,7 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 				Group.Add(SwatchName, GroupCoordinates);
 			}
 		}
+		
 		for (auto It = Group.CreateConstIterator(); It; ++It)
 		{
 			FName Key = It.Key();
@@ -98,9 +88,7 @@ void ADigumWorldActor::Editor_UpdateWorldAsset()
 					}
 				}
 			}
-			
 		}
-	
 	}
 	
 	MarkPackageDirty();

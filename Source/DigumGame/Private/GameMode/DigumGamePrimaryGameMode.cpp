@@ -38,27 +38,26 @@ void ADigumGamePrimaryGameMode::PostInitializeComponents()
 void ADigumGamePrimaryGameMode::OnMapInitialized()
 {
 	bMapInitialized = true;
-	OnGameWorldLoaded.Broadcast();
+
+	CheckPlayerSpawnQueue();
+	// OnGameWorldLoaded.Broadcast();
 }
 
 void ADigumGamePrimaryGameMode::StartPlay()
 {
 	Super::StartPlay();
 
-	
-	if(TSubclassOf<ADigumWorldMapActor> WorldMapActorClass = UDigumAssetManager::GetSubclass<ADigumWorldMapActor>(SoftWorldMapActorClass))
+	if(AActor* WorldMapActor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass()))
 	{
-		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapActorClass);
-		if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
+		if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(WorldMapActor))
 		{
-			MapActor->SetOwner(this);
-			WorldMapActor = MapActor;
-			// UE_LOG(LogTemp, Warning, TEXT("ADigumGamePrimaryGameMode::StartPlay: Found World Map Actor, Owner: %s"), *GetOwner()->GetName());
-			WorldMapActor->GetOnWorldLoadedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::OnMapInitialized);
-			WorldMapActor->BeginInitializeMap();
-			
+			UE_LOG(LogTemp, Warning, TEXT("World Map Actor Found"));
+			MapActor->GetOnWorldLoadedDelegate().AddUObject(this, &ADigumGamePrimaryGameMode::OnMapInitialized);
 		}
 	}
+
+	
+	
 }
 
 void ADigumGamePrimaryGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewPlayer)
@@ -107,6 +106,11 @@ void ADigumGamePrimaryGameMode::SpawnPlayerCharacter(APlayerController* NewPlaye
 
 }
 
+void ADigumGamePrimaryGameMode::TryExecuteRequest(const FDigumWorldRequestParams& InParams)
+{
+
+}
+
 
 int32 ADigumGamePrimaryGameMode::GetWorldSeed() const
 {
@@ -127,6 +131,48 @@ FVector ADigumGamePrimaryGameMode::GetGridSize() const
 		return Settings->GetGridSize();
 	}
 	return FVector::ZeroVector;
+}
+
+void ADigumGamePrimaryGameMode::CheckPlayerSpawnQueue()
+{
+	if(PlayerQueue.IsEmpty())
+	{
+		return;
+	}
+	
+	APlayerController* PlayerController = nullptr;
+	if(PlayerQueue.Peek(PlayerController))
+	{
+		if(PlayerController)
+		{
+			if(SpawnPLayerFromQueue(PlayerController))
+			{
+				PlayerQueue.Dequeue(PlayerController);
+			}
+		}
+	}
+
+	if(!PlayerQueue.IsEmpty())
+	{
+		GetWorldTimerManager().SetTimer(SpawnQueueTimerHandle, this, &ADigumGamePrimaryGameMode::CheckPlayerSpawnQueue, PlayerSpawnDelay, false);
+	}
+	else
+	{
+		GetWorldTimerManager().ClearTimer(SpawnQueueTimerHandle);
+	}
+}
+
+bool ADigumGamePrimaryGameMode::SpawnPLayerFromQueue(APlayerController* PlayerController)
+{
+	if(PlayerController)
+	{
+		if(ADigumMinerPlayerController* MinerPlayerController = Cast<ADigumMinerPlayerController>(PlayerController))
+		{
+			SpawnPlayerCharacter(PlayerController, PlayerStartPositions);
+			return true;
+		}
+	}
+	return false;
 }
 
 void ADigumGamePrimaryGameMode::Tick(float DeltaSeconds)
@@ -181,11 +227,7 @@ void ADigumGamePrimaryGameMode::PostLogin(APlayerController* NewPlayer)
 {
 	Super::PostLogin(NewPlayer);
 
-	OnGameWorldLoaded.AddLambda([this, NewPlayer]
-	{
-		SpawnPlayerCharacter(NewPlayer, PlayerStartPositions);
-	});	
+	PlayerQueue.Enqueue(NewPlayer);
 
-	
 }
 

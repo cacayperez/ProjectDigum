@@ -19,7 +19,7 @@ class DIGUMINVENTORY_API ADigumItemActor : public AActor
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Item", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* Mesh;
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	FDigumItemProperties ItemProperties;
 
 public:
@@ -27,6 +27,7 @@ public:
 	ADigumItemActor(const FObjectInitializer& ObjectInitializer);
 	~ADigumItemActor();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	UPROPERTY()
 	TObjectPtr<AActor> ItemInstigator;

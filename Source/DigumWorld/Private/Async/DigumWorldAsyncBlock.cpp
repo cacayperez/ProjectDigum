@@ -36,6 +36,8 @@ void FDigumWorldAsyncBlock::DoWork()
 	while(LoopCount < Coordinates.CoordinateCount())
 	{
 		const FDigumWorldProceduralCoordinate* Coordinate = Coordinates.GetCoordinate(LoopCount);
+		
+		// UE_LOG(LogTemp, Warning, TEXT("Hierarchy Index: %i"), Coordinate->Hierarchy);
 		const int32 Variant = Coordinate->GetVariant(BlockID);
 		const float X = Coordinate->X * GridX;
 		const float Y = Coordinate->Hierarchy * GridY * (20.0f * -Coordinate->Hierarchy);

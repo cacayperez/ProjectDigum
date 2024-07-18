@@ -58,10 +58,6 @@ public:
 
 	UPROPERTY(Replicated)
 	FVector2D SectionSize;
-	
-
-	
-	FTimerHandle ReuseTimerHandle;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	
@@ -70,8 +66,6 @@ protected:
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	FDigumWorldProceduralSection SectionData;
-
-	
 	
 	UPROPERTY()
 	float CleanupTimer = 10.0f;
@@ -97,7 +91,8 @@ public:
 	void InitializeSpawnData(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection);
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
-	void AddBlock(const FName& InBlockID, const FVector& InLocation, const int32& WidthOffset = 0, const int32& HeightOffset = 0);
+	void AddBlock(const FName& InBlockID, const FVector& InLocation);
+	void RemoveBlock(const FVector& InLocation);
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	void ResetSection();

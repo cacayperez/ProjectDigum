@@ -63,6 +63,11 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 	UPROPERTY(Replicated, VisibleAnywhere)
 	TArray<float> Health;
 
+	UPROPERTY(Replicated, VisibleAnywhere)
+	int32 SectionWidth = 0;
+
+	UPROPERTY(Replicated, VisibleAnywhere)
+	int32 SectionHeight = 0;
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
@@ -93,9 +98,10 @@ public:
 
 	
 	TQueue<TSharedPtr<FDigumWorldAsyncBlockResultArray>> AsyncBlockResultArrayQueue;
-	
+
+	virtual void InitializeISMComponent(const int32& InHierarchyCount, const int32& InSectionWidth, const int32& InSectionHeight);
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
-	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates);
+	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates, const int32& NumOfHierarchies, const int32& InSectionWidth, const int32& InSectionHeight);
 	
 	void ResetChildActor();
 	virtual void SetWorldCollision(const bool& bValue);

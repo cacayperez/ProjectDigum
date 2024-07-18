@@ -7,8 +7,10 @@
 #include "Components/DigumWorldMapSectionComponent.h"
 #include "Components/DigumWorldPositioningComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Settings/DigumWorldSettings.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 
 
 void ADigumWorldMapActor::OnInitializeSection()
@@ -23,8 +25,6 @@ ADigumWorldMapActor::ADigumWorldMapActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	bReplicates = true;
-	
 }
 
 void ADigumWorldMapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -35,11 +35,14 @@ void ADigumWorldMapActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(ADigumWorldMapActor, WorldMap);
 	DOREPLIFETIME(ADigumWorldMapActor, ProceduralRules);
 	DOREPLIFETIME(ADigumWorldMapActor, WorldOffset);
+	DOREPLIFETIME(ADigumWorldMapActor, bInitializedMap);
 }
 
 void ADigumWorldMapActor::OnSectionLoaded(FDigumWorldProceduralSection& DigumWorldProceduralSection)
 {
-	TrySpawnSection(DigumWorldProceduralSection);
+	UE_LOG(LogTemp, Warning, TEXT("Section Loaded"));
+	// TrySpawnSection(DigumWorldProceduralSection);
+	SpawnSection(DigumWorldProceduralSection);
 }
 
 void ADigumWorldMapActor::OnAllSectionsLoaded()
@@ -49,12 +52,60 @@ void ADigumWorldMapActor::OnAllSectionsLoaded()
 	OnWorldLoaded.Broadcast();
 }
 
+void ADigumWorldMapActor::OnWorldRequest(const FDigumWorldRequestParams& DigumWorldRequestParams)
+{
+	TryExecuteAction(DigumWorldRequestParams);
+}
+
+bool ADigumWorldMapActor::IsLocallyOwned()
+{
+	if(GetOwner())
+	{
+		// Never local on dedicated server. IsServerOnly() is checked at compile time and optimized out appropriately.
+		if (FPlatformProperties::IsServerOnly())
+		{
+			checkSlow(!bIsLocallyOwned);
+			return false;
+		}
+	
+		// Fast path if we have this bool set.
+		if (bIsLocallyOwned)
+		{
+			return true;
+		}
+
+		ENetMode NetMode = GetNetMode();
+		if (NetMode == NM_DedicatedServer)
+		{
+			// This is still checked for the PIE case, which would not be caught in the IsServerOnly() check above.
+			checkSlow(!bIsLocallyOwned);
+			return false;
+		}
+
+		if (NetMode == NM_Client || NetMode == NM_Standalone)
+		{
+			// Clients or Standalone only receive their own PC. We are not ROLE_AutonomousProxy until after PostInitializeComponents so we can't check that.
+			bIsLocallyOwned = true;
+			return true;
+		}
+
+	}
+	
+	return false;
+}
+
 // Called when the game starts or when spawned
 void ADigumWorldMapActor::BeginPlay()
 {
 	Super::BeginPlay();
-	BeginInitializeMap();
 
+	BeginInitializeMap();
+	OwningPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if(UDigumWorldSubsystem* WorldSubsystem = UDigumWorldSubsystem::Get(GetWorld()))
+	{
+		WorldSubsystem->GetOnWorldRequestDelegate().AddUObject(this, &ADigumWorldMapActor::OnWorldRequest);
+	}
 }
 
 void ADigumWorldMapActor::OnRemoveSection(ADigumWorldActorSection* InDigumWorldActorSection)
@@ -81,7 +132,6 @@ void ADigumWorldMapActor::SpawnSection(FDigumWorldProceduralSection& InSection)
 		
 		SectionActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
 		SectionActor->GetDigumWorldSectionReadyForCleanupDelegate().AddUObject(this, &ADigumWorldMapActor::OnRemoveSection);
-		SectionActor->SetOwner(GetOwner());
 		SectionActor->SetFolderPath(GetFolderPath());
 		SectionActor->InitializeSpawnData(WorldMap.GetSectionUnitSize(),InSection);
 		SectionActor->FinishSpawning(FTransform::Identity);
@@ -97,7 +147,7 @@ void ADigumWorldMapActor::SpawnSection(FDigumWorldProceduralSection& InSection)
 			SectionActors[SectionIndex] = SectionActor;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("Section Spawned: %i, %i, SectionIndex, %i"), SX, SY, SectionIndex);
+		// UE_LOG(LogTemp, Warning, TEXT("Section Spawned: %i, %i, SectionIndex, %i"), SX, SY, SectionIndex);
 	}
 }
 
@@ -136,8 +186,10 @@ void ADigumWorldMapActor::Server_SpawnSection_Implementation(const FDigumWorldPr
 
 void ADigumWorldMapActor::Multicast_SpawnSection_Implementation(const FDigumWorldProceduralSection& InSection)
 {
+	FDigumWorldProceduralSection Section = FDigumWorldProceduralSection(InSection);
+	SpawnSection(Section);
 	// if(GetOwner())
-	if(HasAuthority())
+	/*if(HasAuthority())
 	{
 		FDigumWorldProceduralSection Section = FDigumWorldProceduralSection(InSection);
 		SpawnSection(Section);
@@ -145,22 +197,41 @@ void ADigumWorldMapActor::Multicast_SpawnSection_Implementation(const FDigumWorl
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_SpawnSection_Implementation: No Owner"));
-	}
+	}*/
 }
 
 void ADigumWorldMapActor::TrySpawnSection(FDigumWorldProceduralSection& InSection)
 {
+
 	/*if(OwningPlayerController && OwningPlayerController->IsLocalController())
 	{
 		SpawnSection(InSection);
 	}*/
-	SpawnSection(InSection);
+	// SpawnSection(InSection);
+	
+	
+	Server_SpawnSection(InSection);
+}
 
+void ADigumWorldMapActor::TryExecuteAction(const FDigumWorldRequestParams& InParams)
+{
+	FVector HitLocation = InParams.HitLocation - WorldOffset;
+	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(HitLocation, WorldMap.GetSectionUnitSize(), SectionCoordinate);
+
+	if(InParams.Request == EDigumWorld_Request::DigumWorldRequest_Add)
+	{
+		TryAddBlock(InParams.BlockID, InParams.HitLocation);
+
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::TryExecuteAction, %s"), *InParams.HitLocation.ToString());
 }
 
 void ADigumWorldMapActor::BeginInitializeMap()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::BeginInitializeMap Called"));
+	if(bInitializedMap) return;
+
 	
 	if(SectionComponent)
 	{
@@ -188,7 +259,8 @@ void ADigumWorldMapActor::BeginInitializeMap()
 		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::BeginInitializeMap SectionComponent"));
 		WorldOffset =  WorldMap.GetWorldOffset();
 		SetActorLocation(WorldOffset);
-		
+
+		bInitializedMap = true;
 	}
 	else
 	{
@@ -198,32 +270,18 @@ void ADigumWorldMapActor::BeginInitializeMap()
 
 }
 
-void ADigumWorldMapActor::AddBlock(const FName& InBlockID, const FVector& InBlockLocation)
+void ADigumWorldMapActor::TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation)
 {
-	// Get Local Position
-	const FVector LocalPosition = InBlockLocation - WorldOffset;
-	
-	// Translate World Position to Section Coordinates
-	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
-	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, WorldMap.GetSectionUnitSize(), SectionCoordinate);
+	// UE_LOG(LogTemp, Warning, TEXT("Remote Role %s"), *UEnum::GetValueAsString(TEXT("Engine.ENetRole"), GetLocalRole()));
+	// AddBlock_Internal(InBlockID, InBlockLocation);
+	Server_AddBlock(InBlockID, InBlockLocation);
+	/*
 
-	if(SectionCoordinate.IsValid())
+	if(!HasAuthority())
 	{
-		const int32 SectionIndex = GetSectionIndex(SectionCoordinate.X, SectionCoordinate.Y);
-		
-		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock: Valid Section Coordinate: %s, %i"), *SectionCoordinate.ToString(), SectionIndex);
-		if(SectionActors.IsValidIndex(SectionIndex))
-		{
-			if(ADigumWorldActorSection* SectionActor = SectionActors[SectionIndex])
-			{
-				SectionActor->AddBlock(InBlockID, LocalPosition, WorldMap.SectionWidth, WorldMap.SectionHeight);
-			}
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock Invalid Section Coordinate"));
-	}
+		AddBlock_Internal(InBlockID, InBlockLocation);
+	}*/
+	
 }
 
 void ADigumWorldMapActor::Editor_GenerateWorldMap()
@@ -259,4 +317,70 @@ TArray<FDigumWorldProceduralSectionCoordinate> ADigumWorldMapActor::GetSectionCo
 int32 ADigumWorldMapActor::GetSectionIndex(const int32 InX, const int32 InY) const
 {
 	return (WorldMap.SectionCount_HorizontalAxis * InY) + InX;
+}
+
+void ADigumWorldMapActor::AddBlock_Internal(const FName& InBlockID, const FVector& InWorldLocation)
+{
+	// Get Local Position
+	const FVector LocalPosition = InWorldLocation - WorldOffset;
+	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock: %s"), *LocalPosition.ToString());
+	// Translate World Position to Section Coordinates
+	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(LocalPosition, WorldMap.GetSectionUnitSize(), SectionCoordinate);
+
+	if(SectionCoordinate.IsValid())
+	{
+		const int32 SectionIndex = GetSectionIndex(SectionCoordinate.X, SectionCoordinate.Y);
+		
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock: Valid Section Coordinate: %s, %i"), *SectionCoordinate.ToString(), SectionIndex);
+		if(SectionActors.IsValidIndex(SectionIndex))
+		{
+			if(ADigumWorldActorSection* SectionActor = SectionActors[SectionIndex])
+			{
+				SectionActor->AddBlock(InBlockID, LocalPosition);
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock Invalid Section Coordinate"));
+	}
+}
+
+
+void ADigumWorldMapActor::Server_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+{
+	if(HasAuthority())
+	{
+		Multicast_AddBlock(InBlockID, InBlockLocation);
+	}
+}
+
+void ADigumWorldMapActor::Multicast_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+{
+	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_AddBlock_Implementation, %s"), *InBlockLocation.ToString());
+
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
+	{
+		Client_AddBlock(InBlockID, InBlockLocation);
+	}
+
+	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
+	{
+		AddBlock_Internal(InBlockID, InBlockLocation);
+	}
+	
+}
+
+
+void ADigumWorldMapActor::RemoveBlock_Internal(const FVector& InWorldLocation)
+{
+	
+}
+
+void ADigumWorldMapActor::Client_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+{
+	AddBlock_Internal(InBlockID, InBlockLocation);
 }
