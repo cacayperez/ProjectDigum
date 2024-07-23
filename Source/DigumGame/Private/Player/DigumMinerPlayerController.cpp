@@ -80,7 +80,6 @@ void ADigumMinerPlayerController::Multicast_SpawnWorldMapActor_Implementation()
 
 void ADigumMinerPlayerController::Server_SpawnWorldMapActor_Implementation()
 {
-	
 	if(HasAuthority())
 	{
 		Multicast_SpawnWorldMapActor();
@@ -110,24 +109,31 @@ void ADigumMinerPlayerController::Server_TryAddBlock_Implementation(const FName&
 }
 
 
-void ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation(const FVector& InBlockLocation)
+void ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation(const FVector& InWorldLocation, const float& InScaledDamage)
 {
 	if(HasAuthority())
 	{
 		if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
 		{
-			FActorSpawnParameters SpawnParams;
-		
 			AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
 			if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
 			{
-				MapActor->TryRemoveBlock(InBlockLocation);
+				MapActor->TryRemoveBlock(InWorldLocation, InScaledDamage);
 			}
 		}
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation, World Map Actor Class is null"));
 		}
+	}
+}
+
+void ADigumMinerPlayerController::TryRequest(const EDigumWorld_Request InRequest, const TArray<FVector> InArrayLocation,
+	const float& InScaledDamage)
+{
+	if(InRequest == EDigumWorld_Request::DigumWorldRequest_Destroy)
+	{
+		TryRemoveBlock(InArrayLocation, InScaledDamage);
 	}
 }
 
@@ -191,8 +197,6 @@ void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 			MapActor->SetReplicates(true);
 		}
 	}
-
-
 }
 
 void ADigumMinerPlayerController::TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation)
@@ -200,4 +204,10 @@ void ADigumMinerPlayerController::TryAddBlock(const FName& InBlockID, const FVec
 	Server_TryAddBlock(InBlockID, InWorldLocation);
 }
 
-
+void ADigumMinerPlayerController::TryRemoveBlock(const TArray<FVector>& InArrayLocation, const float& InScaledDamage)
+{
+	for(const FVector& Location : InArrayLocation)
+	{
+		Server_TryRemoveBlock(Location, InScaledDamage);
+	}
+}

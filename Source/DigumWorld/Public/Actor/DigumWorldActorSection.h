@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Procedural/DigumWorldGenerator.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumWorldActorSection.generated.h"
 
 struct FDigumWorldProceduralSection;
@@ -39,15 +40,14 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	
 	UPROPERTY()
 	TObjectPtr<UDigumVisibilityComponent> VisibilityComponent;
+	
 	/*UPROPERTY()
 	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;*/
 
-	UPROPERTY()
-	TMap<FName, ADigumWorldActorChild*> WorldChildActors;
-
+	/*UPROPERTY()
+	TMap<FName, ADigumWorldActorChild*> WorldChildActors;*/
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FDigumWorldSectionReadyForCleanup, ADigumWorldActorSection*);
-
 
 public:
 	// Sets default values for this actor's properties
@@ -89,10 +89,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	void Reinitialize();
 	void InitializeSpawnData(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection);
+	void OnChildTransact(ADigumWorldActorChild* InWorldChild, const FDigumWorldProceduralSection& InDigumWorldProceduralSection, const FDigumWorldRequestParams& InDigumWorldRequestParams);
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation);
-	void RemoveBlock(const FVector& InLocation);
+	// void RemoveBlock(const FVector& InLocation);
 	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	void ResetSection();

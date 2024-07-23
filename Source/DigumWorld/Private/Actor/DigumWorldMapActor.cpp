@@ -3,10 +3,11 @@
 
 #include "Actor/DigumWorldMapActor.h"
 
+#include "Actor/DigumWorldActorChild.h"
 #include "Actor/DigumWorldActorSection.h"
 #include "Components/DigumWorldMapSectionComponent.h"
-#include "Components/DigumWorldPositioningComponent.h"
 #include "Functions/DigumWorldFunctionHelpers.h"
+#include "Interface/IDigumWorldInteractionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Settings/DigumWorldSettings.h"
@@ -162,6 +163,29 @@ ADigumWorldActorSection* ADigumWorldMapActor::GetSection(const int32 InX, const 
 }
 
 
+void ADigumWorldMapActor::Server_RemoveBlock_Implementation(const FVector& InWorldLocation, const float& InScaledDamage)
+{
+	if(HasAuthority())
+	{
+		Multicast_RemoveBlock(InWorldLocation, InScaledDamage);
+	}
+}
+
+void ADigumWorldMapActor::Multicast_RemoveBlock_Implementation(const FVector& InWorldLocation,
+	const float& InScaledDamage)
+{
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
+	{
+		RemoveBlock_Internal(InWorldLocation, InScaledDamage);
+	}
+
+	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
+	{
+		RemoveBlock_Internal(InWorldLocation, InScaledDamage);
+	}
+}
 
 void ADigumWorldMapActor::EnableSection(const int32 InX, const int32 InY)
 {
@@ -188,28 +212,11 @@ void ADigumWorldMapActor::Multicast_SpawnSection_Implementation(const FDigumWorl
 {
 	FDigumWorldProceduralSection Section = FDigumWorldProceduralSection(InSection);
 	SpawnSection(Section);
-	// if(GetOwner())
-	/*if(HasAuthority())
-	{
-		FDigumWorldProceduralSection Section = FDigumWorldProceduralSection(InSection);
-		SpawnSection(Section);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_SpawnSection_Implementation: No Owner"));
-	}*/
+
 }
 
 void ADigumWorldMapActor::TrySpawnSection(FDigumWorldProceduralSection& InSection)
 {
-
-	/*if(OwningPlayerController && OwningPlayerController->IsLocalController())
-	{
-		SpawnSection(InSection);
-	}*/
-	// SpawnSection(InSection);
-	
-	
 	Server_SpawnSection(InSection);
 }
 
@@ -231,7 +238,6 @@ void ADigumWorldMapActor::TryExecuteAction(const FDigumWorldRequestParams& InPar
 void ADigumWorldMapActor::BeginInitializeMap()
 {
 	if(bInitializedMap) return;
-
 	
 	if(SectionComponent)
 	{
@@ -276,8 +282,9 @@ void ADigumWorldMapActor::TryAddBlock(const FName& InBlockID, const FVector& InB
 	Server_AddBlock(InBlockID, InBlockLocation);
 }
 
-void ADigumWorldMapActor::TryRemoveBlock(const FVector& InWorldLocation)
+void ADigumWorldMapActor::TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage)
 {
+	Server_RemoveBlock(InWorldLocation, InScaledDamage);
 }
 
 void ADigumWorldMapActor::Editor_GenerateWorldMap()
@@ -344,58 +351,57 @@ void ADigumWorldMapActor::AddBlock_Internal(const FName& InBlockID, const FVecto
 }
 
 
-void ADigumWorldMapActor::Server_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+void ADigumWorldMapActor::Server_AddBlock_Implementation(const FName& InBlockID, const FVector& InWorldLocation)
 {
 	if(HasAuthority())
 	{
-		Multicast_AddBlock(InBlockID, InBlockLocation);
+		Multicast_AddBlock(InBlockID, InWorldLocation);
 	}
 }
 
-void ADigumWorldMapActor::Multicast_AddBlock_Implementation(const FName& InBlockID, const FVector& InBlockLocation)
+void ADigumWorldMapActor::Multicast_AddBlock_Implementation(const FName& InBlockID, const FVector& InWorldLocation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_AddBlock_Implementation, %s"), *InBlockLocation.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::Multicast_AddBlock_Implementation, %s"), *InWorldLocation.ToString());
 
 	ENetMode NetMode = GetNetMode();
 
 	if(NetMode == NM_Client || NetMode == NM_Standalone)
 	{
-		AddBlock_Internal(InBlockID, InBlockLocation);
+		AddBlock_Internal(InBlockID, InWorldLocation);
 	}
 
 	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
 	{
-		AddBlock_Internal(InBlockID, InBlockLocation);
+		AddBlock_Internal(InBlockID, InWorldLocation);
 	}
 	
 }
 
 
-void ADigumWorldMapActor::RemoveBlock_Internal(const FVector& InWorldLocation)
+void ADigumWorldMapActor::RemoveBlock_Internal(const FVector& InWorldLocation, const float& InScaledDamage)
 {
+	const FVector Start = InWorldLocation;
+	// HACK : Adding +1.0f due to some weird behavior with the box trace
+	// identical Start and End locations will not return any hits and always returns FVector::ZeroVector
+	const FVector End = InWorldLocation + 1.0f; 
 	
-}
+	// TArray<FHitResult> OutHitResult;
+	FHitResult OutHitResult;
+	TArray<AActor*> IgnoredActors;
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), Start, End, 20.0f, UEngineTypes::ConvertToTraceType(ECC_Camera), false, IgnoredActors, EDrawDebugTrace::ForDuration, OutHitResult, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 
-void ADigumWorldMapActor::Server_RemoveBlock_Implementation(const FVector& InBlockLocation)
-{
-	if(HasAuthority())
+	if(bHit)
 	{
-		Multicast_RemoveBlock(InBlockLocation);
-	}
-}
-
-void ADigumWorldMapActor::Multicast_RemoveBlock_Implementation(const FVector& InBlockLocation)
-{
-	ENetMode NetMode = GetNetMode();
-
-	if(NetMode == NM_Client || NetMode == NM_Standalone)
-	{
-		RemoveBlock_Internal(InBlockLocation);
-	}
-
-	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
-	{
-		RemoveBlock_Internal(InBlockLocation);
+		AActor* HitActor = OutHitResult.GetActor();
+		FVector ImpactLocation = OutHitResult.ImpactPoint;
+		const int32 Index = OutHitResult.Item;
+		if(HitActor)
+		{
+			if(ADigumWorldActorChild* Child = Cast<ADigumWorldActorChild>(HitActor))
+			{
+				Child->RemoveBlock(Index, InScaledDamage);
+			}
+		}
 	}
 }
 

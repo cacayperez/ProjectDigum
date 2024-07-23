@@ -67,6 +67,7 @@ protected:
 	FOnAllSectionsLoaded OnAllSectionsLoaded;
 	void SetAsyncCheck(const bool& bValue);
 	void CheckSectionToGenerate();
+	
 public:
 	TQueue<TSharedPtr<FDigumWorldProceduralSection>> SectionQueue;
 	

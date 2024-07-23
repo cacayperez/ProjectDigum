@@ -102,6 +102,14 @@ void ADigumWorldActorSection::InitializeSpawnData(const FVector2D& InSectionSize
 	InitializeSection(InSectionSize, InSection, nullptr);
 }
 
+void ADigumWorldActorSection::OnChildTransact(ADigumWorldActorChild* InWorldChild,
+	const FDigumWorldProceduralSection& InDigumWorldProceduralSection,
+	const FDigumWorldRequestParams& InDigumWorldRequestParams)
+{
+	
+}
+
+
 void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
 	// GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
@@ -144,6 +152,8 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 					{
 						NewActor->AttachToActor(this, FAttachmentTransformRules::KeepRelativeTransform);
 						NewActor->SetReplicates(true);
+						NewActor->SetSectionData(SectionData);
+						NewActor->GetOnDigumWorldTransactDelegate().AddUObject(this, &ADigumWorldActorSection::OnChildTransact);
 						// NewActor->InitializeISMComponent()
 						// NewActor->SetFolderPath(GetFolderPath());
 						NewActor->InitializeSwatchAsset(BlockID, SwatchAsset, BlockCoordinates, SectionData.HierarchyCount, SectionData.SectionWidth, SectionData.SectionHeight);
@@ -199,6 +209,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	}
 	else
 	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldActorSection::AddBlock, Spawning New Child, %s"), *InBlockID.ToString());
 		UDigumWorldSwatchAsset* Asset = UDigumWorldFunctionHelpers::GetSwatchAsset(InBlockID, TEXT("Primary"));
 		if(Asset)
 		{
@@ -213,7 +224,7 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 					NewActor->FinishSpawning(FTransform::Identity);
 					NewActor->SetActorLocation(GetActorLocation() + HierarchyOffset);
 					
-					WorldChildActors.FindOrAdd(InBlockID, NewActor);
+					ChildActorsContainers.Add(FDigumWorldChildActorsContainer(InBlockID, NewActor));
 					UE_LOG(LogTemp, Warning, TEXT("Block Added %s"), *InBlockID.ToString());
 				}
 			}
@@ -224,16 +235,33 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 }
 
 
-void ADigumWorldActorSection::RemoveBlock(const FVector& InLocation)
+/*void ADigumWorldActorSection::RemoveBlock(const FVector& InLocation)
 {
+	const int32 X = InLocation.X / GridSize.X;
+	const int32 Y = -(InLocation.Z / GridSize.Z);
 	
-}
+	// Temporarily set default hierarchy to 0
+	const int32 Hierarchy = 0;
+	const int32 WidthOffset = SectionData.SectionWidth;
+	const int32 HeightOffset = SectionData.SectionHeight;
+	const int32 LocalX = FMath::Abs(X % WidthOffset);
+	const int32 LocalY = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
+
+	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
+	{
+		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
+		{
+			ChildActor->TryRemoveUsingCoordinate(LocalX, LocalY, Hierarchy);
+		}
+	}
+	
+}*/
 
 void ADigumWorldActorSection::DestroySection()
 {
-	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
 	{
-		if(ADigumWorldActorChild* ChildActor = It->Value)
+		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
 		{
 			ChildActor->Destroy();
 		}
@@ -248,9 +276,9 @@ void ADigumWorldActorSection::ResetSection()
 {
 	SectionData = FDigumWorldProceduralSection(-1,-1);
 	
-	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
 	{
-		if(ADigumWorldActorChild* ChildActor = It->Value)
+		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
 		{
 			ChildActor->ResetChildActor();
 		}
@@ -260,9 +288,9 @@ void ADigumWorldActorSection::ResetSection()
 
 void ADigumWorldActorSection::EnableSection()
 {
-	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
 	{
-		if(ADigumWorldActorChild* ChildActor = It->Value)
+		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
 		{
 			ChildActor->SetActorEnableCollision(true);
 			ChildActor->SetActorHiddenInGame(false);
@@ -277,9 +305,9 @@ void ADigumWorldActorSection::SetSectionEnabled(const bool& bValue)
 {
 	const bool bCollisionEnabled = bValue;
 	const bool bHiddenInGame = !bValue;
-	for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
+	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
 	{
-		if(ADigumWorldActorChild* ChildActor = It->Value)
+		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
 		{
 			ChildActor->SetActorEnableCollision(bCollisionEnabled);
 			ChildActor->SetActorHiddenInGame(bHiddenInGame);
@@ -313,6 +341,10 @@ ADigumWorldActorChild* ADigumWorldActorSection::GetChildActor(const FName& InBlo
 	if(FDigumWorldChildActorsContainer* Container = GetChildActorContainer(InBlockID))
 	{
 		return Container->ChildActor;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Container is null"));
 	}
 
 	return nullptr;

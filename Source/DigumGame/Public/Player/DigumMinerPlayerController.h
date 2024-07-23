@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Player/DigumPlayerController.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumMinerPlayerController.generated.h"
 
 class ADigumGameBackgroundActor;
@@ -58,11 +59,11 @@ public:
 	void Server_TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
 
 	UFUNCTION(Server, Reliable)
-	void Server_TryRemoveBlock(const FVector& InBlockLocation);
-
+	void Server_TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
+	
+	virtual void TryRequest(const EDigumWorld_Request InRequest, const TArray<FVector> InArrayLocation, const float& InScaledDamage);
 
 protected:
-
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnMinerCharacterSpawned, ACharacter*)
 
 	FOnMinerCharacterSpawned OnMinerCharacterSpawned;
@@ -79,4 +80,5 @@ public:
 	
 	ADigumWorldMapActor* GetWorldMapActor() const { return WorldMapActor; }
 	void TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
+	void TryRemoveBlock(const TArray<FVector>& InArrayLocation, const float& InScaledDamage);
 };

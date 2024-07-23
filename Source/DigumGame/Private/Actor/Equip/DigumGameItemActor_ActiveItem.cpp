@@ -7,6 +7,7 @@
 #include "Asset/DigumAssetManager.h"
 #include "Components/DigumActionComponent.h"
 #include "Interface/IDigumActionComponentInterface.h"
+#include "Kismet/GameplayStatics.h"
 #include "Properties/DigumActionProperties.h"
 
 DEFINE_LOG_CATEGORY(LogDigumGameItemActor_ActiveItem);
@@ -16,6 +17,17 @@ ADigumGameItemActor_ActiveItem::ADigumGameItemActor_ActiveItem(const FObjectInit
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+}
+
+void ADigumGameItemActor_ActiveItem::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+}
+
+void ADigumGameItemActor_ActiveItem::BeginPlay()
+{
+	Super::BeginPlay();
+	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 }
 
 void ADigumGameItemActor_ActiveItem::TryActivateItem(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey)

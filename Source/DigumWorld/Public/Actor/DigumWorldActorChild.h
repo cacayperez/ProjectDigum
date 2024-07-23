@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Interface/IDigumWorldInteractionInterface.h"
 #include "Procedural/DigumWorldGenerator.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumWorldActorChild.generated.h"
 
 struct FDigumWorldBlockID;
@@ -51,7 +52,6 @@ UCLASS()
 class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumWorldInteractionInterface
 {
 	GENERATED_BODY()
-
 	
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
@@ -68,12 +68,22 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 
 	UPROPERTY(Replicated, VisibleAnywhere)
 	int32 SectionHeight = 0;
+
+	
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 protected:
+
+	DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDigumWorldTransact, ADigumWorldActorChild*, const FDigumWorldProceduralSection&, const FDigumWorldRequestParams&)
+
+	FOnDigumWorldTransact OnDigumWorldTransact;
+
+	UPROPERTY(Replicated)
+	bool bIsBlocking = false;
+	
 	UPROPERTY(Replicated)
 	FName BlockID;
 	
@@ -82,6 +92,9 @@ protected:
 	
 	UPROPERTY(Replicated)
 	FVector GridSize;
+
+	UPROPERTY(Replicated)
+	FDigumWorldProceduralSection SectionData;
 	
 	virtual void BeginPlay() override;
 	virtual void OnFinishedInitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates);
@@ -91,11 +104,19 @@ protected:
 	virtual void OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation);
 
 	void AsyncAddBlock();
+
+	/*UFUNCTION(Server, Reliable)
+	void Server_Transact(const FDigumWorldRequestParams& InParams);*/
+
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RemoveCoordinate(const FDigumWorldProceduralCoordinate& InCoordinate);*/
+	/*UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Transact(const FDigumWorldRequestParams& InParams);*/
+
+	void Transact_Internal(const FDigumWorldRequestParams& InParams);
 	
 public:
 	virtual void Tick(float DeltaSeconds) override;
-	// TQueue<TSharedPtr<FDigumWorldAsyncBlockResult>> AsyncBlockResultQueue;
-
 	
 	TQueue<TSharedPtr<FDigumWorldAsyncBlockResultArray>> AsyncBlockResultArrayQueue;
 
@@ -110,7 +131,14 @@ public:
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);
 	virtual void DestroyInstance(const int32& InIndex = INDEX_NONE);
 	virtual void OnInteract_Implementation(const AActor* InInstigator, const FDigumWorldRequestParams& InParams) override;
-	// void DestroyInstance(const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 
+
+	virtual void SetSectionData(FDigumWorldProceduralSection& InSection);
+	virtual void RemoveBlock(const int32& InstanceIndex, const float& InScaledDamage);
+	// virtual void TryRemoveUsingCoordinate(const int32& InLocalX, const int32& InLocalY, const int32& InHierarchyIndex);
+	// virtual void TryChildTransact(const FDigumWorldRequestParams& InParams);
+
+	
 	FORCEINLINE UDigumWorldISMComponent* GetInstancedMeshComponent() const { return InstancedMeshComponent; }
+	FOnDigumWorldTransact& GetOnDigumWorldTransactDelegate() { return OnDigumWorldTransact; }
 };

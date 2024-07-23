@@ -34,7 +34,8 @@ void ADigumWorldActorChild::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 	DOREPLIFETIME(ADigumWorldActorChild, Health);
 	DOREPLIFETIME(ADigumWorldActorChild, SectionWidth);
 	DOREPLIFETIME(ADigumWorldActorChild, SectionHeight);
-	
+
+	DOREPLIFETIME(ADigumWorldActorChild, bIsBlocking);
 	DOREPLIFETIME(ADigumWorldActorChild, GridSize);
 	DOREPLIFETIME(ADigumWorldActorChild, SwatchAsset);
 }
@@ -113,10 +114,12 @@ void ADigumWorldActorChild::AsyncAddBlock()
 					const int32 X = Result.Coordinate.X;
 					const int32 Y = Result.Coordinate.Y;
 					const int32 LocalIndex = (SectionWidth * Y) + X;
-					// UE_LOG(LogTemp, Warning, TEXT("LocalIndex, %i"), LocalIndex);
-					InstancedMeshComponent->AddWorldInstance(Transform, HierarchyIndex, Variant, LocalIndex, bHasTopNeighbor);
+					const FDigumWorldProceduralCoordinate Coordinate = Result.Coordinate;
+					UE_LOG(LogTemp, Warning, TEXT("Child : Hierarchy Index, %i"), HierarchyIndex);
+					InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
 				}
 			}
+			
 			SetActorTickEnabled(false);
 			AsyncBlockResultArrayQueue.Dequeue(ArrayResultPtr);
 		}
@@ -124,6 +127,56 @@ void ADigumWorldActorChild::AsyncAddBlock()
 		ArrayResultPtr.Reset();
 	}
 
+}
+
+/*
+void ADigumWorldActorChild::Server_Transact_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	if(HasAuthority())
+	{
+		Transact_Internal(InParams);
+	}
+}
+*/
+
+/*void ADigumWorldActorChild::Multicast_Transact_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
+	{
+		Transact_Internal(InParams);
+	}
+
+	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
+	{
+		Transact_Internal(InParams);
+	}
+}*/
+
+/*void ADigumWorldActorChild::Multicast_RemoveCoordinate_Implementation(
+	const FDigumWorldProceduralCoordinate& InCoordinate)
+{
+	if(!HasAuthority())
+	{
+		if(InstancedMeshComponent)
+		{
+			
+		}
+	}
+}*/
+
+void ADigumWorldActorChild::Transact_Internal(const FDigumWorldRequestParams& InParams)
+{
+	if(InParams.Request == EDigumWorld_Request::DigumWorldRequest_Destroy)
+	{
+		if(InstancedMeshComponent)
+		{
+			const bool bRemoved = InstancedMeshComponent->RemoveWorldInstance(InParams.HitInstanceIndex);
+			
+		}
+	
+	}
 }
 
 void ADigumWorldActorChild::Tick(float DeltaSeconds)
@@ -207,10 +260,8 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
-
 		
 		AddBlock(InBlockID,Coordinates);
-		
 	}
 	
 }
@@ -294,25 +345,67 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 {
 	if(InIndex == INDEX_NONE) return;
 
-	FTransform Transform;
-	if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
+	/*if(InstancedMeshComponent)
+	{
+		InstancedMeshComponent->RemoveWorldInstance(InIndex);
+	}*/
+	// FTransform Transform;
+	/*if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Helloo DestroyInstance %s"), *Transform.GetLocation().ToString());
 		InstancedMeshComponent->RemoveInstance(InIndex);
 		OnDestroyChildInstance(InIndex, Transform.GetLocation());
 		
-	}
+	}*/
 }
 
 void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator,
 	const FDigumWorldRequestParams& InParams)
 {
 	UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
-	if(InParams.Request == EDigumWorld_Request::DigumWorldRequest_Destroy)
+	// OnDigumWorldTransact.Broadcast(this, SectionData, InParams);
+	// TryChildTransact(InParams);
+}
+
+void ADigumWorldActorChild::SetSectionData(FDigumWorldProceduralSection& InSection)
+{
+	SectionData = InSection;
+}
+
+void ADigumWorldActorChild::RemoveBlock(const int32& InInstanceIndex, const float& InScaledDamage)
+{
+	if(!bIsBlocking) return;
+
+	if(InInstanceIndex == INDEX_NONE) return;
+
+	if(InstancedMeshComponent)
 	{
-		DestroyInstance(InParams.HitInstanceIndex);
+		InstancedMeshComponent->RemoveWorldInstance(InInstanceIndex);
 	}
 }
+
+/*
+void ADigumWorldActorChild::TryRemoveUsingCoordinate(const int32& InLocalX, const int32& InLocalY,
+	const int32& InHierarchyIndex)
+{
+	if(!bIsBlocking) return;
+	if(InstancedMeshComponent)
+	{
+		FDigumWorldProceduralCoordinate OutCoordinate;
+		InstancedMeshComponent->RemoveWorldInstance(InLocalX, InLocalY, InHierarchyIndex);
+		/*if(bRemoved)
+		{
+			Multicast_RemoveCoordinate(OutCoordinate);
+		}#1#
+	}
+}
+
+void ADigumWorldActorChild::TryChildTransact(const FDigumWorldRequestParams& InParams)
+{
+	/*Transact_Internal(InParams);#1#
+	// Server_Transact(InParams);
+}
+*/
 
 
 

@@ -25,7 +25,6 @@ class DIGUMBUILD_API ADigumBuildPreviewActor : public AActor
 
 protected:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnSetTargetLocation, const FVector&)
-
 	
 	FOnSetTargetLocation OnSetTargetLocation;
 public:
@@ -38,7 +37,5 @@ public:
 	void SetTargetLocation(const FVector& InTargetLocation, const FVector& InGridSize = FVector(100.0f, 100.0f, 100.0f));
 	bool IsBlockOccupied(const FVector& InLocation, const FVector& InGridSize);
 	FVector SnapToGrid(const FVector& InLocation, const FVector& InGridSize) const;
-	FVector GetPreviewTargetLocation() const;
-
 	FOnSetTargetLocation& GetOnSetTargetLocationDelegate() { return OnSetTargetLocation;}
 };

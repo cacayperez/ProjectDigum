@@ -4,6 +4,7 @@
 #include "Components/DigumWorldISMComponent.h"
 
 #include "AI/NavigationSystemBase.h"
+#include "Procedural/DigumWorldGenerator.h"
 
 static TAutoConsoleVariable<int32> CVarISMForceRemoveAtSwap(
 	TEXT("r.InstancedStaticMeshes.ForceRemoveAtSwap"),
@@ -22,7 +23,7 @@ UDigumWorldISMComponent::UDigumWorldISMComponent()
 	NumCustomDataFloats = 3;
 	SetCastShadow(false);
 	bCastDynamicShadow = false;
-	// SetIsReplicated(true);
+	SetIsReplicated(true);
 }
 
 /*
@@ -172,16 +173,16 @@ void UDigumWorldISMComponent::TickComponent(float DeltaTime, ELevelTick TickType
 void UDigumWorldISMComponent::InitializeSize(const int32& InHierarchyCount, const int32& InSectionWidth,
 	const int32& InSectionHeight)
 {
-	
 	ClearInstances();
 	ISMInstanceData.Empty();
 
-	for(int32 i = 0; i < InHierarchyCount; i++)
+	
+	/*for(int32 i = 0; i < InHierarchyCount; i++)
 	{
-		TArray<FDigumWorldISMInstanceData> Array = {};
+		TArray<TSharedPtr<FDigumWorldISMInstanceData>> Array = {};
 		Array.SetNum(InSectionWidth * InSectionHeight);
 		ISMInstanceData.Add(i, Array);
-	}
+	}*/
 }
 
 /*bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
@@ -209,11 +210,10 @@ void UDigumWorldISMComponent::SetTint(const int32& InstanceIndex, const int32& I
 	}
 }
 
-void UDigumWorldISMComponent::SetSurfacePoint(const int32& InstanceIndex, const bool& bValue)
+void UDigumWorldISMComponent::SetSurfacePoint(const int32& InstanceIndex, const		bool& bValue)
 {
 	const int32 Value = bValue ? 0 : 1;
 	SetCustomDataValue(InstanceIndex, 1, Value, true);
-
 }
 
 void UDigumWorldISMComponent::SetVariant(const int32& InstanceIndex,const int32& Variant)
@@ -221,36 +221,49 @@ void UDigumWorldISMComponent::SetVariant(const int32& InstanceIndex,const int32&
 	SetCustomDataValue(InstanceIndex, 2, Variant, true);
 }
 
-void UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform, const int32& InHierarchyIndex, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor )
+void UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform,  const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor )
 {
-	if(TArray<FDigumWorldISMInstanceData>* Array = ISMInstanceData.Find(InHierarchyIndex))
+	const int32 HierarchyIndex = InCoordinate.Hierarchy;
+
+	FDigumWorldISMInstanceData Data;
+	Data.LocalIndex = InLocalIndex;
+	Data.Transform = InTransform;
+	const int32 InstanceIndex = AddInstance(InTransform);
+	if(InstanceIndex != INDEX_NONE)
 	{
-		if(Array->IsValidIndex(InLocalIndex))
+		SetTint(InstanceIndex, HierarchyIndex);
+		SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
+		SetVariant(InstanceIndex, InVariant);
+		
+		WorldISMData.Add(Data);
+	}
+}
+
+bool UDigumWorldISMComponent::RemoveWorldInstance(const int32& InInstanceIndex)
+{
+	if(WorldISMData.IsValidIndex(InInstanceIndex))
+	{
+		RemoveInstance(InInstanceIndex);
+		WorldISMData.RemoveAt(InInstanceIndex);
+
+		return true;
+	}
+	return false;
+	
+}
+
+void UDigumWorldISMComponent::RemoveWorldInstance(const int32& InLocalX, const int32& InLocalY,
+	const int32& InHierarchyIndex)
+{
+	for(int32 i = 0; i < WorldISMData.Num(); i++)
+	{
+		if(WorldISMData[i].Coordinate.X == InLocalX && WorldISMData[i].Coordinate.Y == InLocalY && WorldISMData[i].Coordinate.Hierarchy == InHierarchyIndex)
 		{
-			int32 InstanceIndex = AddInstance(InTransform);
-			SetTint(InstanceIndex, InHierarchyIndex);
-			SetSurfacePoint(InstanceIndex, bHasTopNeighbor);
-			SetVariant(InstanceIndex, InVariant);
-			FDigumWorldISMInstanceData Data;
-			Data.LocalIndex = InLocalIndex;
-			Data.InstanceIndex = InstanceIndex;
-			Data.Transform = InTransform;
-			(*Array)[InLocalIndex] = Data;
+			RemoveWorldInstance(i);
 		}
 	}
 }
 
-void UDigumWorldISMComponent::RemoveWorldInstance(const int32& InLocalIndex, const int32& InHierarchyIndex)
-{
-	if(TArray<FDigumWorldISMInstanceData>* Array = ISMInstanceData.Find(InHierarchyIndex))
-	{
-		if(Array->IsValidIndex(InLocalIndex))
-		{
-			const int32 InstanceIndex = (*Array)[InLocalIndex].InstanceIndex;
-			RemoveInstance(InstanceIndex);
-			(*Array)[InLocalIndex] = FDigumWorldISMInstanceData();
-		}
-	}
-}
+
 
 

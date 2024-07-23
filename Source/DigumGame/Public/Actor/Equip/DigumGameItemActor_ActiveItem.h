@@ -30,10 +30,18 @@ class DIGUMGAME_API ADigumGameItemActor_ActiveItem : public ADigumItemActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Item", meta=(AllowPrivateAccess="true"))
 	TMap<TEnumAsByte<EDigumGameItem_ActionKey>, TSoftClassPtr<UDigumAction>> Actions;
 
+	
+	
 public:
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController = nullptr;
+	
 	// Sets default values for this actor's properties
 	ADigumGameItemActor_ActiveItem(const FObjectInitializer& ObjectInitializer);
-	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+protected:
+	virtual void BeginPlay() override;
+public:
 	void TryActivateItem(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey = EDigumGameItem_ActionKey::DigumGameActionKey_Default);
 	virtual void OnActivateItem(AActor* InInstigator, const EDigumGameItem_ActionKey ActionKey = EDigumGameItem_ActionKey::DigumGameActionKey_Default);
 	TSubclassOf<UDigumAction> GetActionClass(const EDigumGameItem_ActionKey ActionKey) const;

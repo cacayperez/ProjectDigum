@@ -14,6 +14,7 @@ ADigumGameWorldActorChild_Block::ADigumGameWorldActorChild_Block(const FObjectIn
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bIsBlocking = true;
 }
 
 void ADigumGameWorldActorChild_Block::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)

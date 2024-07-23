@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Procedural/DigumWorldGenerator.h"
 #include "DigumWorldISMComponent.generated.h"
 
 USTRUCT()
@@ -15,8 +16,6 @@ struct FDigumWorldISMInstanceData
 	UPROPERTY()
 	int32 LocalIndex = -1;
 
-	UPROPERTY()
-	int32 InstanceIndex = -1;
 	
 	UPROPERTY()
 	int32 Variant = -1;
@@ -33,6 +32,12 @@ struct FDigumWorldISMInstanceData
 	UPROPERTY()
 	FTransform Transform;
 
+	UPROPERTY()
+	int32 HierarchyIndex = -1;
+
+	UPROPERTY()
+	FDigumWorldProceduralCoordinate Coordinate;
+
 	void DecreaseHealth(const float& InAmount) { Health = Health - InAmount; }
 	void IncreaseHealth(const float& InAmount) { Health = Health + InAmount; }
 };
@@ -41,8 +46,12 @@ UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class DIGUMWORLD_API UDigumWorldISMComponent : public UInstancedStaticMeshComponent
 {
 	GENERATED_BODY()
+
 	
-	TMap<int32, TArray<FDigumWorldISMInstanceData>> ISMInstanceData;
+	TMap<int32, TArray<TSharedPtr<FDigumWorldISMInstanceData>>> ISMInstanceData;
+
+	UPROPERTY()
+	TArray<FDigumWorldISMInstanceData> WorldISMData;
 public:
 	// Sets default values for this component's properties
 	UDigumWorldISMComponent();
@@ -62,6 +71,11 @@ public:
 	void SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex);
 	void SetSurfacePoint(const int32& InstanceIndex, const bool& bValue = false);
 	void SetVariant(const int32& InstanceIndex, const int32& Variant);
-	void AddWorldInstance(const FTransform& InTransform, const int32& InHierarchyIndex, const int32& InVariant,const int32& InLocalIndex, const bool& bHasTopNeighbor = true);
-	void RemoveWorldInstance(const int32& InLocalIndex, const int32& InHierarchyIndex);
+	void AddWorldInstance(const FTransform& InTransform, const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor = true);
+	bool RemoveWorldInstance(const int32& InInstanceIndex);
+	void RemoveWorldInstance(const int32& InLocalX, const int32& InLocalY, const int32& InHierarchyIndex);
+	
+	// void RemoveWorldInstance(const int32& InstanceIndex);
+
+	// int32 GetInstanceIndex(const int32& InLocalX, const int32) const;
 };

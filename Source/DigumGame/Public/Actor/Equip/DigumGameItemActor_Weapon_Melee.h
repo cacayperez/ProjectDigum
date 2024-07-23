@@ -6,7 +6,6 @@
 #include "DigumGameItemActor_ActiveItem.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/Actor.h"
-#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumGameItemActor_Weapon_Melee.generated.h"
 
 class UArrowComponent;
@@ -31,6 +30,9 @@ class DIGUMGAME_API ADigumGameItemActor_Weapon_Melee : public ADigumGameItemActo
 	UPROPERTY()
 	TArray<int32> HitItems;
 
+	UPROPERTY()
+	TArray<FVector> HitLocations;
+
 public:
 
 	// Sets default values for this actor's properties
@@ -39,6 +41,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	FTimerHandle CollisionTimerHandle;
+
+	/*UFUNCTION(Server, Reliable)
+	void Server_TraceCollision();
+	
+	void TraceCollision_Internal();*/
+
 	
 public:
 	float GetScaledDamage() const;

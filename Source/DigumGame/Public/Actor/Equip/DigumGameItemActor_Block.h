@@ -23,8 +23,6 @@ class DIGUMGAME_API ADigumGameItemActor_Block : public ADigumGameItemActor_Activ
 	UPROPERTY()
 	TObjectPtr<ADigumBuildPreviewActor> BlockPreview;
 
-	UPROPERTY(Replicated)
-	TObjectPtr<APlayerController> PlayerController = nullptr;
 
 	UPROPERTY(Replicated)
 	FVector GridSize;

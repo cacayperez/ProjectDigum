@@ -62,9 +62,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
 protected:
-	
 	FOnWorldLoaded OnWorldLoaded;
 	
 	UPROPERTY()
@@ -87,7 +85,7 @@ protected:
 	int32 GetSectionIndex(const int32 InX, const int32 InY) const;
 
 	void AddBlock_Internal(const FName& InBlockID, const FVector& InWorldLocation);
-	void RemoveBlock_Internal(const FVector& InWoorldLocation);
+	void RemoveBlock_Internal(const FVector& InWorldLocation, const float& InScaledDamage);
 
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnSection(const FDigumWorldProceduralSection& InSection);
@@ -96,16 +94,16 @@ protected:
 	void Multicast_SpawnSection(const FDigumWorldProceduralSection& InSection);
 
 	UFUNCTION(Server, Reliable)
-	void Server_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	void Server_AddBlock(const FName& InBlockID, const FVector& InWorldLocation);
 	
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	void Multicast_AddBlock(const FName& InBlockID, const FVector& InWorldLocation);
 	
 	UFUNCTION(Server, Reliable)
-	void Server_RemoveBlock(const FVector& InBlockLocation);
+	void Server_RemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_RemoveBlock(const FVector& InBlockLocation);
+	void Multicast_RemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
 
 public:
 	// void GenerateWorldMap();
@@ -125,7 +123,7 @@ public:
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
 	
 	void TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation);
-	void TryRemoveBlock(const FVector& InWorldLocation);
+	void TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
 
 #if WITH_EDITOR
 	UFUNCTION(BlueprintCallable, Category = "Digum World Map Actor", CallInEditor, meta = (DisplayName = "Generate World Map Actor"))

@@ -459,7 +459,7 @@ bool UDigumWorldGenerator::CreateSection(const FDigumWorldMap& InMap, const int3
 
 	// Foliage
 	TArray<FDigumWorldProceduralBlock> FoliagePlacedBlocks;
-	// GenerateFoliage(InMap.Seed, &MainSection, InProceduralDefinition, FoliagePlacedBlocks);
+	GenerateFoliage(InMap.Seed, &MainSection, InProceduralDefinition, FoliagePlacedBlocks);
 
 	// Trees
 	TArray<FDigumWorldProceduralPlacedBlocks> TreePlacedBlocks;
@@ -537,8 +537,6 @@ bool UDigumWorldGenerator::GenerateTerrainSection(const int32& InMapWidth, const
 	
 	return bResult;
 }
-
-
 
 bool UDigumWorldGenerator::GenerateTrees(const FName& InSeedName, TArray<FDigumWorldProceduralSection>& InSectionArray,
                                          const FDigumWorldProceduralDefinition& InProceduralDefinition, TArray<FDigumWorldProceduralBlock>& InPlacedBlocks)

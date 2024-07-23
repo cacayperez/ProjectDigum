@@ -2,12 +2,8 @@
 
 
 #include "Actor/Equip/DigumGameItemActor_Block.h"
-
-#include "Actor/DigumWorldMapActor.h"
 #include "DigumBuild/Public/Actor/DigumBuildPreviewActor.h"
 #include "Functions/DigumGameItemHelperFunctions.h"
-#include "GameState/DigumGamePrimaryGameState.h"
-#include "Interface/IDigumPlayerCharacterInterface.h"
 #include "Item/DigumGameItemAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -84,14 +80,6 @@ void ADigumGameItemActor_Block::BeginPlay()
 			}
 		}
 	}
-	/*
-	if(GetItemInstigator() && GetItemInstigator()->GetClass()->ImplementsInterface(UIDigumPlayerCharacterInterface::StaticClass()))
-	{
-		TScriptInterface<IIDigumPlayerCharacterInterface> PlayerCharacterInterface = GetItemInstigator();
-		PlayerController = PlayerCharacterInterface->GetPlayerController();
-	}*/
-
-	
 }
 
 void ADigumGameItemActor_Block::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -161,7 +149,6 @@ void ADigumGameItemActor_Block::Client_ExecuteAction_Implementation(const FDigum
 
 void ADigumGameItemActor_Block::ExecuteAction_Internal(const FDigumWorldRequestParams& InParams)
 {
-
 	if(PlayerController)
 	{
 		if(ADigumMinerPlayerController* MPC = Cast<ADigumMinerPlayerController>(PlayerController.Get()))
@@ -169,44 +156,6 @@ void ADigumGameItemActor_Block::ExecuteAction_Internal(const FDigumWorldRequestP
 			MPC->TryAddBlock(InParams.BlockID, InParams.HitLocation);
 		}
 	}
-	/*if(AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), ADigumWorldMapActor::StaticClass()))
-	{
-		if(ADigumWorldMapActor* WorldMapActor = Cast<ADigumWorldMapActor>(Actor))
-		{
-			WorldMapActor->TryExecuteAction(InParams);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Actor is not DigumWorldMapActor"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("World Map Actor Class is null"));
-	}*/
-	/*if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
-	{
-		if(ADigumMinerPlayerController* MPC = Cast<ADigumMinerPlayerController>(PC))
-		{
-			if(ADigumWorldMapActor* WorldMapActor = MPC->GetWorldMapActor())
-			{
-				WorldMapActor->TryExecuteAction(InParams);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("WorldMapActor is null"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerController is not DigumMinerPlayerController"));
-		
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerController is null"));
-	}*/
 }
 
 // Called every frame

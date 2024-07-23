@@ -74,9 +74,3 @@ FVector ADigumBuildPreviewActor::SnapToGrid(const FVector& InLocation, const FVe
 	return GridLocation;
 }
 
-FVector ADigumBuildPreviewActor::GetPreviewTargetLocation() const
-{
-	 /*FVector Location = TargetLocation;
-	Location.Z += GridSize.Z;*/
-	return TargetLocation;
-}

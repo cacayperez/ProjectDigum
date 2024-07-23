@@ -85,15 +85,14 @@ void UDigumWorldMapSectionComponent::AsyncLoadSection()
 					SectionPtr.Reset();
 					CheckSectionToGenerate();
 				}
-
-				if(SectionCounter == TotalNumberOfSections)
-				{
-					OnAllSectionsLoaded.Broadcast();
-					// SetAsyncCheck(false);
-				}
-				
 			}
 		}
+	}
+
+	if(SectionQueue.IsEmpty() && SectionCounter == TotalNumberOfSections)
+	{
+		OnAllSectionsLoaded.Broadcast();
+		SetAsyncCheck(false);
 	}
 }
 
