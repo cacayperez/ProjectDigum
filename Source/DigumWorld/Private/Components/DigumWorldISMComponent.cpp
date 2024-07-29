@@ -176,19 +176,8 @@ void UDigumWorldISMComponent::InitializeSize(const int32& InHierarchyCount, cons
 	ClearInstances();
 	ISMInstanceData.Empty();
 
-	
-	/*for(int32 i = 0; i < InHierarchyCount; i++)
-	{
-		TArray<TSharedPtr<FDigumWorldISMInstanceData>> Array = {};
-		Array.SetNum(InSectionWidth * InSectionHeight);
-		ISMInstanceData.Add(i, Array);
-	}*/
 }
 
-/*bool UDigumWorldISMComponent::RemoveInstance(int32 InstanceIndex)
-{
-	return RemoveInstanceInternal_Custom(InstanceIndex, false);
-}*/
 
 void UDigumWorldISMComponent::SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex)
 {

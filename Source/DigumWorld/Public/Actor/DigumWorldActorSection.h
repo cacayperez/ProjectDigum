@@ -35,17 +35,8 @@ class DIGUMWORLD_API ADigumWorldActorSection : public AActor
 	UPROPERTY(BlueprintReadWrite, Category = "Digum World Actor", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USceneComponent> Root;
 
-	/*UPROPERTY()
-	TObjectPtr<UBoxComponent> BoxComponent;*/
 	
-	UPROPERTY()
-	TObjectPtr<UDigumVisibilityComponent> VisibilityComponent;
 	
-	/*UPROPERTY()
-	TArray<TWeakObjectPtr<ADigumWorldActorChild>> WorldChildActors;*/
-
-	/*UPROPERTY()
-	TMap<FName, ADigumWorldActorChild*> WorldChildActors;*/
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FDigumWorldSectionReadyForCleanup, ADigumWorldActorSection*);
 
@@ -72,8 +63,6 @@ protected:
 
 	UPROPERTY()
 	FTimerHandle CleanupTimerHandle;
-	
-	void OnSetWorldVisibility(bool bValue);
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -93,8 +82,6 @@ public:
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation);
-	// void RemoveBlock(const FVector& InLocation);
-	// void CreateChildActor(UDigumWorldSwatchAsset* SwatchAsset);
 	void DestroySection();
 	void ResetSection();
 	void EnableSection();

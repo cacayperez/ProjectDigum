@@ -268,8 +268,6 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 
 void ADigumWorldActorChild::ResetChildActor()
 {
-	// SetActorEnableCollision(false);
-	// SetActorHiddenInGame(true);
 	Health.Empty();
 	InstancedMeshComponent->ClearInstances();
 }
@@ -310,18 +308,7 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)
 {
-	/*if(InIndex == INDEX_NONE) return; 
-
-	FTransform Transform;
-	int32 OutIndex = -1;
-	if(GetInstancedHitIndex(InLocation, OutIndex))
-	{
-		float Distance = FVector::Distance(InLocation, Transform.GetLocation());
-		if(OutIndex >= 0)
-		{
-			InstancedMeshComponent->RemoveInstance(InIndex);
-		}
-	}*/
+	
 }
 
 void ADigumWorldActorChild::DestroyInstance(const FVector& InLocation, const float& InMaxRange)
@@ -345,26 +332,14 @@ void ADigumWorldActorChild::DestroyInstance(const int32& InIndex)
 {
 	if(InIndex == INDEX_NONE) return;
 
-	/*if(InstancedMeshComponent)
-	{
-		InstancedMeshComponent->RemoveWorldInstance(InIndex);
-	}*/
-	// FTransform Transform;
-	/*if(InstancedMeshComponent->GetInstanceTransform(InIndex, Transform, true))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Helloo DestroyInstance %s"), *Transform.GetLocation().ToString());
-		InstancedMeshComponent->RemoveInstance(InIndex);
-		OnDestroyChildInstance(InIndex, Transform.GetLocation());
-		
-	}*/
+
 }
 
 void ADigumWorldActorChild::OnInteract_Implementation(const AActor* InInstigator,
 	const FDigumWorldRequestParams& InParams)
 {
 	UE_LOG(LogTemp, Warning, TEXT("HitInstanceIndex: %i, %f"), InParams.HitInstanceIndex, InParams.Magnitude);
-	// OnDigumWorldTransact.Broadcast(this, SectionData, InParams);
-	// TryChildTransact(InParams);
+
 }
 
 void ADigumWorldActorChild::SetSectionData(FDigumWorldProceduralSection& InSection)
@@ -383,30 +358,3 @@ void ADigumWorldActorChild::RemoveBlock(const int32& InInstanceIndex, const floa
 		InstancedMeshComponent->RemoveWorldInstance(InInstanceIndex);
 	}
 }
-
-/*
-void ADigumWorldActorChild::TryRemoveUsingCoordinate(const int32& InLocalX, const int32& InLocalY,
-	const int32& InHierarchyIndex)
-{
-	if(!bIsBlocking) return;
-	if(InstancedMeshComponent)
-	{
-		FDigumWorldProceduralCoordinate OutCoordinate;
-		InstancedMeshComponent->RemoveWorldInstance(InLocalX, InLocalY, InHierarchyIndex);
-		/*if(bRemoved)
-		{
-			Multicast_RemoveCoordinate(OutCoordinate);
-		}#1#
-	}
-}
-
-void ADigumWorldActorChild::TryChildTransact(const FDigumWorldRequestParams& InParams)
-{
-	/*Transact_Internal(InParams);#1#
-	// Server_Transact(InParams);
-}
-*/
-
-
-
-

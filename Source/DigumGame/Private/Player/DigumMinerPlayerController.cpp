@@ -113,6 +113,7 @@ void ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation(const FVe
 {
 	if(HasAuthority())
 	{
+		// TODO Store WorldMapActor in a variable
 		if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
 		{
 			AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
@@ -142,7 +143,6 @@ void ADigumMinerPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	InitializeBackground();
-	// TrySpawnWorldMapActor();
 	
 }
 

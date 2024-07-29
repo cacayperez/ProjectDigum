@@ -23,9 +23,6 @@ ADigumWorldActorSection::ADigumWorldActorSection()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
-	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
-	BoxComponent->SetupAttachment(Root);*/
-	VisibilityComponent = CreateDefaultSubobject<UDigumVisibilityComponent>(TEXT("VisibilityComponent"));
 	bReplicates = true;
 	
 }
@@ -40,36 +37,12 @@ void ADigumWorldActorSection::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	
 }
 
-void ADigumWorldActorSection::OnSetWorldVisibility(bool bValue)
-{
-	/*for(auto It = WorldChildActors.CreateConstIterator(); It; ++It)
-	{
-		if(ADigumWorldActorChild* ChildActor = It->Value)
-		{
-			/*ChildActor->SetActorHiddenInGame(bValue);
-			ChildActor->SetWorldCollision(bValue);#1#
-		}
-	}*/
-
-}
-
 
 // Called when the game starts or when spawned
 void ADigumWorldActorSection::BeginPlay()
 {
 	Super::BeginPlay();
 
-	/*if(VisibilityComponent)
-	{
-		VisibilityComponent->GetOnSetVisibilityDelegate().AddUObject(this, &ADigumWorldActorSection::OnSetWorldVisibility);
-	}*/
-
-	/*if(BoxComponent)
-	{
-		GetWorld()->GetTimerManager().SetTimer(ReuseTimerHandle, this, &ADigumWorldActorSection::FlagForReuse, 3.0f, false);
-		BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ADigumWorldActorSection::OnBeginOverlap);
-		BoxComponent->OnComponentEndOverlap.AddDynamic(this, &ADigumWorldActorSection::OnEndOverlap);
-	}*/
 }
 
 void ADigumWorldActorSection::CleanupSection()
@@ -89,8 +62,6 @@ void ADigumWorldActorSection::Tick(float DeltaTime)
 
 void ADigumWorldActorSection::Reinitialize()
 {
-	// UE_LOG(LogTemp, Warning, TEXT("Reinitialize Section"));
-	// EnableSection();
 	GetWorld()->GetTimerManager().ClearTimer(CleanupTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
 }
@@ -112,7 +83,7 @@ void ADigumWorldActorSection::OnChildTransact(ADigumWorldActorChild* InWorldChil
 
 void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset)
 {
-	// GetWorld()->GetTimerManager().SetTimer(CleanupTimerHandle, this, &ADigumWorldActorSection::CleanupSection, CleanupTimer, false);
+
 	SectionData = InSection;
 
 	SectionSize = InSectionSize;
@@ -161,10 +132,7 @@ void ADigumWorldActorSection::InitializeSection(const FVector2D& InSectionSize, 
 
 						ChildActorsContainers.Add(FDigumWorldChildActorsContainer(BlockID, NewActor));
 						
-						// WorldChildActors.FindOrAdd(BlockID, NewActor);
-						/*#if WITH_EDITOR
-											NewActor->SetIsHiddenEdLayer(true);
-						#endif*/
+			
 					}
 					else
 					{
@@ -235,28 +203,6 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 }
 
 
-/*void ADigumWorldActorSection::RemoveBlock(const FVector& InLocation)
-{
-	const int32 X = InLocation.X / GridSize.X;
-	const int32 Y = -(InLocation.Z / GridSize.Z);
-	
-	// Temporarily set default hierarchy to 0
-	const int32 Hierarchy = 0;
-	const int32 WidthOffset = SectionData.SectionWidth;
-	const int32 HeightOffset = SectionData.SectionHeight;
-	const int32 LocalX = FMath::Abs(X % WidthOffset);
-	const int32 LocalY = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
-
-	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
-	{
-		if(ADigumWorldActorChild* ChildActor = It->ChildActor)
-		{
-			ChildActor->TryRemoveUsingCoordinate(LocalX, LocalY, Hierarchy);
-		}
-	}
-	
-}*/
-
 void ADigumWorldActorSection::DestroySection()
 {
 	for(auto It = ChildActorsContainers.CreateConstIterator(); It; ++It)
@@ -317,10 +263,6 @@ void ADigumWorldActorSection::SetSectionEnabled(const bool& bValue)
 	SetActorEnableCollision(bCollisionEnabled);
 	SetActorHiddenInGame(bHiddenInGame);
 
-	if(bValue)
-	{
-		// Reinitialize();
-	}
 }
 
 FDigumWorldChildActorsContainer* ADigumWorldActorSection::GetChildActorContainer(const FName& InBlockID)
@@ -342,10 +284,7 @@ ADigumWorldActorChild* ADigumWorldActorSection::GetChildActor(const FName& InBlo
 	{
 		return Container->ChildActor;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Container is null"));
-	}
-
+	
+	UE_LOG(LogTemp, Warning, TEXT("Container is null"));
 	return nullptr;
 }
