@@ -107,6 +107,7 @@ void ADigumWorldActorChild::AsyncAddBlock()
 			{
 				if(InstancedMeshComponent)
 				{
+					
 					const FTransform Transform = Result.Transform;
 					const int32 HierarchyIndex = Result.Coordinate.Hierarchy;
 					const int32 Variant = Result.Variant;
@@ -116,7 +117,12 @@ void ADigumWorldActorChild::AsyncAddBlock()
 					const int32 LocalIndex = (SectionWidth * Y) + X;
 					const FDigumWorldProceduralCoordinate Coordinate = Result.Coordinate;
 					UE_LOG(LogTemp, Warning, TEXT("Child : Hierarchy Index, %i"), HierarchyIndex);
-					InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
+					const bool bResult = InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
+
+					if(bResult)
+					{
+						
+					}
 				}
 			}
 			
@@ -266,6 +272,35 @@ void ADigumWorldActorChild::InitializeSwatchAsset(const FName& InBlockID, UDigum
 	
 }
 
+void ADigumWorldActorChild::InitializeSwatchAsset_UsingParams(UDigumWorldSwatchAsset* InSwatchAsset,
+	FDigumWorldProceduralCoordinateArray Coordinates, const int32& NumOfHierarchies, const int32& InSectionWidth,
+	const int32& InSectionHeight, const FDigumWorldRequestParams& InParams)
+{
+	SwatchAsset = InSwatchAsset;
+	BlockID = InParams.BlockID;
+	SectionWidth = InSectionWidth;
+	SectionHeight = InSectionHeight;
+
+	InitializeISMComponent(NumOfHierarchies, SectionWidth, SectionHeight);
+	if(SwatchAsset)
+	{
+		BuildChildProperties(SwatchAsset);
+		Health.Empty();
+		InstancedMeshComponent->ClearInstances();
+		GridSize = GetDefault<UDigumWorldSettings>()->GridSize;
+		if(UStaticMesh* Mesh = UDigumAssetManager::GetAsset<UStaticMesh>(SwatchAsset->SwatchMesh))
+		{
+			InstancedMeshComponent->SetStaticMesh(Mesh);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
+		}
+		
+		AddBlock(BlockID,Coordinates);
+	}
+}
+
 void ADigumWorldActorChild::ResetChildActor()
 {
 	Health.Empty();
@@ -301,9 +336,25 @@ void ADigumWorldActorChild::AddBlock(const FName& InBlockID, FDigumWorldProcedur
 
 	AsyncTask(ENamedThreads::AnyThread, [this, InBlockID, PositionOffset, InCoordinates]
 	{
-		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates))->StartBackgroundTask();
+		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates, FDigumWorldRequestParams()))->StartBackgroundTask();
 	});
 	
+}
+
+void ADigumWorldActorChild::AddBlock(const FDigumWorldRequestParams& InParams, FDigumWorldProceduralCoordinateArray& InCoordinates)
+{
+	const FName InBlockID = InParams.BlockID;
+	const float GridX = GridSize.X;
+	const float GridY = GridSize.Y;
+	const float GridZ = GridSize.Z;
+
+	const FVector PositionOffset = SwatchAsset->GetPositionOffset();
+	SetActorTickEnabled(true);
+
+	AsyncTask(ENamedThreads::AnyThread, [this, InBlockID, PositionOffset, InCoordinates, InParams]
+	{
+		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates, InParams))->StartBackgroundTask();
+	});
 }
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)
@@ -313,8 +364,6 @@ void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLoc
 
 void ADigumWorldActorChild::DestroyInstance(const FVector& InLocation, const float& InMaxRange)
 {
-	/*float Distance = FVector::Distance(InLocation, GetActorLocation());
-	if(Distance > InMaxRange) return;*/
 	int32 OutIndex;
 	UE_LOG(LogTemp, Warning, TEXT("Hitttt"));
 	if(GetInstancedHitIndex(InLocation, InMaxRange, OutIndex))

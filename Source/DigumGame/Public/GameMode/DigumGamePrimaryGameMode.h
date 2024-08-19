@@ -54,6 +54,9 @@ class DIGUMGAME_API ADigumGamePrimaryGameMode : public ADigumGameMode
 	UPROPERTY()
 	TArray<FVector> PlayerStartPositions;
 
+	UPROPERTY()
+	int32 PlayerCount = 0;
+
 public:
 	ADigumGamePrimaryGameMode();
 	
@@ -89,6 +92,7 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void FindBestStartPosition(const FVector& InInitialPosition, TArray<FVector>& OccupiedPositions, FVector& OutPosition, const float& InMinDistance = 100.0f);
+	
 public:
 	virtual void PostLogin(APlayerController* NewPlayer) override;
 	

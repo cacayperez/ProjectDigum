@@ -59,6 +59,12 @@ public:
 	void Server_TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
 
 	UFUNCTION(Server, Reliable)
+	void Server_TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
+
+	UFUNCTION(Server, Reliable)
 	void Server_TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
 	
 	virtual void TryRequest(const EDigumWorld_Request InRequest, const TArray<FVector> InArrayLocation, const float& InScaledDamage);
@@ -67,7 +73,8 @@ protected:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnMinerCharacterSpawned, ACharacter*)
 
 	FOnMinerCharacterSpawned OnMinerCharacterSpawned;
-	
+
+	virtual void AddBlock_UsingParams_Internal(const FDigumWorldRequestParams& InParams);
 	virtual void BeginPlay() override;
 	virtual void InitializeBackground();
 	virtual void SpawnPlayerCharacter_Internal(const FVector& InWorldLocation);
@@ -79,6 +86,7 @@ public:
 	bool IsCharacterInitialized() const { return bCharacterHasBeenInitialized; }
 	
 	ADigumWorldMapActor* GetWorldMapActor() const { return WorldMapActor; }
-	void TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
+	// void TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation);
+	void TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
 	void TryRemoveBlock(const TArray<FVector>& InArrayLocation, const float& InScaledDamage);
 };

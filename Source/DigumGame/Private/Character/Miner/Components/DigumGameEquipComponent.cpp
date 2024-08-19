@@ -7,6 +7,7 @@
 #include "Character/DigumCharacter.h"
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Player/DigumPlayerController.h"
 
 
 // Sets default values for this component's properties
@@ -17,6 +18,7 @@ UDigumGameEquipComponent::UDigumGameEquipComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	SetIsReplicated(true);
 }
 
 
@@ -26,11 +28,24 @@ void UDigumGameEquipComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
+	/*if(APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0))
 	{
 		PlayerController = PC;	
-	}
-	
+	}*/
+
+	/*if(GetOwner())
+	{
+		if(ACharacter* Character = Cast<ACharacter>(GetOwner()))
+		{
+			if(AController* PC = Character->GetController())
+			{
+				if(ADigumPlayerController* DigumPC = Cast<ADigumPlayerController>(PC))
+				{
+					PlayerController = DigumPC;
+				}
+			}
+		}
+	}*/
 }
 
 
@@ -59,7 +74,7 @@ void UDigumGameEquipComponent::SetEquippedItemActor(const EDigumGame_EquipSlot E
 }
 
 void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const FDigumItemProperties& InItemProperties, 
-                                         const EDigumGame_EquipSlot EquipSlot)
+                                        const int32 InSlotIndex,  const EDigumGame_EquipSlot EquipSlot)
 {
 	const ACharacter* Character = Cast<ACharacter>(GetOwner());
 
@@ -79,11 +94,12 @@ void UDigumGameEquipComponent::EquipItem(const TSubclassOf<ADigumItemActor> Item
 		if(ItemActor && Mesh)
 		{
 			ItemActor->SetOwner(GetOwner());
-			// ItemActor->SetReplicates(true);
 			ItemActor->SetItemInstigator(GetOwner());
+			ItemActor->SetPlayerController(PlayerController);
 			ItemActor->SetActorLocation(Character->GetActorLocation());
 			ItemActor->SetItemProperties(InItemProperties);
 			ItemActor->FinishSpawning(FTransform::Identity);
+			ItemActor->SetSlotIndex(InSlotIndex);
 			ItemActor->AttachToComponent(Mesh, FAttachmentTransformRules::SnapToTargetIncludingScale, TEXT("Hand_Front_01_Socket"));
 			
 			SetEquippedItemActor(EquipSlot, ItemActor);
@@ -99,5 +115,20 @@ void UDigumGameEquipComponent::ClearEquippedItem(const EDigumGame_EquipSlot Equi
 		EquippedItem->Destroy();
 		EquippedItems.FindAndRemoveChecked(EquipSlot);
 	}
+}
+
+void UDigumGameEquipComponent::SetPlayerController(ADigumPlayerController* InPlayerController)
+{
+	if(GetNetMode() == NM_Client)
+	{
+		if(InPlayerController == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("InPlayerController is nullptr"));
+			return;
+		}
+	}
+	PlayerController = InPlayerController;
+
+	// TO-DO set controller for all equipped items when player controller is set
 }
 

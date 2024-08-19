@@ -71,7 +71,7 @@ public:
 	void SetTint(const int32& InstanceIndex, const int32& InHierarchyIndex);
 	void SetSurfacePoint(const int32& InstanceIndex, const bool& bValue = false);
 	void SetVariant(const int32& InstanceIndex, const int32& Variant);
-	void AddWorldInstance(const FTransform& InTransform, const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor = true);
+	bool AddWorldInstance(const FTransform& InTransform, const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor = true);
 	bool RemoveWorldInstance(const int32& InInstanceIndex);
 	void RemoveWorldInstance(const int32& InLocalX, const int32& InLocalY, const int32& InHierarchyIndex);
 	

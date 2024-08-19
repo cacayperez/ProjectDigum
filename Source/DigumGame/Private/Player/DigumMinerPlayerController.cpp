@@ -129,12 +129,60 @@ void ADigumMinerPlayerController::Server_TryRemoveBlock_Implementation(const FVe
 	}
 }
 
+void ADigumMinerPlayerController::Server_TryAddBlock_UsingParams_Implementation(
+	const FDigumWorldRequestParams& InParams)
+{
+	if(HasAuthority())
+	{
+		Multicast_TryAddBlock_UsingParams(InParams);
+	}
+	
+}
+
+void ADigumMinerPlayerController::Multicast_TryAddBlock_UsingParams_Implementation(
+	const FDigumWorldRequestParams& InParams)
+{
+	
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer || NetMode || NM_Standalone)
+	{
+		AddBlock_UsingParams_Internal(InParams);
+	}
+
+	if(NetMode == NM_Client)
+	{
+		AddBlock_UsingParams_Internal(InParams);
+	}
+	
+}
+
 void ADigumMinerPlayerController::TryRequest(const EDigumWorld_Request InRequest, const TArray<FVector> InArrayLocation,
-	const float& InScaledDamage)
+                                             const float& InScaledDamage)
 {
 	if(InRequest == EDigumWorld_Request::DigumWorldRequest_Destroy)
 	{
 		TryRemoveBlock(InArrayLocation, InScaledDamage);
+	}
+}
+
+
+void ADigumMinerPlayerController::AddBlock_UsingParams_Internal(const FDigumWorldRequestParams& InParams)
+{
+	if(TSubclassOf<ADigumWorldMapActor> WorldMapClass = UDigumWorldSettings::GetWorldMapActorClass())
+	{
+		FActorSpawnParameters SpawnParams;
+	
+		AActor* Actor = UGameplayStatics::GetActorOfClass(GetWorld(), WorldMapClass);
+		if(ADigumWorldMapActor* MapActor = Cast<ADigumWorldMapActor>(Actor))
+		{
+			MapActor->TryAddBlock_UsingParams(InParams);
+			UE_LOG(LogTemp, Warning, TEXT("Are you working? #1"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumMinerPlayerController::Server_TryAddBlock_Implementation, World Map Actor Class is null"));
 	}
 }
 
@@ -198,10 +246,9 @@ void ADigumMinerPlayerController::SpawnWorldMapActor_Internal()
 		}
 	}
 }
-
-void ADigumMinerPlayerController::TryAddBlock(const FName& InBlockID, const FVector& InWorldLocation)
+void ADigumMinerPlayerController::TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams)
 {
-	Server_TryAddBlock(InBlockID, InWorldLocation);
+	Server_TryAddBlock_UsingParams(InParams);
 }
 
 void ADigumMinerPlayerController::TryRemoveBlock(const TArray<FVector>& InArrayLocation, const float& InScaledDamage)

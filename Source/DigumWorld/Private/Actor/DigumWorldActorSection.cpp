@@ -202,6 +202,56 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	// create block if it doesnt exist
 }
 
+void ADigumWorldActorSection::AddBlock(const FDigumWorldRequestParams& InRequestParams)
+{
+	const FName BlockID = InRequestParams.BlockID;
+	const FVector Location = InRequestParams.HitLocation;
+	
+	ADigumWorldActorChild* ChildActor = GetChildActor(BlockID);//WorldChildActors.FindRef(InBlockID);
+	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
+	FDigumWorldProceduralCoordinate Coordinate = FDigumWorldProceduralCoordinate();
+	Coordinate.BlockID = BlockID;
+
+	const int32 X = Location.X / GridSize.X;
+	const int32 Y = -(Location.Z / GridSize.Z);
+	const int32 Hierarchy = -Location.Y / GridSize.Y;
+	const int32 WidthOffset = SectionData.SectionWidth;
+	const int32 HeightOffset = SectionData.SectionHeight;
+	Coordinate.X = FMath::Abs(X % WidthOffset);
+	Coordinate.Y = FMath::Abs(Y) > 0? Y % WidthOffset : 0;
+	Coordinate.Hierarchy = Hierarchy;
+
+	CoordinateArray.AddCoordinate(Coordinate);
+	
+	if(ChildActor)
+	{
+		ChildActor->AddBlock(InRequestParams, CoordinateArray);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldActorSection::AddBlock, Spawning New Child, %s"), *BlockID.ToString());
+		UDigumWorldSwatchAsset* Asset = UDigumWorldFunctionHelpers::GetSwatchAsset(BlockID, TEXT("Primary"));
+		if(Asset)
+		{
+			if(TSubclassOf<ADigumWorldActorChild> ChildClass = Asset->GetChildActorClass())
+			{
+				FVector HierarchyOffset = FVector(0, Hierarchy * GridSize.Y, 0);
+				ADigumWorldActorChild* NewActor = GetWorld()->SpawnActorDeferred<ADigumWorldActorChild>(ChildClass, FTransform::Identity);
+				if(NewActor)
+				{
+					NewActor->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
+					NewActor->InitializeSwatchAsset_UsingParams(Asset, CoordinateArray, SectionData.HierarchyCount, SectionData.SectionWidth, SectionData.SectionHeight, InRequestParams);
+					NewActor->FinishSpawning(FTransform::Identity);
+					NewActor->SetActorLocation(GetActorLocation() + HierarchyOffset);
+					
+					ChildActorsContainers.Add(FDigumWorldChildActorsContainer(BlockID, NewActor));
+					UE_LOG(LogTemp, Warning, TEXT("Block Added %s"), *BlockID.ToString());
+				}
+			}
+		}
+	}
+}
+
 
 void ADigumWorldActorSection::DestroySection()
 {

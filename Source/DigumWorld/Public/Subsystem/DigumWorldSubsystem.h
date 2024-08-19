@@ -37,6 +37,21 @@ public:
 	UPROPERTY()
 	float Magnitude;
 
+	UPROPERTY()
+	int32 SessionID;
+
+	UPROPERTY()
+	int32 Amount;
+
+	UPROPERTY()
+	int32 SlotIndex;
+
+	
+	FString ToString() const
+	{
+		return FString::Printf(TEXT("Request: %s, BlockID: %s, HitInstanceIndex: %d, HitLocation: %s, Instigator: %s, Magnitude: %f,\\n SessionID: %i , Amount: %i, SlotIndex: %i"),
+			*UEnum::GetValueAsString(Request.GetValue()), *BlockID.ToString(), HitInstanceIndex, *HitLocation.ToString(), *Instigator->GetName(), Magnitude, SessionID, Amount, SlotIndex);
+	}
 };
 /**	
  * 

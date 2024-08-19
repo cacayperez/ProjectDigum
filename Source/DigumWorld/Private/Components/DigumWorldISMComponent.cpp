@@ -210,7 +210,7 @@ void UDigumWorldISMComponent::SetVariant(const int32& InstanceIndex,const int32&
 	SetCustomDataValue(InstanceIndex, 2, Variant, true);
 }
 
-void UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform,  const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor )
+bool UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform,  const FDigumWorldProceduralCoordinate& InCoordinate, const int32& InVariant, const int32& InLocalIndex, const bool& bHasTopNeighbor )
 {
 	const int32 HierarchyIndex = InCoordinate.Hierarchy;
 
@@ -225,7 +225,10 @@ void UDigumWorldISMComponent::AddWorldInstance(const FTransform& InTransform,  c
 		SetVariant(InstanceIndex, InVariant);
 		
 		WorldISMData.Add(Data);
+		return true;
 	}
+
+	return false;
 }
 
 bool UDigumWorldISMComponent::RemoveWorldInstance(const int32& InInstanceIndex)

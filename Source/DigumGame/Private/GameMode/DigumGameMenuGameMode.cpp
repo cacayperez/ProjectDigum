@@ -8,7 +8,7 @@
 
 ADigumGameMenuGameMode::ADigumGameMenuGameMode()
 {
-	PlayerControllerClass = ADigumGameMenuPlayerController::StaticClass();
+	// PlayerControllerClass = ADigumGameMenuPlayerController::StaticClass();
 	DefaultPawnClass = ADigumGameMenuPlayerPawn::StaticClass();
 	
 }

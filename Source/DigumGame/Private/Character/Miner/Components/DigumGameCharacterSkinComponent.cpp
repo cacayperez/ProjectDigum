@@ -24,3 +24,15 @@ void UDigumGameCharacterSkinComponent::BeginPlay()
 	
 }
 
+void UDigumGameCharacterSkinComponent::InitializeSkin(const TMap<EDigumGame_BodySkinSlot, const FName>& InSkinID)
+{
+}
+
+void UDigumGameCharacterSkinComponent::SetSkeletalMesh(USkeletalMeshComponent* InSkeletalMesh)
+{
+}
+
+void UDigumGameCharacterSkinComponent::TryModifySkin(const EDigumGame_BodySkinSlot& InSlot, const FName& InSkinID)
+{
+}
+

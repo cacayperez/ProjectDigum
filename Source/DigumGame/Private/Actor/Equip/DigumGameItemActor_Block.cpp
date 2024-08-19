@@ -18,6 +18,7 @@ ADigumGameItemActor_Block::ADigumGameItemActor_Block(const FObjectInitializer& O
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
 
 }
 
@@ -28,6 +29,10 @@ void ADigumGameItemActor_Block::GetLifetimeReplicatedProps(TArray<FLifetimePrope
 	DOREPLIFETIME(ADigumGameItemActor_Block, TargetLocation);
 }
 
+void ADigumGameItemActor_Block::SetTargetLocation(const FVector& InTargetLocation)
+{
+	Server_SetTargetLocation(InTargetLocation);
+}
 
 // Called when the game starts or when spawned
 void ADigumGameItemActor_Block::BeginPlay()
@@ -38,8 +43,6 @@ void ADigumGameItemActor_Block::BeginPlay()
 
 	GridSize = UDigumWorldSettings::GetGridSize();
 
-	// const FDigumItemProperties* Properties = GetItemProperties();
-	PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	
 	if(Properties->IsValid() && PlayerController && PlayerController->IsLocalController())
 	{
@@ -64,10 +67,7 @@ void ADigumGameItemActor_Block::BeginPlay()
 					Location.Y = 0.0f;
 					BlockPreview->SetTargetLocation(Location);
 					BlockPreview->FinishSpawning(FTransform::Identity);
-					BlockPreview->GetOnSetTargetLocationDelegate().AddLambda([this](const FVector& InLocation)
-					{
-						TargetLocation = InLocation;
-					});
+					BlockPreview->GetOnSetTargetLocationDelegate().AddUObject(this, &ADigumGameItemActor_Block::SetTargetLocation);
 				}
 				else
 				{
@@ -126,15 +126,20 @@ void ADigumGameItemActor_Block::Server_ExecuteAction_Implementation(const FDigum
 {
 	if(HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Server_ExecuteAction_Implementation: Add Block"));
 		Multicast_ExecuteAction(InParams);
-		// Client_ExecuteAction(InParams);
 	}
 }
 
 void ADigumGameItemActor_Block::Multicast_ExecuteAction_Implementation(const FDigumWorldRequestParams& InParams)
 {
-	if(PlayerController && PlayerController->IsLocalController())
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer || NetMode == NM_Standalone)
+	{
+		ExecuteAction_Internal(InParams);
+	}
+
+	if(NetMode == NM_Client)
 	{
 		ExecuteAction_Internal(InParams);
 	}
@@ -149,14 +154,34 @@ void ADigumGameItemActor_Block::Client_ExecuteAction_Implementation(const FDigum
 
 void ADigumGameItemActor_Block::ExecuteAction_Internal(const FDigumWorldRequestParams& InParams)
 {
-	if(PlayerController)
+	
+	if(PlayerController && PlayerController->IsLocalController())
 	{
 		if(ADigumMinerPlayerController* MPC = Cast<ADigumMinerPlayerController>(PlayerController.Get()))
 		{
-			MPC->TryAddBlock(InParams.BlockID, InParams.HitLocation);
+			MPC->TryAddBlock_UsingParams(InParams);
 		}
 	}
 }
+
+void ADigumGameItemActor_Block::Multicast_SetTargetLocation_Implementation(const FVector& InTargetLocation)
+{
+	TargetLocation = InTargetLocation;
+}
+
+void ADigumGameItemActor_Block::Client_SetTargetLocation_Implementation(const FVector& InTargetLocation)
+{
+	TargetLocation = InTargetLocation;
+}
+
+void ADigumGameItemActor_Block::Server_SetTargetLocation_Implementation(const FVector& InTargetLocation)
+{
+	if(HasAuthority())
+	{
+		Multicast_SetTargetLocation(InTargetLocation);
+	}
+}
+
 
 // Called every frame
 void ADigumGameItemActor_Block::Tick(float DeltaTime)
@@ -173,14 +198,25 @@ void ADigumGameItemActor_Block::Tick(float DeltaTime)
 void ADigumGameItemActor_Block::OnActivateItem(AActor* InInstigator, const EDigumGameItem_ActionKey ActionKey)
 {
 	Super::OnActivateItem(InInstigator, ActionKey);
+
 	FName BlockID = GetItemProperties()->GetItemID();
 	RequestParams = FDigumWorldRequestParams();
 	RequestParams.Request = EDigumWorld_Request::DigumWorldRequest_Add;
 	RequestParams.Instigator = GetItemInstigator();
 	RequestParams.HitLocation = TargetLocation;
 	RequestParams.BlockID = BlockID;
-	UE_LOG(LogTemp, Warning, TEXT("OnActivateItem: Add Block, %s"), *TargetLocation.ToString());
-	ExecuteAction_Internal(RequestParams);
+	RequestParams.Amount = 1;
+	RequestParams.SlotIndex = GetSlotIndex();
+	int32 SessionID = -1;
+	if(PlayerController)
+	{
+		SessionID = PlayerController->GetPlayerInfo().PlayerSessionID;
+	}
+
+	RequestParams.SessionID = SessionID;
+	UE_LOG(LogTemp, Warning, TEXT("OnActivateItem: Add Block, %s, Session ID: %i"), *TargetLocation.ToString(), SessionID);
+
+	Server_ExecuteAction(RequestParams);
 	
 }
 

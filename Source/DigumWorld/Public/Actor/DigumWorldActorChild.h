@@ -29,9 +29,12 @@ struct FDigumWorldAsyncBlockResult
 	
 	UPROPERTY()
 	FTransform Transform;
-
+	
 	UPROPERTY()
 	FDigumWorldProceduralCoordinate Coordinate;
+
+	UPROPERTY()
+	FDigumWorldRequestParams RequestParams;
 };
 
 USTRUCT()
@@ -69,7 +72,6 @@ class DIGUMWORLD_API ADigumWorldActorChild : public ADigumActor, public IIDigumW
 	UPROPERTY(Replicated, VisibleAnywhere)
 	int32 SectionHeight = 0;
 
-	
 public:
 	// Sets default values for this actor's properties
 	ADigumWorldActorChild(const FObjectInitializer& ObjectInitializer);
@@ -105,14 +107,6 @@ protected:
 
 	void AsyncAddBlock();
 
-	/*UFUNCTION(Server, Reliable)
-	void Server_Transact(const FDigumWorldRequestParams& InParams);*/
-
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_RemoveCoordinate(const FDigumWorldProceduralCoordinate& InCoordinate);*/
-	/*UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Transact(const FDigumWorldRequestParams& InParams);*/
-
 	void Transact_Internal(const FDigumWorldRequestParams& InParams);
 	
 public:
@@ -123,21 +117,19 @@ public:
 	virtual void InitializeISMComponent(const int32& InHierarchyCount, const int32& InSectionWidth, const int32& InSectionHeight);
 	virtual void InitializeSwatchAsset(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldAssetCoordinateArray Coordinates, const int32 HierarchyIndex = 0);
 	virtual void InitializeSwatchAsset(const FName& InBlockID, UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates, const int32& NumOfHierarchies, const int32& InSectionWidth, const int32& InSectionHeight);
+	virtual void InitializeSwatchAsset_UsingParams(UDigumWorldSwatchAsset* InSwatchAsset, FDigumWorldProceduralCoordinateArray Coordinates, const int32& NumOfHierarchies, const int32& InSectionWidth, const int32& InSectionHeight, const FDigumWorldRequestParams& InParams);
 	
 	void ResetChildActor();
 	virtual void SetWorldCollision(const bool& bValue);
 	virtual void AddBlock(const FName& InBlockID, FDigumWorldProceduralCoordinateArray& InCoordinates);
+	virtual void AddBlock(const FDigumWorldRequestParams& InParams, FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex = INDEX_NONE);
 	void DestroyInstance(const FVector& InLocation, const float& InMaxRange);
 	virtual void DestroyInstance(const int32& InIndex = INDEX_NONE);
 	virtual void OnInteract_Implementation(const AActor* InInstigator, const FDigumWorldRequestParams& InParams) override;
-
-
+	
 	virtual void SetSectionData(FDigumWorldProceduralSection& InSection);
 	virtual void RemoveBlock(const int32& InstanceIndex, const float& InScaledDamage);
-	// virtual void TryRemoveUsingCoordinate(const int32& InLocalX, const int32& InLocalY, const int32& InHierarchyIndex);
-	// virtual void TryChildTransact(const FDigumWorldRequestParams& InParams);
-
 	
 	FORCEINLINE UDigumWorldISMComponent* GetInstancedMeshComponent() const { return InstancedMeshComponent; }
 	FOnDigumWorldTransact& GetOnDigumWorldTransactDelegate() { return OnDigumWorldTransact; }

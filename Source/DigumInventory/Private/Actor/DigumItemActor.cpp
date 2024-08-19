@@ -3,6 +3,8 @@
 
 #include "Actor/DigumItemActor.h"
 
+#include "Net/UnrealNetwork.h"
+
 ADigumItemActor::ADigumItemActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -24,6 +26,9 @@ ADigumItemActor::~ADigumItemActor()
 void ADigumItemActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ADigumItemActor, ItemProperties);
+	DOREPLIFETIME(ADigumItemActor, PlayerController);
+	DOREPLIFETIME(ADigumItemActor, SlotIndex);
 }
 
 void ADigumItemActor::SetItemInstigator(AActor* InInstigator)
@@ -39,4 +44,14 @@ void ADigumItemActor::SetItemProperties(const FDigumItemProperties& InItemProper
 FDigumItemProperties* ADigumItemActor::GetItemProperties()
 {
 	return &ItemProperties;
+}
+
+void ADigumItemActor::SetPlayerController(ADigumPlayerController* InPlayerController)
+{
+	PlayerController = InPlayerController;
+}
+
+void ADigumItemActor::SetSlotIndex(const int32 InSlotIndex)
+{
+	SlotIndex = InSlotIndex;
 }

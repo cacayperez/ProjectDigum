@@ -22,7 +22,7 @@ void ADigumGameMenuPlayerController::BeginPlay()
 		bShowMouseCursor = true;
 		GEngine->GameViewport->AddViewportWidgetContent(SNew(SWeakWidget).PossiblyNullContent(WidgetStack.ToSharedRef()));
 
-		InitializeUI();
+		// InitializeUI();
 	}
 	
 }

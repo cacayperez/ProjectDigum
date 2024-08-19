@@ -101,6 +101,7 @@ protected:
 	
 	virtual void ActivateEquippedItemAction_Internal(const FDigumGameActionParams& ActionParams);
 	virtual void EquipItem_Internal(const int32& InItemIndex);
+
 	
 	
 public:

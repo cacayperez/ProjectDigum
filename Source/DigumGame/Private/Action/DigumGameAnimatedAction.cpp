@@ -10,6 +10,8 @@
 
 UDigumGameAnimatedAction::~UDigumGameAnimatedAction()
 {
+	OnBeginExecuteAction.Unbind();
+	OnFinishedAction.Unbind();
 	AnimationMontage = nullptr;
 	AnimInstance = nullptr;
 }

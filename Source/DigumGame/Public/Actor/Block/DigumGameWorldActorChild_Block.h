@@ -17,7 +17,6 @@ class DIGUMGAME_API ADigumGameWorldActorChild_Block : public ADigumWorldActorChi
 	UPROPERTY()
 	TObjectPtr<UDigumGameWorldBlockAsset> BlockAsset;
 
-
 public:
 	// Sets default values for this actor's properties
 	ADigumGameWorldActorChild_Block(const FObjectInitializer& ObjectInitializer);

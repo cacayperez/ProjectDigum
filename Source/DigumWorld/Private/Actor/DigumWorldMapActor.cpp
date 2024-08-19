@@ -187,6 +187,21 @@ void ADigumWorldMapActor::Multicast_RemoveBlock_Implementation(const FVector& In
 	}
 }
 
+void ADigumWorldMapActor::Multicast_AddBlock_UsingParams_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	ENetMode NetMode = GetNetMode();
+
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
+	{
+		AddBlock_Internal_UsingParams(InParams);
+	}
+
+	if(NetMode == NM_DedicatedServer  || NetMode == NM_ListenServer)
+	{
+		AddBlock_Internal_UsingParams(InParams);
+	}
+}
+
 void ADigumWorldMapActor::EnableSection(const int32 InX, const int32 InY)
 {
 	if(ADigumWorldActorSection* SectionActor = GetSection(InX , InY))
@@ -282,6 +297,11 @@ void ADigumWorldMapActor::TryAddBlock(const FName& InBlockID, const FVector& InB
 	Server_AddBlock(InBlockID, InBlockLocation);
 }
 
+void ADigumWorldMapActor::TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams)
+{
+	Server_AddBlock_UsingParams(InParams);
+}
+
 void ADigumWorldMapActor::TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage)
 {
 	Server_RemoveBlock(InWorldLocation, InScaledDamage);
@@ -350,6 +370,32 @@ void ADigumWorldMapActor::AddBlock_Internal(const FName& InBlockID, const FVecto
 	}
 }
 
+void ADigumWorldMapActor::AddBlock_Internal_UsingParams(const FDigumWorldRequestParams& InParams)
+{
+	const FVector HitLocation = InParams.HitLocation - WorldOffset;
+	FDigumWorldProceduralSectionCoordinate SectionCoordinate;
+	UDigumWorldFunctionHelpers::ConvertToSectionCoordinates(HitLocation, WorldMap.GetSectionUnitSize(), SectionCoordinate);
+
+	if(SectionCoordinate.IsValid())
+	{
+		const int32 SectionIndex = GetSectionIndex(SectionCoordinate.X, SectionCoordinate.Y);
+		
+		if(SectionActors.IsValidIndex(SectionIndex))
+		{
+			if(ADigumWorldActorSection* SectionActor = SectionActors[SectionIndex])
+			{
+				SectionActor->AddBlock(InParams.BlockID, HitLocation);
+				UE_LOG(LogTemp, Warning, TEXT("Are you working? #2"));
+				UE_LOG(LogTemp, Warning, TEXT("#2 Params, %s"), *InParams.ToString());
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ADigumWorldMapActor::AddBlock Invalid Section Coordinate"));
+	}
+}
+
 
 void ADigumWorldMapActor::Server_AddBlock_Implementation(const FName& InBlockID, const FVector& InWorldLocation)
 {
@@ -402,6 +448,14 @@ void ADigumWorldMapActor::RemoveBlock_Internal(const FVector& InWorldLocation, c
 				Child->RemoveBlock(Index, InScaledDamage);
 			}
 		}
+	}
+}
+
+void ADigumWorldMapActor::Server_AddBlock_UsingParams_Implementation(const FDigumWorldRequestParams& InParams)
+{
+	if(HasAuthority())
+	{
+		Multicast_AddBlock_UsingParams(InParams);
 	}
 }
 

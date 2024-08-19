@@ -7,6 +7,7 @@
 #include "DigumGameEquipComponent.generated.h"
 
 
+class ADigumPlayerController;
 struct FDigumItemProperties;
 class ADigumItemActor;
 
@@ -27,7 +28,7 @@ class DIGUMGAME_API UDigumGameEquipComponent : public UActorComponent
 	TMap<TEnumAsByte<EDigumGame_EquipSlot>, TObjectPtr<ADigumItemActor>> EquippedItems;
 
 	UPROPERTY()
-	TObjectPtr<APlayerController> PlayerController = nullptr;
+	TObjectPtr<ADigumPlayerController> PlayerController = nullptr;
 	
 public:
 	// Sets default values for this component's properties
@@ -46,11 +47,12 @@ private:
 	void SetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot, ADigumItemActor* ItemActor);
 	
 public:
-	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const FDigumItemProperties& InItemProperties, const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
+	void EquipItem(const TSubclassOf<ADigumItemActor> ItemActorClass, const FDigumItemProperties& InItemProperties, const int32 InSlotIndex = -1, const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
 	// ADigumItemActor*& GetEquippedItemActor() const { return EquippedItemActor; }
 	
 	ADigumItemActor* GetEquippedItemActor(const EDigumGame_EquipSlot EquipSlot);
 	void ClearEquippedItem(const EDigumGame_EquipSlot EquipSlot = EDigumGame_EquipSlot::DigumEquipSlot_MainHand);
 
-	APlayerController* GetPlayerController() const { return PlayerController; }
+	ADigumPlayerController* GetPlayerController() const { return PlayerController; }
+	void SetPlayerController(ADigumPlayerController* InPlayerController);
 };

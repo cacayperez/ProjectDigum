@@ -6,13 +6,15 @@
 #include "Actor/DigumWorldActorChild.h"
 
 FDigumWorldAsyncBlock::FDigumWorldAsyncBlock(ADigumWorldActorChild* InActorChild, const FName& InBlockID,
-                                             const FVector& InGridSize, const FVector& InPositionOffset, const FDigumWorldProceduralCoordinateArray& InCoordinates)
+	const FVector& InGridSize, const FVector& InPositionOffset,
+	const FDigumWorldProceduralCoordinateArray& InCoordinates, const FDigumWorldRequestParams& InParams)
 {
 	ActorChild = InActorChild;
 	BlockID = InBlockID;
 	GridSize = InGridSize;
 	PositionOffset = InPositionOffset;
 	Coordinates = InCoordinates;
+	Params = InParams;
 }
 
 FDigumWorldAsyncBlock::~FDigumWorldAsyncBlock()
@@ -50,6 +52,7 @@ void FDigumWorldAsyncBlock::DoWork()
 		Result.Coordinate = *Coordinate;
 		Result.Transform = Transform;
 		Result.Variant = Variant;
+		Result.RequestParams = Params;
 		ResultArray->Add(Result);
 		LoopCount++;
 	}

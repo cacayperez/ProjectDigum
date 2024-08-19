@@ -22,8 +22,7 @@ class DIGUMGAME_API ADigumGameItemActor_Block : public ADigumGameItemActor_Activ
 	
 	UPROPERTY()
 	TObjectPtr<ADigumBuildPreviewActor> BlockPreview;
-
-
+	
 	UPROPERTY(Replicated)
 	FVector GridSize;
 
@@ -39,6 +38,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
+	void SetTargetLocation(const FVector& InTargetLocation);
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -60,6 +60,17 @@ protected:
 	void Client_ExecuteAction(const FDigumWorldRequestParams& InParams);
 
 	void ExecuteAction_Internal(const FDigumWorldRequestParams& InParams);
+
+	UFUNCTION(Client, Reliable)
+	void Client_SetTargetLocation(const FVector& InTargetLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetTargetLocation(const FVector& InTargetLocation);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetTargetLocation(const FVector& InTargetLocation);
+
+	
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

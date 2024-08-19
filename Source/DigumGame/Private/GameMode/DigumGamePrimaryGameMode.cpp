@@ -168,7 +168,9 @@ bool ADigumGamePrimaryGameMode::SpawnPLayerFromQueue(APlayerController* PlayerCo
 	{
 		if(ADigumMinerPlayerController* MinerPlayerController = Cast<ADigumMinerPlayerController>(PlayerController))
 		{
+			MinerPlayerController->SetPlayerSessionID(PlayerCount);
 			SpawnPlayerCharacter(PlayerController, PlayerStartPositions);
+			PlayerCount++;
 			return true;
 		}
 	}

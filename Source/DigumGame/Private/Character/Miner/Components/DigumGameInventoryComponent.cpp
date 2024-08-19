@@ -24,7 +24,7 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 	const FName ContentCategory = InItemProperties.ContentCategory;
 	const FName ItemID = InItemProperties.ItemID;
 
-
+	// game custom properties
 	if(const UDigumGameItemAsset* GameItemAsset = UDigumGameItemHelperFunctions::GetGameItemAsset(ItemID, ContentCategory))
 	{
 		UDigumGameItem* Item = NewObject<UDigumGameItem>();
@@ -40,27 +40,6 @@ bool UDigumGameInventoryComponent::BuildItemProperties(const FDigumItemPropertie
 		OutBuiltItem = Item;
 		return true;
 	}
-	/*if(const FDigumContentCategory* ContentCategoryData = UDigumGameDeveloperSettings::GetContentCategoryData(ContentCategory))
-	{
-		UDataTable* ItemTable = UDigumAssetManager::GetAsset<UDataTable>(ContentCategoryData->ItemTable);
-		if(ItemTable == nullptr)
-		{
-			return false;
-		}
-		
-		if(UDigumItemAsset* Asset =
-			UDigumItemTable::GetDigumItemAsset(
-				ItemID,
-				ItemTable))
-		{
-			UDigumGameItemAsset* GameItemAsset = Cast<UDigumGameItemAsset>(Asset);
-			if(GameItemAsset)
-			{
-				
-			}
-		}
-	}
-	*/
 
 	return false;
 }

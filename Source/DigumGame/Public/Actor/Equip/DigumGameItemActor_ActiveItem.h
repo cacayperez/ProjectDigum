@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "DigumGameItemActor_ActiveItem.generated.h"
 
+class ADigumPlayerController;
 class UDigumAction;
 class UCapsuleComponent;
 
@@ -30,11 +31,8 @@ class DIGUMGAME_API ADigumGameItemActor_ActiveItem : public ADigumItemActor
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Digum Item", meta=(AllowPrivateAccess="true"))
 	TMap<TEnumAsByte<EDigumGameItem_ActionKey>, TSoftClassPtr<UDigumAction>> Actions;
 
-	
-	
 public:
-	UPROPERTY()
-	TObjectPtr<APlayerController> PlayerController = nullptr;
+	
 	
 	// Sets default values for this actor's properties
 	ADigumGameItemActor_ActiveItem(const FObjectInitializer& ObjectInitializer);
@@ -47,5 +45,6 @@ public:
 	TSubclassOf<UDigumAction> GetActionClass(const EDigumGameItem_ActionKey ActionKey) const;
 	virtual void OnActionBegin(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey);
 	virtual void OnActionFinished(AActor* InInstigator, const EDigumGameItem_ActionKey& ActionKey);
+
 
 };

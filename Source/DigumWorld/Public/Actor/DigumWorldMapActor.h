@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Procedural/DigumWorldGenerator.h"
 #include "Procedural/DigumWorldMap.h"
+#include "Subsystem/DigumWorldSubsystem.h"
 #include "DigumWorldMapActor.generated.h"
 
 struct FDigumWorldRequestParams;
@@ -85,6 +86,7 @@ protected:
 	int32 GetSectionIndex(const int32 InX, const int32 InY) const;
 
 	void AddBlock_Internal(const FName& InBlockID, const FVector& InWorldLocation);
+	void AddBlock_Internal_UsingParams(const FDigumWorldRequestParams& InParams);
 	void RemoveBlock_Internal(const FVector& InWorldLocation, const float& InScaledDamage);
 
 	UFUNCTION(Server, Reliable)
@@ -95,9 +97,15 @@ protected:
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddBlock(const FName& InBlockID, const FVector& InWorldLocation);
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
 	
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AddBlock(const FName& InBlockID, const FVector& InWorldLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
 	
 	UFUNCTION(Server, Reliable)
 	void Server_RemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
@@ -123,6 +131,8 @@ public:
 	APlayerController* GetOwningPlayerController() const { return OwningPlayerController; }
 	
 	void TryAddBlock(const FName& InBlockID, const FVector& InBlockLocation);
+	
+	void TryAddBlock_UsingParams(const FDigumWorldRequestParams& InParams);
 	void TryRemoveBlock(const FVector& InWorldLocation, const float& InScaledDamage);
 
 #if WITH_EDITOR

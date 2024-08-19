@@ -20,6 +20,7 @@
 #include "Input/DigumInputSettingsAsset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/DigumPlayerController.h"
 #include "Properties/DigumItem.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 
@@ -231,7 +232,7 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 		FDigumItemProperties ItemProperties;
 		GetInventoryComponent()->GetItemProperties(InItemIndex, ItemProperties);
 		if(ItemActorClass) UE_LOG(LogDigumMinerCharacter, Warning, TEXT("ItemActorClass: %s"), *ItemActorClass->GetName());
-		EquipComponent->EquipItem(ItemActorClass, ItemProperties);
+		EquipComponent->EquipItem(ItemActorClass, ItemProperties, InItemIndex);
 
 		if(GetActionComponent())
 		{
@@ -279,8 +280,6 @@ void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputCompo
 	{
 		UE_LOG(LogDigumMinerCharacter, Error, TEXT("Player Controller is null"));
 	}
-	
-
 	
 	if(AssignedInputComponent)
 	{
@@ -365,8 +364,14 @@ UDigumActionComponent* ADigumMinerCharacter::GetActionComponentBP_Implementation
 void ADigumMinerCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
-	UE_LOG(LogTemp, Warning, TEXT("=== Possessing"));
 	
+	if(ADigumPlayerController* DigumPC = Cast<ADigumPlayerController>(NewController))
+	{
+		if(GetEquipComponent())
+		{
+			GetEquipComponent()->SetPlayerController(DigumPC);
+		}
+	}
 }
 
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)
