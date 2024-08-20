@@ -134,12 +134,12 @@ void ADigumGameItemActor_Block::Multicast_ExecuteAction_Implementation(const FDi
 {
 	ENetMode NetMode = GetNetMode();
 
-	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer || NetMode == NM_Standalone)
+	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer )
 	{
 		ExecuteAction_Internal(InParams);
 	}
 
-	if(NetMode == NM_Client)
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
 	{
 		ExecuteAction_Internal(InParams);
 	}

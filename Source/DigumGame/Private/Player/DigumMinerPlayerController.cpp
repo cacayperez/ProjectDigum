@@ -145,12 +145,12 @@ void ADigumMinerPlayerController::Multicast_TryAddBlock_UsingParams_Implementati
 	
 	ENetMode NetMode = GetNetMode();
 
-	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer || NetMode || NM_Standalone)
+	if(NetMode == NM_ListenServer || NetMode == NM_DedicatedServer )
 	{
 		AddBlock_UsingParams_Internal(InParams);
 	}
 
-	if(NetMode == NM_Client)
+	if(NetMode == NM_Client || NetMode == NM_Standalone)
 	{
 		AddBlock_UsingParams_Internal(InParams);
 	}

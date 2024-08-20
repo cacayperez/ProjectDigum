@@ -4,17 +4,13 @@
 #include "Character/Miner/Components/PlayerMinerUIComponent.h"
 
 #include "Character/Miner/DigumMinerCharacter.h"
-#include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Core/SDigumWidgetStack.h"
 #include "Kismet/GameplayStatics.h"
 #include "Settings/DigumContentDefinition.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 #include "UI/ActionBar/DigumActionBarWidget.h"
 #include "UI/Inventory/DigumInventoryWidget.h"
-#include "UI/Inventory/SDigumInventoryWindow.h"
-#include "Widgets/SCanvas.h"
 #include "Widgets/SWeakWidget.h"
-#include "Widgets/Layout/SConstraintCanvas.h"
 #include "Window/SDigumWindow.h"
 
 
@@ -60,9 +56,6 @@ void UPlayerMinerUIComponent::BeginPlay()
 	{
 		InitializeUI();
 	}
-
-	
-
 }
 
 void UPlayerMinerUIComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

@@ -68,21 +68,20 @@ void ADigumMinerCharacter::Server_EquipItem_Implementation(const int32& InItemIn
 		Multicast_EquipItem(InItemIndex);
 }
 
-void ADigumMinerCharacter::Server_RemoveItemFromInventory_Implementation(const FName& InBlockID, const int32 InAmount,
+void ADigumMinerCharacter::Server_RemoveItemFromInventory_Implementation(const int32 InAmount,
 	const int32 InSlotIndex)
 {
 	if(HasAuthority())
 	{
-		Multicast_RemoveItemFromInventory(InBlockID, InAmount, InSlotIndex);
+		Multicast_RemoveItemFromInventory(InAmount, InSlotIndex);
 	}
 }
 
-void ADigumMinerCharacter::Multicast_RemoveItemFromInventory_Implementation(const FName& InBlockID,
-	const int32 InAmount, const int32 InSlotIndex)
+void ADigumMinerCharacter::Multicast_RemoveItemFromInventory_Implementation(const int32 InAmount, const int32 InSlotIndex)
 {
-	if(Controller->IsLocalController())
+	if(HasAuthority())
 	{
-		RemoveItemFromInventory_Internal(InBlockID, InAmount, InSlotIndex);
+		RemoveItemFromInventory_Internal(InAmount, InSlotIndex);
 	}
 }
 
@@ -259,11 +258,12 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 	}
 }
 
-void ADigumMinerCharacter::RemoveItemFromInventory_Internal(const FName& InBlockID, const int32 InAmount,
+void ADigumMinerCharacter::RemoveItemFromInventory_Internal(const int32 InAmount,
 	const int32 InSlotIndex)
 {
 	if(GetInventoryComponent())
 	{
+		GetInventoryComponent()->RemoveItemFromSlot(InSlotIndex, InAmount);
 		
 	}
 }
@@ -276,7 +276,7 @@ void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputCompo
 		UE_LOG(LogTemp, Warning, TEXT("Controller is null"));
 		return;
 	}
-	
+	  
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
 		const UDigumGameDeveloperSettings* DigumGameDeveloperSettings = GetDefault<UDigumGameDeveloperSettings>();
@@ -401,9 +401,10 @@ void ADigumMinerCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-void ADigumMinerCharacter::TryRemoveItemFromInventory(const FName& InBlockID, const int32 InAmount,
+void ADigumMinerCharacter::TryRemoveItemFromInventory(const int32 InAmount,
 	const int32 InSlotIndex)
 {
+	Server_RemoveItemFromInventory(InAmount, InSlotIndex);
 }
 
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)

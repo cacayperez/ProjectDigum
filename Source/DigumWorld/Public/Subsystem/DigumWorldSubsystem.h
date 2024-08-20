@@ -51,8 +51,9 @@ public:
 	
 	FString ToString() const
 	{
+		const FString InstigatorName = Instigator ? Instigator->GetName() : TEXT("None");
 		return FString::Printf(TEXT("Request: %s, BlockID: %s, HitInstanceIndex: %d, HitLocation: %s, Instigator: %s, Magnitude: %f,\\n SessionID: %i , Amount: %i, SlotIndex: %i"),
-			*UEnum::GetValueAsString(Request.GetValue()), *BlockID.ToString(), HitInstanceIndex, *HitLocation.ToString(), *Instigator->GetName(), Magnitude, SessionID, Amount, SlotIndex);
+			*UEnum::GetValueAsString(Request.GetValue()), *BlockID.ToString(), HitInstanceIndex, *HitLocation.ToString(), *InstigatorName, Magnitude, SessionID, Amount, SlotIndex);
 	}
 };
 /**	

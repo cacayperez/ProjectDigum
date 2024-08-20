@@ -1,0 +1,25 @@
+﻿// Copyright Side C Studios Corporation, Inc. All Rights Reserved.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "UObject/Interface.h"
+#include "DigumAvatarInterface.generated.h"
+
+// This class does not need to be modified.
+UINTERFACE()
+class UDigumAvatarInterface : public UInterface
+{
+	GENERATED_BODY()
+};
+
+/**
+ * 
+ */
+class DIGUMAVATAR_API IDigumAvatarInterface
+{
+	GENERATED_BODY()
+
+	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
+public:
+};

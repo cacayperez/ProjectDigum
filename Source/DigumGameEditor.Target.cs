@@ -16,6 +16,6 @@ public class DigumGameEditorTarget : TargetRules
 
 	private void RegisterModulesCreatedByRider()
 	{
-		ExtraModuleNames.AddRange(new string[] { "DigumCore", "DigumWorld", "DigumAction", "DigumInventory", "DigumUI", "DigumWorldEditor", "DigumBuild", "DigumSave" });
+		ExtraModuleNames.AddRange(new string[] { "DigumCore", "DigumWorld", "DigumAction", "DigumInventory", "DigumUI", "DigumWorldEditor", "DigumBuild", "DigumSave", "DigumAvatar" });
 	}
 }

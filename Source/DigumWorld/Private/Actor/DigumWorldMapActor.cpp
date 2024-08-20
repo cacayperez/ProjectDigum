@@ -384,7 +384,7 @@ void ADigumWorldMapActor::AddBlock_Internal_UsingParams(const FDigumWorldRequest
 		{
 			if(ADigumWorldActorSection* SectionActor = SectionActors[SectionIndex])
 			{
-				SectionActor->AddBlock(InParams.BlockID, HitLocation);
+				SectionActor->AddBlock(InParams, WorldOffset);
 				UE_LOG(LogTemp, Warning, TEXT("Are you working? #2"));
 				UE_LOG(LogTemp, Warning, TEXT("#2 Params, %s"), *InParams.ToString());
 			}

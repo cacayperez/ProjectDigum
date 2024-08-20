@@ -101,14 +101,14 @@ protected:
 	void Multicast_EquipItem(const int32& InItemIndex);
 
 	UFUNCTION(Server, Reliable)
-	void Server_RemoveItemFromInventory(const FName& InBlockID, const int32 InAmount, const int32 InSlotIndex);
+	void Server_RemoveItemFromInventory(const int32 InAmount, const int32 InSlotIndex);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_RemoveItemFromInventory(const FName& InBlockID, const int32 InAmount, const int32 InSlotIndex);
+	void Multicast_RemoveItemFromInventory(const int32 InAmount, const int32 InSlotIndex);
 	
 	virtual void ActivateEquippedItemAction_Internal(const FDigumGameActionParams& ActionParams);
 	virtual void EquipItem_Internal(const int32& InItemIndex);
-	virtual void RemoveItemFromInventory_Internal(const FName& InBlockID, const int32 InAmount, const int32 InSlotIndex);
+	virtual void RemoveItemFromInventory_Internal(const int32 InAmount, const int32 InSlotIndex);
 	
 public:
 	// Sets default values for this character's properties
@@ -168,5 +168,5 @@ public:
 	virtual UDigumActionComponent* GetActionComponent() const override;
 	virtual UDigumActionComponent* GetActionComponentBP_Implementation() const override;
 	virtual void PossessedBy(AController* NewController) override;
-	void TryRemoveItemFromInventory(const FName& InBlockID, const int32 InAmount, const int32 InSlotIndex);
+	void TryRemoveItemFromInventory(const int32 InAmount, const int32 InSlotIndex);
 };

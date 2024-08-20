@@ -31,7 +31,7 @@ void ADigumGameWorldActorChild_Block::OnBlockAdded(const FDigumWorldRequestParam
 		if(ADigumMinerCharacter* Character = Cast<ADigumMinerCharacter>(Actor))
 		{
 			// UE_LOG(LogTemp, Warning, TEXT("Instigator: %s"), *Character->GetName());
-			Character->TryRemoveItemFromInventory(InParams.BlockID, InParams.Amount, InParams.SlotIndex);
+			Character->TryRemoveItemFromInventory(InParams.Amount, InParams.SlotIndex);
 		}
 		else
 		{
@@ -40,7 +40,7 @@ void ADigumGameWorldActorChild_Block::OnBlockAdded(const FDigumWorldRequestParam
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No Instigator"));
+		UE_LOG(LogTemp, Warning, TEXT("No Instigator: %s"), *InParams.ToString());
 	}
 }
 

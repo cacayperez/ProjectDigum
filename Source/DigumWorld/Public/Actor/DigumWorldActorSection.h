@@ -82,7 +82,7 @@ public:
 	void InitializeSection(const FVector2D& InSectionSize, FDigumWorldProceduralSection& InSection, UDigumWorldProceduralAsset* ProceduralAsset);
 	void CreateChildActor(FDigumWorldProceduralCoordinateArray& InCoordinates);
 	void AddBlock(const FName& InBlockID, const FVector& InLocation);
-	void AddBlock(const FDigumWorldRequestParams& InRequestParams);
+	void AddBlock(const FDigumWorldRequestParams& InRequestParams, const FVector& InWorldOffset = FVector::ZeroVector);
 	void DestroySection();
 	void ResetSection();
 	void EnableSection();

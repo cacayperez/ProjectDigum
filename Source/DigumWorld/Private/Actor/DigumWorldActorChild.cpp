@@ -118,10 +118,12 @@ void ADigumWorldActorChild::AsyncAddBlock()
 					const FDigumWorldRequestParams RequestParams = Result.RequestParams;
 					const FDigumWorldProceduralCoordinate Coordinate = Result.Coordinate;
 					UE_LOG(LogTemp, Warning, TEXT("Child : Hierarchy Index, %i"), HierarchyIndex);
+					// InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
 					const bool bResult = InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
 
 					if(bResult)
 					{
+						UE_LOG(LogTemp, Warning, TEXT("Child : OnBlockAdded %s"), *RequestParams.ToString());
 						OnBlockAdded(RequestParams, Coordinate);
 					}
 				}
@@ -298,7 +300,7 @@ void ADigumWorldActorChild::InitializeSwatchAsset_UsingParams(UDigumWorldSwatchA
 			UE_LOG(LogTemp, Warning, TEXT("Mesh is null"));
 		}
 		
-		AddBlock(BlockID,Coordinates);
+		AddBlock(InParams,Coordinates);
 	}
 }
 

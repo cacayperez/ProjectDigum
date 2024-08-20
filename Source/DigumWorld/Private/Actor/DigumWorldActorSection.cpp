@@ -202,10 +202,10 @@ void ADigumWorldActorSection::AddBlock(const FName& InBlockID, const FVector& In
 	// create block if it doesnt exist
 }
 
-void ADigumWorldActorSection::AddBlock(const FDigumWorldRequestParams& InRequestParams)
+void ADigumWorldActorSection::AddBlock(const FDigumWorldRequestParams& InRequestParams, const FVector& InWorldOffset)
 {
 	const FName BlockID = InRequestParams.BlockID;
-	const FVector Location = InRequestParams.HitLocation;
+	const FVector Location = InRequestParams.HitLocation - InWorldOffset;
 	
 	ADigumWorldActorChild* ChildActor = GetChildActor(BlockID);//WorldChildActors.FindRef(InBlockID);
 	FDigumWorldProceduralCoordinateArray CoordinateArray = FDigumWorldProceduralCoordinateArray();
