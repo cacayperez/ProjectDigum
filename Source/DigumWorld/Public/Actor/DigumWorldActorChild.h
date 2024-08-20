@@ -108,6 +108,9 @@ protected:
 	void AsyncAddBlock();
 
 	void Transact_Internal(const FDigumWorldRequestParams& InParams);
+
+	
+	virtual void OnBlockAdded(const FDigumWorldRequestParams& InParams, const FDigumWorldProceduralCoordinate& InCoordinate) {};
 	
 public:
 	virtual void Tick(float DeltaSeconds) override;

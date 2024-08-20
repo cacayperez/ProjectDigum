@@ -20,6 +20,9 @@ class DIGUMINVENTORY_API UDigumInventorySlot : public UObject
 
 	UPROPERTY()
 	TObjectPtr<UDigumItem> ItemObject;
+
+	UPROPERTY()
+	TArray<FString> UIDArray;
 	
 public:
 	
@@ -45,6 +48,7 @@ public:
 	int32 GetStackSize() const;
 	int32 GetItemAmount() const;
 	void SetAmount(const int32& InAmount) { ItemProperties.ItemAmount = InAmount; }
+	
 	// returns stack excess
 	int32 IncrementAmount(const int32& InAmount);
 	// returns remaining amount

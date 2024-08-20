@@ -6,6 +6,7 @@
 #include "Actor/DigumPickupActor.h"
 #include "Asset/DigumAssetManager.h"
 #include "Asset/DigumGameWorldBlockAsset.h"
+#include "Character/Miner/DigumMinerCharacter.h"
 
 
 // Sets default values
@@ -17,23 +18,35 @@ ADigumGameWorldActorChild_Block::ADigumGameWorldActorChild_Block(const FObjectIn
 	bIsBlocking = true;
 }
 
+void ADigumGameWorldActorChild_Block::OnBlockAdded(const FDigumWorldRequestParams& InParams,
+	const FDigumWorldProceduralCoordinate& InCoordinate)
+{
+	Super::OnBlockAdded(InParams, InCoordinate);
+
+	// TODO: Implement block added logic
+	// Remove from inventory
+
+	if(AActor* Actor = InParams.Instigator)
+	{
+		if(ADigumMinerCharacter* Character = Cast<ADigumMinerCharacter>(Actor))
+		{
+			// UE_LOG(LogTemp, Warning, TEXT("Instigator: %s"), *Character->GetName());
+			Character->TryRemoveItemFromInventory(InParams.BlockID, InParams.Amount, InParams.SlotIndex);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Instigator is not a miner character"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Instigator"));
+	}
+}
+
 void ADigumGameWorldActorChild_Block::OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation)
 {
 	Super::OnDestroyChildInstance(InIndex, InLocation);
-	/*TSubclassOf<ADigumPickupActor> PickupActorClass = GetPickupActorClass();
-	if(BlockAsset)
-	{
-		ADigumPickupActor* PickupActor = GetWorld()->SpawnActorDeferred<ADigumPickupActor>(PickupActorClass, FTransform(InLocation));
-		if(PickupActor)
-		{
-			FDigumItemProperties ItemProperties = FDigumItemProperties();
-			ItemProperties.ItemID = BlockID; 
-			ItemProperties.ItemAmount = 1;
-			ItemProperties.ContentCategory = TEXT("Primary");
-			PickupActor->SetItemProperties(ItemProperties);
-			PickupActor->FinishSpawning(FTransform(InLocation));
-		}
-	}*/
 }
 
 void ADigumGameWorldActorChild_Block::BuildChildProperties(UDigumWorldSwatchAsset* InSwatchAsset)

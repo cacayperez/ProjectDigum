@@ -68,6 +68,24 @@ void ADigumMinerCharacter::Server_EquipItem_Implementation(const int32& InItemIn
 		Multicast_EquipItem(InItemIndex);
 }
 
+void ADigumMinerCharacter::Server_RemoveItemFromInventory_Implementation(const FName& InBlockID, const int32 InAmount,
+	const int32 InSlotIndex)
+{
+	if(HasAuthority())
+	{
+		Multicast_RemoveItemFromInventory(InBlockID, InAmount, InSlotIndex);
+	}
+}
+
+void ADigumMinerCharacter::Multicast_RemoveItemFromInventory_Implementation(const FName& InBlockID,
+	const int32 InAmount, const int32 InSlotIndex)
+{
+	if(Controller->IsLocalController())
+	{
+		RemoveItemFromInventory_Internal(InBlockID, InAmount, InSlotIndex);
+	}
+}
+
 void ADigumMinerCharacter::ActivateEquippedItemAction_Internal(const FDigumGameActionParams& InActionParams)
 {
 	if(GetEquipComponent())
@@ -241,6 +259,15 @@ void ADigumMinerCharacter::EquipItem_Internal(const int32& InItemIndex)
 	}
 }
 
+void ADigumMinerCharacter::RemoveItemFromInventory_Internal(const FName& InBlockID, const int32 InAmount,
+	const int32 InSlotIndex)
+{
+	if(GetInventoryComponent())
+	{
+		
+	}
+}
+
 void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputComponent)
 {
 	UE_LOG(LogTemp, Warning, TEXT("=== Initializing input"));
@@ -372,6 +399,11 @@ void ADigumMinerCharacter::PossessedBy(AController* NewController)
 			GetEquipComponent()->SetPlayerController(DigumPC);
 		}
 	}
+}
+
+void ADigumMinerCharacter::TryRemoveItemFromInventory(const FName& InBlockID, const int32 InAmount,
+	const int32 InSlotIndex)
+{
 }
 
 void ADigumMinerCharacter::SetFaceDirection(float InDirection)

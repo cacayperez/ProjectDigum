@@ -46,6 +46,8 @@ public:
 	UPROPERTY()
 	int32 SlotIndex;
 
+	UPROPERTY()
+	FString UniqueID;
 	
 	FString ToString() const
 	{

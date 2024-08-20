@@ -6,6 +6,7 @@
 #include "Character/Miner/DigumMinerCharacter.h"
 #include "Character/Miner/Components/DigumGameInventoryComponent.h"
 #include "Core/SDigumWidgetStack.h"
+#include "Kismet/GameplayStatics.h"
 #include "Settings/DigumContentDefinition.h"
 #include "Settings/DigumGameDeveloperSettings.h"
 #include "UI/ActionBar/DigumActionBarWidget.h"
@@ -25,6 +26,7 @@ UPlayerMinerUIComponent::UPlayerMinerUIComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
+	SetIsReplicated(false);
 }
 
 void UPlayerMinerUIComponent::OnToggleInventory()
@@ -50,16 +52,17 @@ void UPlayerMinerUIComponent::OnCancelAction()
 void UPlayerMinerUIComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	OwningMiner = Cast<ADigumMinerCharacter>(GetOwner());
 	
-	if(OwningMiner.IsValid())
+	OwningMiner = Cast<ADigumMinerCharacter>(GetOwner());
+
+	OwningController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if(OwningController.IsValid() && OwningController->IsLocalPlayerController())
 	{
-		OwningController = OwningMiner->GetLocalViewingPlayerController();
+		InitializeUI();
 	}
- 
-	InitializeUI();
+
+	
+
 }
 
 void UPlayerMinerUIComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)

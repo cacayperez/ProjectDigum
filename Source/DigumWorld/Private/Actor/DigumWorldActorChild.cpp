@@ -115,13 +115,14 @@ void ADigumWorldActorChild::AsyncAddBlock()
 					const int32 X = Result.Coordinate.X;
 					const int32 Y = Result.Coordinate.Y;
 					const int32 LocalIndex = (SectionWidth * Y) + X;
+					const FDigumWorldRequestParams RequestParams = Result.RequestParams;
 					const FDigumWorldProceduralCoordinate Coordinate = Result.Coordinate;
 					UE_LOG(LogTemp, Warning, TEXT("Child : Hierarchy Index, %i"), HierarchyIndex);
 					const bool bResult = InstancedMeshComponent->AddWorldInstance(Transform, Coordinate, Variant, LocalIndex, bHasTopNeighbor);
 
 					if(bResult)
 					{
-						
+						OnBlockAdded(RequestParams, Coordinate);
 					}
 				}
 			}
@@ -356,6 +357,7 @@ void ADigumWorldActorChild::AddBlock(const FDigumWorldRequestParams& InParams, F
 		(new FAutoDeleteAsyncTask<FDigumWorldAsyncBlock>(this, InBlockID, GridSize, PositionOffset, InCoordinates, InParams))->StartBackgroundTask();
 	});
 }
+
 
 void ADigumWorldActorChild::OnCollide(AActor* InInstigator, const FVector& InLocation, const int32& InIndex)
 {

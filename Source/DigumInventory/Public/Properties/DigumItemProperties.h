@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Object/DigumProgram.h"
 #include "UObject/Object.h"
 #include "DigumItemProperties.generated.h"
 
@@ -26,12 +27,19 @@ struct FDigumItemProperties
 {
 	GENERATED_BODY()
 public:
-	FDigumItemProperties() : ItemID(NAME_None), ItemAmount(0) {}
+	FDigumItemProperties() : ItemID(NAME_None), ItemAmount(0)
+	{
+		UniqueID = UDigumProgram::GenerateUniqueID();
+	}
 	FDigumItemProperties(const FName& InItemID, const int32 InAmount = 1)
 	{
 		ItemID = InItemID;
 		ItemAmount = InAmount;
+		UniqueID = UDigumProgram::GenerateUniqueID();
 	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
+	FString UniqueID = TEXT("Invalid");
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Inventory")
 	FName ItemID;
