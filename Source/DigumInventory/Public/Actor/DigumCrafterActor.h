@@ -3,22 +3,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DigumChestActor.h"
 #include "GameFramework/Actor.h"
-#include "DigumAvatarModifierActor.generated.h"
-
-class IDigumAvatarInterface;
+#include "DigumCrafterActor.generated.h"
 
 UCLASS()
-class DIGUMAVATAR_API ADigumAvatarModifierActor : public AActor
+class DIGUMINVENTORY_API ADigumCrafterActor : public ADigumChestActor
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	TScriptInterface<IDigumAvatarInterface> AvatarInterface = nullptr;
-	
 public:
 	// Sets default values for this actor's properties
-	ADigumAvatarModifierActor();
+	ADigumCrafterActor();
 
 protected:
 	// Called when the game starts or when spawned
@@ -28,4 +24,3 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 };
-

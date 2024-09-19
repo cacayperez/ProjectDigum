@@ -3,6 +3,8 @@
 
 #include "Component/DigumAvatarComponent.h"
 
+#include "GameFramework/Character.h"
+
 
 // Sets default values for this component's properties
 UDigumAvatarComponent::UDigumAvatarComponent()
@@ -20,8 +22,30 @@ void UDigumAvatarComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	// initialize mesh component
+	SkeletalMeshComponent = GetMeshComponent();
+}
+
+USkeletalMeshComponent* UDigumAvatarComponent::GetMeshComponent()
+{
+	if(SkeletalMeshComponent == nullptr)
+	{
+		if(GetOwner())
+		{
+			if(ACharacter* Character = Cast<ACharacter>(GetOwner()))
+			{
+				SkeletalMeshComponent = Character->GetMesh();
+			}
+		}
+		
+	}
+#if WITH_EDITOR
+	if(SkeletalMeshComponent == nullptr)
+		UE_LOG(LogTemp, Warning, TEXT("UDigumAvatarComponent::GetMeshComponent, Skeletal mesh is null ptr"))
+#endif
 	
+
+	return SkeletalMeshComponent;
 }
 
 

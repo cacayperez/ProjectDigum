@@ -3,15 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/SaveGame.h"
 #include "UObject/Object.h"
-#include "DigumSavedGameObject.generated.h"
+#include "DigumRecipeAsset.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class DIGUMGAME_API UDigumSavedGameObject : public USaveGame
+class DIGUMINVENTORY_API UDigumRecipeAsset : public UObject
 {
 	GENERATED_BODY()
 };

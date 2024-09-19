@@ -191,7 +191,6 @@ void ADigumMinerCharacter::BeginPlay()
 				UE_LOG(LogTemp, Warning, TEXT("Character Registering Positioning Component"));
 				// WorldMapActor->RegisterPositioningComponent(PositioningComponent);
 			}
-			
 		}
 	}
 }
@@ -264,8 +263,8 @@ void ADigumMinerCharacter::RemoveItemFromInventory_Internal(const int32 InAmount
 	if(GetInventoryComponent())
 	{
 		GetInventoryComponent()->RemoveItemFromSlot(InSlotIndex, InAmount);
-		
 	}
+
 }
 
 void ADigumMinerCharacter::InitializeInputBindings(UInputComponent* InInputComponent)

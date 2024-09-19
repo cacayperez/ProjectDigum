@@ -23,6 +23,14 @@ void ADigumChestActor::BeginPlay()
 	
 }
 
+void ADigumChestActor::TryOpen(const int32 KeyID)
+{
+	if(KeyID == GetKeyID())
+	{
+		// TODO Open the chest
+	}
+}
+
 // Called every frame
 void ADigumChestActor::Tick(float DeltaTime)
 {
@@ -32,5 +40,23 @@ void ADigumChestActor::Tick(float DeltaTime)
 UDigumInventoryComponent* ADigumChestActor::GetInventoryComponent() const
 {
 	return InventoryComponent;
+}
+
+void ADigumChestActor::Open(int32 KeyID)
+{
+	TryOpen(KeyID);
+}
+
+void ADigumChestActor::Close()
+{
+}
+
+void ADigumChestActor::Lock()
+{
+}
+
+int32 ADigumChestActor::GetKeyID() const
+{
+	return KeyID;
 }
 

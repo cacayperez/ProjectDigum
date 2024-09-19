@@ -6,9 +6,17 @@
 #include "UObject/Object.h"
 #include "DigumAvatarProperties.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDigumAvatarProperties
 {
 	GENERATED_BODY()
+	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Avatar")
+	FName AvatarID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Digum Avatar")
+	FName ContentCategory;
+
 	
 };

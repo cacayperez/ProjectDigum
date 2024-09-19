@@ -15,7 +15,8 @@ class DIGUMGAME_API UDigumGameSaveFunctionHelper : public UObject
 {
 	GENERATED_BODY()
 public:
-	static void CreateSaveCharacter(UDigumGameSavedGameObject_Character* SavedGameObject, FString SaveSlotName, int32 UserIndex);
+	static void CreateSaveCharacter(UDigumGameSavedGameObject_Character* InSavedGameObject, const FString& InSaveSlotName, int32 InUserIndex);
+	static FString GetFullFolderPath(FString InLocalPath);
 	
 	
 };

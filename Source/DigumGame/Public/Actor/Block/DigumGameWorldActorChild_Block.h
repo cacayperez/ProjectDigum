@@ -26,5 +26,4 @@ protected:
 	virtual void OnDestroyChildInstance(const int32& InIndex, const FVector& InLocation) override;
 	virtual void BuildChildProperties(UDigumWorldSwatchAsset* InSwatchAsset) override;
 	TSubclassOf<ADigumPickupActor> GetPickupActorClass() const;
-
 };

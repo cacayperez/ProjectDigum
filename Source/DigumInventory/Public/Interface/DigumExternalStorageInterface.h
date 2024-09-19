@@ -24,4 +24,8 @@ class DIGUMINVENTORY_API IDigumExternalStorageInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual UDigumInventoryComponent* GetInventoryComponent() const = 0;
+	virtual void Open(int32 KeyID = -1) = 0;
+	virtual void Close() = 0;
+	virtual void Lock() = 0;
+	virtual int32 GetKeyID() const = 0;
 };
